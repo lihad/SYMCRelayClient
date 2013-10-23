@@ -1,4 +1,4 @@
-version 5.5 - client repository only
+version 5.6 - client repository only
 
 please feel free to post any issues/requests to the git.
 

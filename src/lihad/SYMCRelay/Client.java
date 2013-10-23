@@ -4,10 +4,15 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 
 public class Client implements Runnable {
 
-	protected final static double version = 5.5;
+	protected final static double version = 5.6;
 
 	// connect status constants
 	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
@@ -170,6 +175,7 @@ public class Client implements Runnable {
 							// all else is received as text
 							else {
 								appendToChatBox(s + "\n");
+								SYMCSound.playDing();
 								gui.changeStatusTS(NULL, true, true);
 							}
 						}
@@ -191,6 +197,7 @@ public class Client implements Runnable {
 				// close all streams/sockets
 				cleanup();
 				gui.changeStatusTS(DISCONNECTED, true, true);
+				SYMCSound.playDisconnect();
 				break;
 
 			default: break; // do nothing
