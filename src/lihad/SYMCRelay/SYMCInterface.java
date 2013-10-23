@@ -195,7 +195,7 @@ public class SYMCInterface {
 		chatLine.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				String s = chatLine.getText();
-				if (!s.equals("")) { Client.appendToChatBox(Client.username+": " + s + "\n");  chatLine.selectAll();
+				if (!s.equals("")) { Client.appendToChatBox(Client.username+": " + s + "\n");  chatLine.setText(null);
 				// send the string
 				Client.sendString(s);
 				}

@@ -7,7 +7,7 @@ import java.net.*;
 
 public class Client implements Runnable {
 
-	private final static int version = 5;
+	private final static double version = 5.1;
 
 	// connect status constants
 	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
@@ -104,7 +104,7 @@ public class Client implements Runnable {
 					gui.changeStatusTS(CONNECTED, true, true);
 
 					// format { <version> <username> <ip> <port> }
-					out.print(version +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName()+"\n"); 
+					out.print(Math.floor(version) +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName()+"\n"); 
 					out.flush();
 
 
