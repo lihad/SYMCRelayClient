@@ -63,7 +63,7 @@ public class SYMCInterface {
 		ActionAdapter buttonListener = null;
 
 		// create an options pane
-		JPanel optionsPane = new JPanel(new GridLayout(4, 1));
+		JPanel optionsPane = new JPanel(new GridLayout(1, 4));
 
 		// ip address input
 		pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -223,7 +223,7 @@ public class SYMCInterface {
 		// set main pane
 		JPanel mainPane = new JPanel(new BorderLayout());
 		mainPane.add(statusBar, BorderLayout.SOUTH);
-		mainPane.add(optionsPane, BorderLayout.WEST);
+		mainPane.add(optionsPane, BorderLayout.NORTH);
 		mainPane.add(chatPane, BorderLayout.CENTER);
 		mainPane.add(userPane, BorderLayout.EAST);
 
