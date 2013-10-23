@@ -155,7 +155,7 @@ public class Client implements Runnable {
 							}
 							// if server wants to notify the client of users connected
 							if (s.contains(CONNECTED_USERS)) {
-								appendToUserBox(s.replace(" ", "\n"));
+								appendToUserBox(s.replace(" ", "\n").replace(CONNECTED_USERS, ""));
 								if(toAppendUser.length() > 0){
 									gui.userText.setText(null);
 									gui.userText.append(toAppendUser.toString());

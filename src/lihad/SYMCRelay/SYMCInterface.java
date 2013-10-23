@@ -153,11 +153,13 @@ public class SYMCInterface {
 		connectButton.setMnemonic(KeyEvent.VK_C);
 		connectButton.setActionCommand("connect");
 		connectButton.addActionListener(buttonListener);
+
 		connectButton.setEnabled(true);
 		disconnectButton = new JButton("Disconnect");
 		disconnectButton.setMnemonic(KeyEvent.VK_D);
 		disconnectButton.setActionCommand("disconnect");
 		disconnectButton.addActionListener(buttonListener);
+
 		disconnectButton.setEnabled(false);
 		buttonPane.add(connectButton);
 		buttonPane.add(disconnectButton);
