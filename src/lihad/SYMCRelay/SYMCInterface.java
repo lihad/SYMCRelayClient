@@ -228,7 +228,7 @@ public class SYMCInterface {
 		mainPane.add(userPane, BorderLayout.EAST);
 
 		// set main frame
-		mainFrame = new JFrame("SYMCRelay");
+		mainFrame = new JFrame("SYMCRelay - Version "+Client.version);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setContentPane(mainPane);
 		mainFrame.setSize(mainFrame.getPreferredSize());
