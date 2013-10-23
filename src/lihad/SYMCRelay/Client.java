@@ -104,7 +104,7 @@ public class Client implements Runnable {
 					gui.changeStatusTS(CONNECTED, true, true);
 
 					// format { <version> <username> <ip> <port> }
-					out.print(Math.floor(version) +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName()+"\n"); 
+					out.print( (int)Math.floor(version) +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName()+"\n"); 
 					out.flush();
 
 
