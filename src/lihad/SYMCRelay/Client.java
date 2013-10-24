@@ -1,18 +1,15 @@
 package lihad.SYMCRelay;
 
-import java.util.*;
 import java.io.*;
 import java.net.*;
+import java.util.Arrays;
 
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.text.BadLocationException;
 
 
 public class Client implements Runnable {
 
-	protected final static double version = 5.6;
+	protected final static double version = 5.7;
 
 	// connect status constants
 	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
@@ -34,7 +31,8 @@ public class Client implements Runnable {
 	public final static String 
 	END_CHAT_SESSION = new Character((char)0).toString()+"\n", // indicates the end of a session
 	HEARTBEAT = new Character((char)1).toString()+"\n", // session heartbeat
-	CONNECTED_USERS = new Character((char)2).toString(); // this is always followed by a list of users, separated by spaces. indicates connected users
+	CONNECTED_USERS = new Character((char)2).toString(), // this is always followed by a list of users, separated by spaces. indicates connected users
+	FORMAT = new Character((char)8).toString(); // this is always followed by a format code, followed by the format request
 
 	// variables and stuff
 	public static int connectionStatus = DISCONNECTED;
@@ -48,6 +46,7 @@ public class Client implements Runnable {
 	public static Socket socket = null;
 	public static BufferedReader in = null;
 	public static PrintWriter out = null;
+	private static int hearbeat_count = 0;
 
 	// GUI Interface Instance
 	public static SYMCInterface gui = null;
@@ -88,7 +87,18 @@ public class Client implements Runnable {
 	// main procedure
 	public static void main(String args[]) {
 		String s;
-		
+		//read any previous ip entered
+		if(Arrays.asList(new File("C:\\temp").list()).contains("symcrelayclient.txt")){
+			try {
+				System.out.println("loading previous... ");
+				BufferedReader rd;
+				rd = new BufferedReader(new FileReader(new File("C:\\temp\\symcrelayclient.txt")));
+				hostIP = rd.readLine();
+				rd.close();
+			}catch(Exception e){e.printStackTrace();}
+		}
+
+
 		//create and initialize gui
 		gui = new SYMCInterface(client);
 		gui.initGUI();
@@ -140,7 +150,12 @@ public class Client implements Runnable {
 				break;
 
 			case CONNECTED:
-				heartbeat();
+				//send heartbeat
+				if(hearbeat_count > 25){
+					heartbeat();
+					hearbeat_count = 0;
+				}
+				hearbeat_count++;
 				try {
 
 					// send data
@@ -167,7 +182,7 @@ public class Client implements Runnable {
 								appendToUserBox(s.replace(" ", "\n").replace(CONNECTED_USERS, ""));
 								if(toAppendUser.length() > 0){
 									gui.userText.setText(null);
-									gui.userText.append(toAppendUser.toString());
+									gui.userText.getDocument().insertString(gui.userText.getDocument().getLength(), toAppendUser.toString(), null);
 									toAppendUser.setLength(0);
 									gui.mainFrame.repaint();
 								}
@@ -185,6 +200,9 @@ public class Client implements Runnable {
 					e.printStackTrace();
 					cleanup();
 					gui.changeStatusTS(DISCONNECTED, false, true);
+				} catch (BadLocationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 				break;
 

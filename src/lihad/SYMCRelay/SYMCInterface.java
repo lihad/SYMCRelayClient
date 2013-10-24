@@ -15,26 +15,41 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.Arrays;
 
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.text.StyledDocument;
 
 public class SYMCInterface {
 
 	// GUI components
 	public JFrame mainFrame = null;
-	public JTextArea chatText = null, userText = null;
+	public JTextPane chatText = null;
+	public JTextPane userText = null;
 	public JTextField chatLine = null;
 	public JPanel statusBar = null;
 	public JLabel statusField = null;
 	public JTextField statusColor = null;
 	public JTextField ipField = null, portField = null, usernameField = null;
 	public JButton connectButton = null, disconnectButton = null;
+	public JMenuItem connectItem = null, disconnectItem = null, exitItem = null;
+	public String format = "738678 b i";
+	public JDialog jd = new JDialog();
+
 
 	// client instance
 	public Client client;
@@ -48,22 +63,12 @@ public class SYMCInterface {
 	// initialize options pane
 	private JPanel initOptionsPane() {
 
-		//read any previous ip entered
-		if(Arrays.asList(new File("C:\\temp").list()).contains("symcrelayclient.txt")){
-			try {
-				System.out.println("loading previous... ");
-				BufferedReader rd;
-				rd = new BufferedReader(new FileReader(new File("C:\\temp\\symcrelayclient.txt")));
-				Client.hostIP = rd.readLine();
-				rd.close();
-			}catch(Exception e){e.printStackTrace();}
-		}
-
+		
 		JPanel pane = null;
 		ActionAdapter buttonListener = null;
 
 		// create an options pane
-		JPanel optionsPane = new JPanel(new GridLayout(1, 4));
+		JPanel optionsPane = new JPanel(new GridLayout(4, 1));
 
 		// ip address input
 		pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -145,7 +150,10 @@ public class SYMCInterface {
 		JPanel buttonPane = new JPanel(new GridLayout(1, 2));
 		buttonListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				if (e.getActionCommand().equals("connect"))changeStatusTS(Client.BEGIN_CONNECT, true, false);
+				if (e.getActionCommand().equals("connect")){
+					jd.setVisible(false);
+					changeStatusTS(Client.BEGIN_CONNECT, true, false);
+				}
 				else changeStatusTS(Client.DISCONNECTING, true, false);
 			}
 		};
@@ -162,13 +170,91 @@ public class SYMCInterface {
 
 		disconnectButton.setEnabled(false);
 		buttonPane.add(connectButton);
-		buttonPane.add(disconnectButton);
+		//buttonPane.add(disconnectButton);
 		optionsPane.add(buttonPane);
 
 		return optionsPane;
 	}
 
 	// initialize all the GUI components and display the frame
+	
+	private JMenuBar initMenuPane() {
+		ActionAdapter buttonListener = null;
+		ActionAdapter connectListener = null;
+		ActionAdapter exitListener = null;
+
+		
+		JMenuBar menuBar;
+		JMenu menu, submenu;
+		JMenuItem menuItem;
+		JRadioButtonMenuItem rbMenuItem;
+		JCheckBoxMenuItem cbMenuItem;
+
+		//Create the menu bar.
+		menuBar = new JMenuBar();
+
+		//Build the first menu.
+		connectListener = new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				if (e.getActionCommand().equals("connect")){
+					JPanel mainPane = new JPanel(new BorderLayout());
+					JPanel optionsPane = initOptionsPane();
+					
+					mainPane.add(optionsPane, BorderLayout.CENTER);
+					jd.setContentPane(mainPane);
+					jd.setSize(jd.getPreferredSize());
+					jd.setLocationRelativeTo(mainFrame); 
+					//jd.setUndecorated(true);
+					
+					jd.pack();
+					jd.setVisible(true);
+					
+					
+
+					
+					//changeStatusTS(Client.BEGIN_CONNECT, true, false);
+				}
+				else changeStatusTS(Client.DISCONNECTING, true, false);
+			}
+		};
+		
+		exitListener = new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		};
+		
+		menu = new JMenu("Menu");
+		menu.setMnemonic(KeyEvent.VK_A);
+		menuBar.add(menu);
+
+		//a group of JMenuItems
+		connectItem = new JMenuItem("Connect...", KeyEvent.VK_C);
+		connectItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
+		connectItem.setActionCommand("connect");
+		connectItem.addActionListener(connectListener);
+		menu.add(connectItem);
+		
+		//a group of JMenuItems
+		disconnectItem = new JMenuItem("Disconnect", KeyEvent.VK_D);
+		disconnectItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK));
+		disconnectItem.setActionCommand("disconnect");
+		disconnectItem.addActionListener(connectListener);
+		disconnectItem.setEnabled(false);
+		menu.add(disconnectItem);
+	
+		menu.addSeparator();
+		
+		exitItem = new JMenuItem("Exit", KeyEvent.VK_E);
+		exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.ALT_MASK));
+		exitItem.addActionListener(exitListener);
+		menu.add(exitItem);
+
+		
+		return menuBar;
+	}
+	
+	
 	public void initGUI() {
 		// set status bar
 		statusField = new JLabel();
@@ -181,12 +267,12 @@ public class SYMCInterface {
 		statusBar.add(statusField, BorderLayout.CENTER);
 
 		// set options pane
-		JPanel optionsPane = initOptionsPane();
-
+		//JPanel optionsPane = initOptionsPane();
+		JMenuBar menuPane = initMenuPane();
+		
 		// set chat pane
 		JPanel chatPane = new JPanel(new BorderLayout());
-		chatText = new JTextArea(10, 50);
-		chatText.setLineWrap(true);
+		chatText = new JTextPane();
 		chatText.setEditable(false);
 		chatText.setForeground(Color.blue);
 		JScrollPane chatTextPane = new JScrollPane(chatText,
@@ -197,7 +283,7 @@ public class SYMCInterface {
 		chatLine.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				String s = chatLine.getText();
-				if (!s.equals("")) { Client.appendToChatBox(Client.username+": " + s + "\n");  chatLine.setText(null);
+				if (!s.equals("")) { Client.appendToChatBox(Client.username+": " + SYMCColor.encodeTextPaneFormat(s, format) + "\n");  chatLine.setText(null);
 				// send the string
 				Client.sendString(s);
 				}
@@ -209,8 +295,7 @@ public class SYMCInterface {
 
 		// set user pane
 		JPanel userPane = new JPanel(new BorderLayout());
-		userText = new JTextArea(10, 50);
-		userText.setLineWrap(false);
+		userText = new JTextPane();
 		userText.setEditable(false);
 		userText.setForeground(Color.black);
 		JScrollPane userTextPane = new JScrollPane(userText,
@@ -223,7 +308,7 @@ public class SYMCInterface {
 		// set main pane
 		JPanel mainPane = new JPanel(new BorderLayout());
 		mainPane.add(statusBar, BorderLayout.SOUTH);
-		mainPane.add(optionsPane, BorderLayout.NORTH);
+		mainPane.add(menuPane, BorderLayout.NORTH);
 		mainPane.add(chatPane, BorderLayout.CENTER);
 		mainPane.add(userPane, BorderLayout.EAST);
 
@@ -239,11 +324,16 @@ public class SYMCInterface {
 
 	// connectButton, disconnectButton, ipField, portField, usernameField, chatLine_text, chatLine_boolean, statusColor
 	private void updateFieldsHelpers(boolean cb, boolean db, boolean ipf, boolean pf, boolean uf, String clt, boolean clb, boolean f, Color c){
-		connectButton.setEnabled(cb);
-		disconnectButton.setEnabled(db);
-		ipField.setEnabled(ipf);
-		portField.setEnabled(pf);
-		usernameField.setEnabled(uf);
+		//connectButton.setEnabled(cb);
+		//disconnectButton.setEnabled(db);
+		//connectButton.setVisible(cb);
+		//disconnectButton.setVisible(db);
+		//ipField.setEnabled(ipf);
+		//portField.setEnabled(pf);
+		//usernameField.setEnabled(uf);
+		connectItem.setEnabled(cb);
+		disconnectItem.setEnabled(db);
+
 		if(clt != null)chatLine.setText(clt); 
 		if(f) chatLine.grabFocus();
 		chatLine.setEnabled(clb);
@@ -261,11 +351,12 @@ public class SYMCInterface {
 		}
 
 		// update non state-based fields
-		ipField.setText(Client.hostIP);
-		portField.setText((new Integer(Client.port)).toString());
-		usernameField.setText(Client.username);
+		//ipField.setText(Client.hostIP);
+		//portField.setText((new Integer(Client.port)).toString());
+		//usernameField.setText(Client.username);
 		statusField.setText(Client.statusString);
-		chatText.append(Client.toAppend.toString());
+		StyledDocument doc = chatText.getStyledDocument();
+		SYMCColor.decodeTextPaneFormat(doc, Client.toAppend.toString());
 		Client.toAppend.setLength(0);
 	}
 
