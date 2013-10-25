@@ -19,7 +19,7 @@ public class SYMCColor {
 				String[] config = str_arr[i].split(" ");
 				for(String s : config){
 					if(s.length() == 6){
-						StyleConstants.setForeground(key, Color.decode(s));
+						StyleConstants.setForeground(key, Color.decode("#"+s));
 					}else{
 						if(s.equalsIgnoreCase("b"))StyleConstants.setBold(key, true);
 						if(s.equalsIgnoreCase("u"))StyleConstants.setUnderline(key, true);

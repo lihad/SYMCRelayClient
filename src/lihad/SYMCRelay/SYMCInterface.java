@@ -349,7 +349,8 @@ public class SYMCInterface {
 		JPanel chatPane = new JPanel(new BorderLayout());
 		chatText = new JTextPane();
 		chatText.setEditable(false);
-		chatText.setForeground(Color.blue);
+		chatText.setForeground(Color.black);
+
 		JScrollPane chatTextPane = new JScrollPane(chatText,
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -358,7 +359,7 @@ public class SYMCInterface {
 		chatLine.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				String s = chatLine.getText();
-				if (!s.equals("")) { Client.appendToChatBox(Client.username+": " + SYMCColor.encodeTextPaneFormat(s, format) + "\n");  chatLine.setText(null);
+				if (!s.equals("")) { SYMCColor.decodeTextPaneFormat(chatText.getStyledDocument(), Client.username+": "+SYMCColor.encodeTextPaneFormat(s, format) + "\n");  chatLine.setText(null);
 				// send the string
 				Client.sendString(SYMCColor.encodeTextPaneFormat(s, format));
 				}
@@ -430,8 +431,7 @@ public class SYMCInterface {
 		//portField.setText((new Integer(Client.port)).toString());
 		//usernameField.setText(Client.username);
 		statusField.setText(Client.statusString);
-		StyledDocument doc = chatText.getStyledDocument();
-		SYMCColor.decodeTextPaneFormat(doc, Client.toAppend.toString());
+		SYMCColor.decodeTextPaneFormat(chatText.getStyledDocument(), Client.toAppend.toString());
 		Client.toAppend.setLength(0);
 	}
 
