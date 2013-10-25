@@ -10,13 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.Arrays;
 
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
@@ -44,11 +38,12 @@ public class SYMCInterface {
 	public JPanel statusBar = null;
 	public JLabel statusField = null;
 	public JTextField statusColor = null;
-	public JTextField ipField = null, portField = null, usernameField = null;
-	public JButton connectButton = null, disconnectButton = null;
-	public JMenuItem connectItem = null, disconnectItem = null, exitItem = null;
-	public String format = "738678 b i";
+	public JTextField ipField = null, portField = null, usernameField = null, hexColor = null;
+	public JButton connectButton = null, disconnectButton = null, colorSetButton;
+	public JMenuItem connectItem = null, disconnectItem = null, exitItem = null, soundToggleItem = null, colorChangeItem = null;
+	public String format = "000000";
 	public JDialog jd = new JDialog();
+	public JDialog colorPaneDialog = new JDialog();
 
 
 	// client instance
@@ -59,11 +54,55 @@ public class SYMCInterface {
 	// class
 	public SYMCInterface(Client c){client = c;}
 
+	// initialize options pane
+	private JPanel initColorPane() {
+		JPanel pane = null;
+		ActionAdapter buttonListener = null;
 
+		JPanel colorPane = new JPanel(new GridLayout(4, 1));
+
+		// color input
+		pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		pane.add(new JLabel("Hex Color:"));
+		hexColor = new JTextField(6); hexColor.setText(format);
+		hexColor.setEnabled(true);
+		hexColor.addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) {
+				hexColor.selectAll();
+				// should be editable only when disconnected
+				if (Client.connectionStatus != Client.DISCONNECTED) changeStatusTS(Client.NULL, true, false);
+				else Client.hostIP = hexColor.getText();
+			}
+		});
+		pane.add(hexColor);
+		colorPane.add(pane);
+		
+		// set button
+		JPanel buttonPane = new JPanel(new GridLayout(1,1));
+		buttonListener = new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				try{
+					Color.decode("#"+hexColor.getText());
+					format = hexColor.getText();
+					colorPaneDialog.setVisible(false);
+				}catch(NumberFormatException e1){
+					hexColor.setText("invali");
+				}			
+			}
+		};
+		
+		colorSetButton = new JButton("Set");
+		colorSetButton.addActionListener(buttonListener);
+		buttonPane.add(colorSetButton);
+		
+		
+		pane.add(buttonPane);
+		return pane;
+	}
+	
 	// initialize options pane
 	private JPanel initOptionsPane() {
 
-		
 		JPanel pane = null;
 		ActionAdapter buttonListener = null;
 
@@ -181,11 +220,12 @@ public class SYMCInterface {
 	private JMenuBar initMenuPane() {
 		ActionAdapter buttonListener = null;
 		ActionAdapter connectListener = null;
+		ActionAdapter colorListener = null;
 		ActionAdapter exitListener = null;
 
 		
 		JMenuBar menuBar;
-		JMenu menu, submenu;
+		JMenu relay, options, customize;
 		JMenuItem menuItem;
 		JRadioButtonMenuItem rbMenuItem;
 		JCheckBoxMenuItem cbMenuItem;
@@ -193,7 +233,7 @@ public class SYMCInterface {
 		//Create the menu bar.
 		menuBar = new JMenuBar();
 
-		//Build the first menu.
+		//build 'connect...' option listener
 		connectListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("connect")){
@@ -210,11 +250,26 @@ public class SYMCInterface {
 					jd.setVisible(true);
 					
 					
-
-					
 					//changeStatusTS(Client.BEGIN_CONNECT, true, false);
 				}
 				else changeStatusTS(Client.DISCONNECTING, true, false);
+			}
+		};
+		
+		//build 'color' option listener
+		colorListener = new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				JPanel mainPane = new JPanel(new BorderLayout());
+				JPanel colorPane = initColorPane();
+
+				mainPane.add(colorPane, BorderLayout.CENTER);
+				
+				colorPaneDialog.setContentPane(mainPane);
+				colorPaneDialog.setSize(colorPaneDialog.getPreferredSize());
+				colorPaneDialog.setLocationRelativeTo(mainFrame); 
+				
+				colorPaneDialog.pack();
+				colorPaneDialog.setVisible(true);
 			}
 		};
 		
@@ -224,32 +279,52 @@ public class SYMCInterface {
 			}
 		};
 		
-		menu = new JMenu("Menu");
-		menu.setMnemonic(KeyEvent.VK_A);
-		menuBar.add(menu);
+		// relay menu drop
+		/////////////////////////////////////////////////////////////
+		relay = new JMenu("Relay");
+		relay.setMnemonic(KeyEvent.VK_A);
+		menuBar.add(relay);
 
-		//a group of JMenuItems
 		connectItem = new JMenuItem("Connect...", KeyEvent.VK_C);
 		connectItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
 		connectItem.setActionCommand("connect");
 		connectItem.addActionListener(connectListener);
-		menu.add(connectItem);
+		relay.add(connectItem);
 		
-		//a group of JMenuItems
 		disconnectItem = new JMenuItem("Disconnect", KeyEvent.VK_D);
 		disconnectItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK));
 		disconnectItem.setActionCommand("disconnect");
 		disconnectItem.addActionListener(connectListener);
 		disconnectItem.setEnabled(false);
-		menu.add(disconnectItem);
+		relay.add(disconnectItem);
 	
-		menu.addSeparator();
+		relay.addSeparator();
 		
 		exitItem = new JMenuItem("Exit", KeyEvent.VK_E);
 		exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.ALT_MASK));
 		exitItem.addActionListener(exitListener);
-		menu.add(exitItem);
+		relay.add(exitItem);
 
+
+		// options menu drop
+		/////////////////////////////////////////////////////////////
+		
+		
+		// customize menu drop
+		/////////////////////////////////////////////////////////////
+		
+		customize = new JMenu("Customize");
+		menuBar.add(customize);
+		
+		soundToggleItem = new JCheckBoxMenuItem("Sound On");
+		soundToggleItem.setMnemonic(KeyEvent.VK_S);
+		soundToggleItem.setSelected(true);
+		customize.add(soundToggleItem);		
+		
+		colorChangeItem = new JMenuItem("Color"); 
+		colorChangeItem.setSelected(true);
+		colorChangeItem.addActionListener(colorListener);
+		customize.add(colorChangeItem);	
 		
 		return menuBar;
 	}
@@ -285,7 +360,7 @@ public class SYMCInterface {
 				String s = chatLine.getText();
 				if (!s.equals("")) { Client.appendToChatBox(Client.username+": " + SYMCColor.encodeTextPaneFormat(s, format) + "\n");  chatLine.setText(null);
 				// send the string
-				Client.sendString(s);
+				Client.sendString(SYMCColor.encodeTextPaneFormat(s, format));
 				}
 			}
 		});

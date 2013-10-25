@@ -9,7 +9,7 @@ import javax.swing.text.BadLocationException;
 
 public class Client implements Runnable {
 
-	protected final static double version = 5.7;
+	protected final static double version = 5.8;
 
 	// connect status constants
 	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
@@ -125,11 +125,6 @@ public class Client implements Runnable {
 					// format { <version> <username> <ip> <port> }
 					out.print( version +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName()+"\n"); 
 					out.flush();
-
-
-					//TODO: kill this. needs to be sent from server.
-					appendToChatBox("$$$| welcome to the symc relay \n");
-					appendToChatBox("$$$| joined to  #"+channel+"\n");
 
 					//save file
 					try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("C:\\temp\\symcrelayclient.txt")))){
