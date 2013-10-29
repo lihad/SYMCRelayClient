@@ -13,7 +13,7 @@ import javax.swing.text.BadLocationException;
 
 public class Client implements Runnable {
 
-	protected final static double build = 100;
+	protected final static double build = 101;
 
 	// connect status constants
 	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
@@ -66,7 +66,7 @@ public class Client implements Runnable {
 	/////////////////////////////////////////////////////////////////
 
 	// append to the chat box
-	protected static void appendToChatBox(Channel c, String s) { synchronized (toAppend) { toAppend.get(c).append(s); }}
+	protected static void appendToChatBox(Channel c, String s) { synchronized (toAppend) { toAppend.put(c, toAppend.get(c).append(s)); }}
 
 	// append to the user box
 	protected static void appendToUserBox(String s) {synchronized (toAppendUser) {toAppendUser.append(s);}}
