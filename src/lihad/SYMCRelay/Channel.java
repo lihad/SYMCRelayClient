@@ -21,7 +21,6 @@ public class Channel {
 	
 	Channel(final String n){
 		name = n;
-		panel = new JPanel(new BorderLayout());
 		pane = new JTextPane();
 		pane.setEditable(false);
 		pane.setForeground(Color.black);
@@ -41,11 +40,11 @@ public class Channel {
 			}
 		});
 
+		panel = new JPanel(new BorderLayout());
 		panel.add(field, BorderLayout.SOUTH);
 		panel.add(chatTextPane, BorderLayout.CENTER);
 		panel.setPreferredSize(new Dimension(500, 200));
 		
-		Client.channelJoinRequest(name);
-		
+		Client.channelJoinRequest(name);	
 	}
 }

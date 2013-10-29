@@ -4,21 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,14 +21,12 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.text.StyledDocument;
 
 public class Interface {
 
@@ -47,10 +40,7 @@ public class Interface {
 	public JButton connectButton = null, colorSetButton = null, channelJoinButton = null;
 	public JMenuItem connectItem = null, disconnectItem = null, exitItem = null, soundToggleItem = null, colorChangeItem = null,
 			channelJoinItem = null, channelLeaveItem = null;
-	public JDialog connectPaneDialog = new JDialog();
-	public JDialog colorPaneDialog = new JDialog();
-	public JDialog channelPaneDialog = new JDialog();
-
+	public JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), channelPaneDialog = new JDialog();
 	public JTabbedPane tabbedPane = new JTabbedPane();
 
 	// client instance
@@ -127,7 +117,6 @@ public class Interface {
 
 	// initialize options pane
 	private JPanel initOptionsPane() {
-
 		JPanel optionsPane = new JPanel(new GridLayout(4, 1));
 
 		// ip address input
@@ -236,20 +225,11 @@ public class Interface {
 					connectPaneDialog.setContentPane(mainPane);
 					connectPaneDialog.setSize(connectPaneDialog.getPreferredSize());
 					connectPaneDialog.setLocationRelativeTo(mainFrame); 
-					//jd.setUndecorated(true);
-
 					connectPaneDialog.pack();
 					connectPaneDialog.setVisible(true);
-
-
-					//changeStatusTS(Client.BEGIN_CONNECT, true, false);
 				}
 				else{
-					System.out.println("disconnecting");
-
-					for(int i = 0; i <tabbedPane.getTabCount(); i++){
-						tabbedPane.remove(i);
-					}
+					for(;tabbedPane.getTabCount() > 0;)tabbedPane.remove(tabbedPane.getTabCount() - 1);
 					changeStatusTS(Client.DISCONNECTING, true, false);
 				}
 			}
@@ -266,7 +246,6 @@ public class Interface {
 				colorPaneDialog.setContentPane(mainPane);
 				colorPaneDialog.setSize(colorPaneDialog.getPreferredSize());
 				colorPaneDialog.setLocationRelativeTo(mainFrame); 
-
 				colorPaneDialog.pack();
 				colorPaneDialog.setVisible(true);
 			}
@@ -280,16 +259,12 @@ public class Interface {
 					JPanel channelPane = initChannelPane();
 
 					mainPane.add(channelPane, BorderLayout.CENTER);
+					
 					channelPaneDialog.setContentPane(mainPane);
 					channelPaneDialog.setSize(channelPaneDialog.getPreferredSize());
 					channelPaneDialog.setLocationRelativeTo(mainFrame); 
-					//jd.setUndecorated(true);
-
 					channelPaneDialog.pack();
 					channelPaneDialog.setVisible(true);
-
-
-					//changeStatusTS(Client.BEGIN_CONNECT, true, false);
 				}
 				else{
 					Client.channelLeaveRequest(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()).replace("#", ""));
@@ -441,10 +416,6 @@ public class Interface {
 		case Client.BEGIN_CONNECT: updateFieldsHelpers(false, false, false, false, false, null, false, false, Color.orange); break;
 		}
 
-		// update non state-based fields
-		//ipField.setText(Client.hostIP);
-		//portField.setText((new Integer(Client.port)).toString());
-		//usernameField.setText(Client.username);
 		statusField.setText(Client.statusString);		
 		for(Map.Entry<Channel, StringBuffer> e : Client.toAppend.entrySet()){
 			if(e.getValue().length() > 0)SYMCColor.decodeTextPaneFormat(e.getKey().pane.getStyledDocument(), e.getValue().toString());

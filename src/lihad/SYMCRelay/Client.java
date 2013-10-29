@@ -13,7 +13,7 @@ import javax.swing.text.BadLocationException;
 
 public class Client implements Runnable {
 
-	protected final static double build = 102;
+	protected final static double build = 103;
 
 	// connect status constants
 	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
@@ -93,18 +93,15 @@ public class Client implements Runnable {
 
 	/////////////////////////////////////////////////////////////////
 
-	protected static Channel getChannel(String name){
-		for(Channel c : channels){
-			if(c.name.equalsIgnoreCase(name)) return c;
-		}
-		return null;
-	}
+	// get channel
+	protected static Channel getChannel(String name){for(Channel c : channels)if(c.name.equalsIgnoreCase(name)) return c; return null;}
 
-	// sends notification to the server that client is still actively using socket
+	// notification to the server of join/leave
 	protected static void channelJoinRequest(String chan){ out.print(chan+CHANNEL_JOIN); out.flush();}
 
 	protected static void channelLeaveRequest(String chan){ out.print(chan+CHANNEL_LEAVE); out.flush();}
-
+	
+	// sends notification to the server that client is still actively using socket
 	private static void heartbeat(){ out.print(HEARTBEAT); out.flush();}
 
 	// main procedure
@@ -114,10 +111,8 @@ public class Client implements Runnable {
 		if(Arrays.asList(new File("C:\\temp").list()).contains("symcrelayclient.txt")){
 			try {
 				System.out.println("loading previous... ");
-				BufferedReader rd;
-				rd = new BufferedReader(new FileReader(new File("C:\\temp\\symcrelayclient.txt")));
-				hostIP = rd.readLine();
-				rd.close();
+				BufferedReader rd = new BufferedReader(new FileReader(new File("C:\\temp\\symcrelayclient.txt")));
+				hostIP = rd.readLine(); rd.close();
 			}catch(Exception e){e.printStackTrace();}
 		}
 
@@ -145,7 +140,6 @@ public class Client implements Runnable {
 					statusMessages[4] = (" Connected to "+hostIP+" || #"+channel);
 					/////////////////////
 
-
 					gui.changeStatusTS(CONNECTED, true, true);
 
 					// format { <version> <username> <ip> <port> }
@@ -166,7 +160,6 @@ public class Client implements Runnable {
 				// error will fail connection
 				catch (IOException e) {
 					e.printStackTrace();
-
 					cleanup();
 					gui.changeStatusTS(DISCONNECTED, false, true);
 				}
@@ -224,12 +217,8 @@ public class Client implements Runnable {
 					e.printStackTrace();
 					cleanup();
 					gui.changeStatusTS(DISCONNECTED, false, true);
-				} catch (BadLocationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				} catch (BadLocationException e) {e.printStackTrace();}
 				break;
-
 
 			case DISCONNECTING:
 
