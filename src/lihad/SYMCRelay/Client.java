@@ -3,13 +3,17 @@ package lihad.SYMCRelay;
 import java.io.*;
 import java.net.*;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.text.BadLocationException;
 
 
 public class Client implements Runnable {
 
-	protected final static double version = 5.9;
+	protected final static double build = 100;
 
 	// connect status constants
 	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
@@ -27,17 +31,25 @@ public class Client implements Runnable {
 	// instance
 	public final static Client client = new Client();
 
+	public static List<Channel> channels = new LinkedList<Channel>();
+
+	public static String format = "000000";
+
 	//these are the characters received by the client/server to tell certain requests apart.
 	public final static String 
 	END_CHAT_SESSION = new Character((char)0).toString()+"\n", // indicates the end of a session
 	HEARTBEAT = new Character((char)1).toString()+"\n", // session heartbeat
 	CONNECTED_USERS = new Character((char)2).toString(), // this is always followed by a list of users, separated by spaces. indicates connected users
+	CHANNEL = new Character((char)3).toString(), // this is always followed by a format code, followed by the format reques
+	CHANNEL_JOIN = new Character((char)4).toString()+"\n",
+	CHANNEL_LEAVE = new Character((char)5).toString()+"\n",
 	FORMAT = new Character((char)8).toString(); // this is always followed by a format code, followed by the format request
+
 
 	// variables and stuff
 	public static int connectionStatus = DISCONNECTED;
 	public static String statusString = statusMessages[connectionStatus];
-	public static StringBuffer toAppend = new StringBuffer("");
+	public static Map<Channel, StringBuffer> toAppend = new HashMap<Channel, StringBuffer>();
 	public static StringBuffer toAppendUser = new StringBuffer("");
 	public static StringBuffer toSend = new StringBuffer("");
 
@@ -54,8 +66,8 @@ public class Client implements Runnable {
 	/////////////////////////////////////////////////////////////////
 
 	// append to the chat box
-	protected static void appendToChatBox(String s) { synchronized (toAppend) { toAppend.append(s); }}
-	
+	protected static void appendToChatBox(Channel c, String s) { synchronized (toAppend) { toAppend.get(c).append(s); }}
+
 	// append to the user box
 	protected static void appendToUserBox(String s) {synchronized (toAppendUser) {toAppendUser.append(s);}}
 
@@ -81,7 +93,18 @@ public class Client implements Runnable {
 
 	/////////////////////////////////////////////////////////////////
 
+	protected static Channel getChannel(String name){
+		for(Channel c : channels){
+			if(c.name.equalsIgnoreCase(name)) return c;
+		}
+		return null;
+	}
+
 	// sends notification to the server that client is still actively using socket
+	protected static void channelJoinRequest(String chan){ out.print(chan+CHANNEL_JOIN); out.flush();}
+
+	protected static void channelLeaveRequest(String chan){ out.print(chan+CHANNEL_LEAVE); out.flush();}
+
 	private static void heartbeat(){ out.print(HEARTBEAT); out.flush();}
 
 	// main procedure
@@ -105,13 +128,14 @@ public class Client implements Runnable {
 
 
 		while (true) {
-			
+
 			// run everything in this while loop ~10 ms + processing time
 			try { Thread.sleep(10); }catch (InterruptedException e) {e.printStackTrace();}
 
 			switch (connectionStatus) {
 			case BEGIN_CONNECT:
 				try {
+
 					// create socket
 					socket = new Socket(hostIP, port);
 					in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -120,11 +144,15 @@ public class Client implements Runnable {
 					/////////////////////
 					statusMessages[4] = (" Connected to "+hostIP+" || #"+channel);
 					/////////////////////
+
+
 					gui.changeStatusTS(CONNECTED, true, true);
 
 					// format { <version> <username> <ip> <port> }
-					out.print( version +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName()+"\n"); 
+					out.print( build +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName()+"\n"); 
 					out.flush();
+
+					gui.createGUIChannel("lobby");
 
 					//save file
 					try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("C:\\temp\\symcrelayclient.txt")))){
@@ -175,7 +203,7 @@ public class Client implements Runnable {
 							// if server wants to notify the client of users connected
 							if (s.contains(CONNECTED_USERS)) {
 								appendToUserBox(s.replace(" ", "\n").replace(CONNECTED_USERS, ""));
-								if(toAppendUser.length() > 0){
+								if(toAppendUser.length() >= 0){
 									gui.userText.setText(null);
 									gui.userText.getDocument().insertString(gui.userText.getDocument().getLength(), toAppendUser.toString(), null);
 									toAppendUser.setLength(0);
@@ -184,7 +212,8 @@ public class Client implements Runnable {
 							}
 							// all else is received as text
 							else {
-								appendToChatBox(s + "\n");
+								String[] arr = s.split(CHANNEL);
+								appendToChatBox(getChannel(arr[0]), arr[1] + "\n");
 								SYMCSound.playDing();
 								gui.changeStatusTS(NULL, true, true);
 							}

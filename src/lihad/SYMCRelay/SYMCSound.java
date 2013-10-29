@@ -23,7 +23,6 @@ public class SYMCSound {
 	}
 	public static void playConnect(){
 		if(!Client.gui.soundToggleItem.isSelected()) return;
-
 		try {
 			Clip clip = AudioSystem.getClip();
 			clip.open(AudioSystem.getAudioInputStream(new File("C:\\Windows\\Media\\Speech On.wav")));
