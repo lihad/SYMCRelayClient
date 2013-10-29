@@ -35,7 +35,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.text.StyledDocument;
 
-public class SYMCInterface {
+public class Interface {
 
 	// GUI components
 	public JFrame mainFrame = null;
@@ -44,10 +44,10 @@ public class SYMCInterface {
 	public JLabel statusField = null;
 	public JTextField statusColor = null;
 	public JTextField ipField = null, portField = null, usernameField = null, hexColor = null, channel = null;
-	public JButton connectButton = null, disconnectButton = null, colorSetButton = null, channelJoinButton = null;
+	public JButton connectButton = null, colorSetButton = null, channelJoinButton = null;
 	public JMenuItem connectItem = null, disconnectItem = null, exitItem = null, soundToggleItem = null, colorChangeItem = null,
 			channelJoinItem = null, channelLeaveItem = null;
-	public JDialog jd = new JDialog();
+	public JDialog connectPaneDialog = new JDialog();
 	public JDialog colorPaneDialog = new JDialog();
 	public JDialog channelPaneDialog = new JDialog();
 
@@ -59,22 +59,19 @@ public class SYMCInterface {
 	/////////////////////////////////////////////////////////////////
 
 	// class
-	public SYMCInterface(Client c){client = c;}
+	public Interface(Client c){client = c;}
 
 	// initialize channel pane
 	private JPanel initChannelPane() {
-		JPanel pane = null;
-		ActionAdapter buttonListener = null;
-		pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-		JPanel channelPane = new JPanel(new GridLayout(1, 1));
 		pane.add(new JLabel("#"));
 		channel = new JTextField(6); channel.setText("");
 		channel.setEnabled(true);
 
 		// set button
 		JPanel buttonPane = new JPanel(new GridLayout(1,1));
-		buttonListener = new ActionAdapter() {
+		ActionAdapter buttonListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				createGUIChannel(channel.getText());
 				channelPaneDialog.setVisible(false);
@@ -86,19 +83,13 @@ public class SYMCInterface {
 		channelJoinButton.addActionListener(buttonListener);
 		buttonPane.add(channelJoinButton);
 
-
 		pane.add(buttonPane);
 		return pane;
 	}
 
 	// initialize options pane
 	private JPanel initColorPane() {
-		JPanel pane = null;
-		ActionAdapter buttonListener = null;
-
-
-		// color input
-		pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		pane.add(new JLabel("Hex Color:"));
 		hexColor = new JTextField(6); hexColor.setText(Client.format);
 		hexColor.setEnabled(true);
@@ -114,7 +105,7 @@ public class SYMCInterface {
 
 		// set button
 		JPanel buttonPane = new JPanel(new GridLayout(1,1));
-		buttonListener = new ActionAdapter() {
+		ActionAdapter buttonListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				try{
 					Color.decode("#"+hexColor.getText());
@@ -130,7 +121,6 @@ public class SYMCInterface {
 		colorSetButton.addActionListener(buttonListener);
 		buttonPane.add(colorSetButton);
 
-
 		pane.add(buttonPane);
 		return pane;
 	}
@@ -138,14 +128,10 @@ public class SYMCInterface {
 	// initialize options pane
 	private JPanel initOptionsPane() {
 
-		JPanel pane = null;
-		ActionAdapter buttonListener = null;
-
-		// create an options pane
 		JPanel optionsPane = new JPanel(new GridLayout(4, 1));
 
 		// ip address input
-		pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		pane.add(new JLabel("Host IP:"));
 		ipField = new JTextField(10); ipField.setText(Client.hostIP);
 		ipField.setEnabled(true);
@@ -210,22 +196,12 @@ public class SYMCInterface {
 		pane.add(usernameField);
 		optionsPane.add(pane);
 
-		//TODO: not needed?
-		//////////////////////////////
-		buttonListener = new ActionAdapter() {
-			public void actionPerformed(ActionEvent e) {
-				if (Client.connectionStatus != Client.DISCONNECTED) changeStatusTS(Client.NULL, true, false);
-				else ipField.setEnabled(true);
-			}
-		};
-		//////////////////////////////
-
 		// connect/disconnect buttons
 		JPanel buttonPane = new JPanel(new GridLayout(1, 2));
-		buttonListener = new ActionAdapter() {
+		ActionAdapter buttonListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("connect")){
-					jd.setVisible(false);
+					connectPaneDialog.setVisible(false);
 					changeStatusTS(Client.BEGIN_CONNECT, true, false);
 				}
 				else changeStatusTS(Client.DISCONNECTING, true, false);
@@ -235,55 +211,35 @@ public class SYMCInterface {
 		connectButton.setMnemonic(KeyEvent.VK_C);
 		connectButton.setActionCommand("connect");
 		connectButton.addActionListener(buttonListener);
-
 		connectButton.setEnabled(true);
-		disconnectButton = new JButton("Disconnect");
-		disconnectButton.setMnemonic(KeyEvent.VK_D);
-		disconnectButton.setActionCommand("disconnect");
-		disconnectButton.addActionListener(buttonListener);
-
-		disconnectButton.setEnabled(false);
+		
 		buttonPane.add(connectButton);
-		//buttonPane.add(disconnectButton);
 		optionsPane.add(buttonPane);
 
 		return optionsPane;
 	}
 
 	// initialize all the GUI components and display the frame
-
 	private JMenuBar initMenuPane() {
-		ActionAdapter buttonListener = null;
-		ActionAdapter connectListener = null;
-		ActionAdapter colorListener = null;
-		ActionAdapter exitListener = null;
-		ActionAdapter channelListener = null;
 
-
-		JMenuBar menuBar;
-		JMenu relay, channel, customize;
-		JMenuItem menuItem;
-		JRadioButtonMenuItem rbMenuItem;
-		JCheckBoxMenuItem cbMenuItem;
-
-		//Create the menu bar.
-		menuBar = new JMenuBar();
+		//create the menu bar.
+		JMenuBar menuBar = new JMenuBar();
 
 		//build 'connect...' option listener
-		connectListener = new ActionAdapter() {
+		ActionAdapter connectListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("connect")){
 					JPanel mainPane = new JPanel(new BorderLayout());
 					JPanel optionsPane = initOptionsPane();
 
 					mainPane.add(optionsPane, BorderLayout.CENTER);
-					jd.setContentPane(mainPane);
-					jd.setSize(jd.getPreferredSize());
-					jd.setLocationRelativeTo(mainFrame); 
+					connectPaneDialog.setContentPane(mainPane);
+					connectPaneDialog.setSize(connectPaneDialog.getPreferredSize());
+					connectPaneDialog.setLocationRelativeTo(mainFrame); 
 					//jd.setUndecorated(true);
 
-					jd.pack();
-					jd.setVisible(true);
+					connectPaneDialog.pack();
+					connectPaneDialog.setVisible(true);
 
 
 					//changeStatusTS(Client.BEGIN_CONNECT, true, false);
@@ -300,7 +256,7 @@ public class SYMCInterface {
 		};
 
 		//build 'color' option listener
-		colorListener = new ActionAdapter() {
+		ActionAdapter colorListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				JPanel mainPane = new JPanel(new BorderLayout());
 				JPanel colorPane = initColorPane();
@@ -316,8 +272,8 @@ public class SYMCInterface {
 			}
 		};
 
-		//build 'connect...' option listener
-		channelListener = new ActionAdapter() {
+		//build 'channel' option listener
+		ActionAdapter channelListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("join")){
 					JPanel mainPane = new JPanel(new BorderLayout());
@@ -342,7 +298,8 @@ public class SYMCInterface {
 			}
 		};
 
-		exitListener = new ActionAdapter() {
+		//build 'exit' option listener
+		ActionAdapter exitListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				System.exit(0);
 			}
@@ -350,7 +307,7 @@ public class SYMCInterface {
 
 		// relay menu drop
 		/////////////////////////////////////////////////////////////
-		relay = new JMenu("Relay");
+		JMenu relay = new JMenu("Relay");
 		relay.setMnemonic(KeyEvent.VK_A);
 		menuBar.add(relay);
 
@@ -377,7 +334,7 @@ public class SYMCInterface {
 
 		// channel menu drop
 		/////////////////////////////////////////////////////////////
-		channel = new JMenu("Channel");
+		JMenu channel = new JMenu("Channel");
 		menuBar.add(channel);
 
 		channelJoinItem = new JMenuItem("Join...", KeyEvent.VK_J);
@@ -395,7 +352,7 @@ public class SYMCInterface {
 		// customize menu drop
 		/////////////////////////////////////////////////////////////
 
-		customize = new JMenu("Customize");
+		JMenu customize = new JMenu("Customize");
 		menuBar.add(customize);
 
 		soundToggleItem = new JCheckBoxMenuItem("Sound On");
@@ -422,17 +379,8 @@ public class SYMCInterface {
 		statusBar.add(statusColor, BorderLayout.WEST);
 		statusBar.add(statusField, BorderLayout.CENTER);
 
-		// set options pane
-		//JPanel optionsPane = initOptionsPane();
+		// set menu pane
 		JMenuBar menuPane = initMenuPane();
-
-		// set chat pane
-		
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		// set user pane
 		JPanel userPane = new JPanel(new BorderLayout());
@@ -464,9 +412,9 @@ public class SYMCInterface {
 		mainFrame.setVisible(true);
 	}
 
-	public void createGUIChannel(String name){
+	protected void createGUIChannel(String name){
 		Channel chan = new Channel(name);
-		tabbedPane.addTab("#"+name, chan.panel);
+		tabbedPane.addTab("#"+chan.name, chan.panel);
 		Client.toAppend.put(chan, new StringBuffer());
 		Client.channels.add(chan);
 		updateFields();

@@ -13,7 +13,7 @@ import javax.swing.text.BadLocationException;
 
 public class Client implements Runnable {
 
-	protected final static double build = 101;
+	protected final static double build = 102;
 
 	// connect status constants
 	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
@@ -61,7 +61,7 @@ public class Client implements Runnable {
 	private static int hearbeat_count = 0;
 
 	// GUI Interface Instance
-	public static SYMCInterface gui = null;
+	public static Interface gui = null;
 
 	/////////////////////////////////////////////////////////////////
 
@@ -123,7 +123,7 @@ public class Client implements Runnable {
 
 
 		//create and initialize gui
-		gui = new SYMCInterface(client);
+		gui = new Interface(client);
 		gui.initGUI();
 
 
