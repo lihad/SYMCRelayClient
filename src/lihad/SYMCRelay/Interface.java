@@ -27,6 +27,8 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class Interface {
 
@@ -100,6 +102,7 @@ public class Interface {
 				try{
 					Color.decode("#"+hexColor.getText());
 					Client.format = hexColor.getText();
+					Client.save("format", Client.format);
 					colorPaneDialog.setVisible(false);
 				}catch(NumberFormatException e1){
 					hexColor.setText("invali");
@@ -201,7 +204,7 @@ public class Interface {
 		connectButton.setActionCommand("connect");
 		connectButton.addActionListener(buttonListener);
 		connectButton.setEnabled(true);
-		
+
 		buttonPane.add(connectButton);
 		optionsPane.add(buttonPane);
 
@@ -259,7 +262,7 @@ public class Interface {
 					JPanel channelPane = initChannelPane();
 
 					mainPane.add(channelPane, BorderLayout.CENTER);
-					
+
 					channelPaneDialog.setContentPane(mainPane);
 					channelPaneDialog.setSize(channelPaneDialog.getPreferredSize());
 					channelPaneDialog.setLocationRelativeTo(mainFrame); 
@@ -316,12 +319,14 @@ public class Interface {
 		channelJoinItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J, ActionEvent.ALT_MASK));
 		channelJoinItem.setActionCommand("join");
 		channelJoinItem.addActionListener(channelListener);
+		channelJoinItem.setEnabled(false);
 		channel.add(channelJoinItem);
 
 		channelLeaveItem = new JMenuItem("Leave", KeyEvent.VK_L);
 		channelLeaveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.ALT_MASK));
 		channelLeaveItem.setActionCommand("leave");
 		channelLeaveItem.addActionListener(channelListener);
+		channelLeaveItem.setEnabled(false);
 		channel.add(channelLeaveItem);
 
 		// customize menu drop
@@ -369,6 +374,13 @@ public class Interface {
 		userPane.add(userTextPane, BorderLayout.CENTER);
 		userPane.setPreferredSize(new Dimension(100, 200));
 
+		//set tabbed pane
+		tabbedPane.addChangeListener(new ChangeListener(){
+			public void stateChanged(ChangeEvent arg0) {
+				flash_off(tabbedPane.getSelectedIndex());
+			}
+		});
+		
 		// set main pane
 		JPanel mainPane = new JPanel(new BorderLayout());
 		mainPane.add(statusBar, BorderLayout.SOUTH);
@@ -394,11 +406,23 @@ public class Interface {
 		Client.channels.add(chan);
 		updateFields();
 	}
-	
+
+	protected void flash_on(int index){
+		tabbedPane.setForegroundAt(index, Color.red);
+	}
+
+	protected void flash_off(int index){
+		tabbedPane.setForegroundAt(index, Color.black);
+		updateFields();
+	}
+
 	// connectButton, disconnectButton, ipField, portField, usernameField, chatLine_text, chatLine_boolean, statusColor
-	private void updateFieldsHelpers(boolean cb, boolean db, boolean ipf, boolean pf, boolean uf, String clt, boolean clb, boolean f, Color c){
+	private void updateFieldsHelpers(boolean cb, boolean db, boolean ipf, boolean pf, boolean uf, String clt, boolean clb, boolean f, boolean cha, Color c){
 		connectItem.setEnabled(cb);
 		disconnectItem.setEnabled(db);
+		channelJoinItem.setEnabled(cha);
+		channelLeaveItem.setEnabled(cha);
+
 
 		if(clt != null)for(Channel ch : Client.channels) ch.field.setText(clt); 
 		if(f) Client.channels.get(0).field.grabFocus();
@@ -410,15 +434,22 @@ public class Interface {
 
 		//update state-based fields
 		switch (Client.connectionStatus) {
-		case Client.DISCONNECTED: updateFieldsHelpers(true, false, true, true, true, "", false, false, Color.red); break;
-		case Client.DISCONNECTING: updateFieldsHelpers(false, false, false, false, false, null, false, false, Color.orange); break;
-		case Client.CONNECTED: updateFieldsHelpers(false, true, false, false, false, null, true, false, Color.green); break;
-		case Client.BEGIN_CONNECT: updateFieldsHelpers(false, false, false, false, false, null, false, false, Color.orange); break;
+		case Client.DISCONNECTED: updateFieldsHelpers(true, false, true, true, true, "", false, false, false, Color.red); break;
+		case Client.DISCONNECTING: updateFieldsHelpers(false, false, false, false, false, null, false, false, false, Color.orange); break;
+		case Client.CONNECTED: updateFieldsHelpers(false, true, false, false, false, null, true, false, true, Color.green); break;
+		case Client.BEGIN_CONNECT: updateFieldsHelpers(false, false, false, false, false, null, false, false, false, Color.orange); break;
 		}
 
 		statusField.setText(Client.statusString);		
 		for(Map.Entry<Channel, StringBuffer> e : Client.toAppend.entrySet()){
-			if(e.getValue().length() > 0)SYMCColor.decodeTextPaneFormat(e.getKey().pane.getStyledDocument(), e.getValue().toString());
+			if(e.getValue().length() > 0){
+				SYMCColor.decodeTextPaneFormat(e.getKey().pane.getStyledDocument(), e.getValue().toString());
+				for(int i = 0; i < tabbedPane.getTabCount(); i++){
+					if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(e.getKey().name)){
+						flash_on(i);
+					}
+				}
+			}
 			e.getValue().setLength(0);
 		}
 	}

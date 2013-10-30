@@ -44,6 +44,7 @@ public class Channel {
 		panel.add(field, BorderLayout.SOUTH);
 		panel.add(chatTextPane, BorderLayout.CENTER);
 		panel.setPreferredSize(new Dimension(500, 200));
+
 		
 		Client.channelJoinRequest(name);	
 	}

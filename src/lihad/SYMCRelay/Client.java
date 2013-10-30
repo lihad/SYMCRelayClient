@@ -7,13 +7,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.swing.text.BadLocationException;
 
 
 public class Client implements Runnable {
 
-	protected final static double build = 103;
+	protected final static double build = 104;
+	protected final static double config_build = 104;
 
 	// connect status constants
 	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
@@ -35,6 +37,10 @@ public class Client implements Runnable {
 
 	public static String format = "000000";
 
+	// save config
+	private static File file = new File("C:\\temp\\symcrelayclient.cfg");
+	private static Properties config;
+	
 	//these are the characters received by the client/server to tell certain requests apart.
 	public final static String 
 	END_CHAT_SESSION = new Character((char)0).toString()+"\n", // indicates the end of a session
@@ -104,6 +110,14 @@ public class Client implements Runnable {
 	// sends notification to the server that client is still actively using socket
 	private static void heartbeat(){ out.print(HEARTBEAT); out.flush();}
 
+	protected static void save(String key, String value){
+		try {
+			config.setProperty(key, value);
+			config.store(new FileOutputStream(file), "");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	// main procedure
 	public static void main(String args[]) {
 		String s;
@@ -111,8 +125,12 @@ public class Client implements Runnable {
 		if(Arrays.asList(new File("C:\\temp").list()).contains("symcrelayclient.txt")){
 			try {
 				System.out.println("loading previous... ");
-				BufferedReader rd = new BufferedReader(new FileReader(new File("C:\\temp\\symcrelayclient.txt")));
-				hostIP = rd.readLine(); rd.close();
+				config = new Properties();
+				if(!file.exists())file.createNewFile();
+				config.load(new BufferedReader(new FileReader(file)));
+				System.out.println(config.getProperty("build"));
+				hostIP = config.getProperty("ip");
+				format = config.getProperty("format");
 			}catch(Exception e){e.printStackTrace();}
 		}
 
@@ -149,12 +167,7 @@ public class Client implements Runnable {
 					gui.createGUIChannel("lobby");
 
 					//save file
-					try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("C:\\temp\\symcrelayclient.txt")))){
-						writer.write(hostIP);
-						writer.newLine();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					save("ip", hostIP);
 
 				}
 				// error will fail connection
@@ -176,8 +189,7 @@ public class Client implements Runnable {
 
 					// send data
 					if (toSend.length() != 0) {
-						out.print(toSend); 
-						out.flush();
+						out.print(toSend); out.flush();
 						toSend.setLength(0);
 						gui.changeStatusTS(NULL, true, true);
 					}
