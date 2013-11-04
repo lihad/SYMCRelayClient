@@ -14,7 +14,7 @@ import javax.swing.text.BadLocationException;
 
 public class Client implements Runnable {
 
-	protected final static double build = 105;
+	protected final static double build = 106;
 	protected final static double config_build = 104;
 
 	// connect status constants
@@ -36,6 +36,8 @@ public class Client implements Runnable {
 	public static List<Channel> channels = new LinkedList<Channel>();
 
 	public static String format = "000000";
+	public static String window = null;
+
 
 	// save config
 	private static File file = new File("C:\\temp\\symcrelayclient.cfg");
@@ -131,6 +133,7 @@ public class Client implements Runnable {
 				System.out.println(config.getProperty("build"));
 				hostIP = config.getProperty("ip");
 				format = config.getProperty("format");
+				window = config.getProperty("window");
 			}catch(Exception e){e.printStackTrace();}
 		}
 

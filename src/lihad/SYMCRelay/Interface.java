@@ -279,6 +279,8 @@ public class Interface {
 		//build 'exit' option listener
 		ActionAdapter exitListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
+				//save window size
+				Client.save("window", mainFrame.getSize().width+","+mainFrame.getSize().height);
 				System.exit(0);
 			}
 		};
@@ -392,7 +394,8 @@ public class Interface {
 		mainFrame = new JFrame("SYMCRelay - Build "+Client.build);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setContentPane(mainPane);
-		mainFrame.setPreferredSize(new Dimension(750,275));
+		if(Client.window != null)mainFrame.setPreferredSize(new Dimension(Integer.parseInt(Client.window.split(",")[0]),Integer.parseInt(Client.window.split(",")[1])));
+		else mainFrame.setPreferredSize(new Dimension(750,275));
 		mainFrame.setLocation(200, 200);
 		mainFrame.setUndecorated(false);
 		mainFrame.pack();
