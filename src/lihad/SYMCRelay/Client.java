@@ -14,7 +14,7 @@ import javax.swing.text.BadLocationException;
 
 public class Client implements Runnable {
 
-	protected final static double build = 104;
+	protected final static double build = 105;
 	protected final static double config_build = 104;
 
 	// connect status constants
@@ -155,7 +155,7 @@ public class Client implements Runnable {
 					out = new PrintWriter(socket.getOutputStream(), true);
 					//TODO:  temp fix to update data on "connected" bar.
 					/////////////////////
-					statusMessages[4] = (" Connected to "+hostIP+" || #"+channel);
+					statusMessages[4] = (" Connected to "+hostIP);
 					/////////////////////
 
 					gui.changeStatusTS(CONNECTED, true, true);

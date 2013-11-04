@@ -452,6 +452,7 @@ public class Interface {
 			}
 			e.getValue().setLength(0);
 		}
+		mainFrame.toFront();
 	}
 
 	/////////////////////////////////////////////////////////////////
