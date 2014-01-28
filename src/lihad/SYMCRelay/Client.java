@@ -14,7 +14,7 @@ import javax.swing.text.BadLocationException;
 
 public class Client implements Runnable {
 
-	protected final static double build = 106;
+	protected final static double build = 107;
 	protected final static double config_build = 104;
 
 	// connect status constants
@@ -40,7 +40,8 @@ public class Client implements Runnable {
 
 
 	// save config
-	private static File file = new File("C:\\temp\\symcrelayclient.cfg");
+	private static String s_f = "C:\\temp\\symcrelayclient.cfg";
+	private static File file = new File(s_f);
 	private static Properties config;
 	
 	//these are the characters received by the client/server to tell certain requests apart.
@@ -48,7 +49,7 @@ public class Client implements Runnable {
 	END_CHAT_SESSION = new Character((char)0).toString()+"\n", // indicates the end of a session
 	HEARTBEAT = new Character((char)1).toString()+"\n", // session heartbeat
 	CONNECTED_USERS = new Character((char)2).toString(), // this is always followed by a list of users, separated by spaces. indicates connected users
-	CHANNEL = new Character((char)3).toString(), // this is always followed by a format code, followed by the format reques
+	CHANNEL = new Character((char)3).toString(), // this is always followed by a format code, followed by the format request
 	CHANNEL_JOIN = new Character((char)4).toString()+"\n",
 	CHANNEL_LEAVE = new Character((char)5).toString()+"\n",
 	FORMAT = new Character((char)8).toString(); // this is always followed by a format code, followed by the format request
@@ -124,7 +125,7 @@ public class Client implements Runnable {
 	public static void main(String args[]) {
 		String s;
 		//read any previous ip entered
-		if(Arrays.asList(new File("C:\\temp").list()).contains("symcrelayclient.txt")){
+		if(Arrays.asList(new File("C:\\temp").list()).contains("symcrelayclient.cfg")){
 			try {
 				System.out.println("loading previous... ");
 				config = new Properties();
@@ -198,18 +199,21 @@ public class Client implements Runnable {
 					}
 
 					// receive data
-
+					System.out.println("waiting....");
 					if (in.ready()) {
+						System.out.println("packet incoming...");
 
 						s = in.readLine();
 						if ((s != null) &&  (s.length() != 0)) {
 
 							// if server wants the client to disconnect
 							if (s.equals(END_CHAT_SESSION.replace("\n", ""))) {
+								System.out.println("force received. ["+s+"]");
 								gui.changeStatusTS(DISCONNECTING, true, true);
 							}
 							// if server wants to notify the client of users connected
 							if (s.contains(CONNECTED_USERS)) {
+								System.out.println("connected received. ["+s+"]");
 								appendToUserBox(s.replace(" ", "\n").replace(CONNECTED_USERS, ""));
 								if(toAppendUser.length() >= 0){
 									gui.userText.setText(null);
@@ -220,6 +224,7 @@ public class Client implements Runnable {
 							}
 							// all else is received as text
 							else {
+								System.out.println("chat received. ["+s+"]");
 								String[] arr = s.split(CHANNEL);
 								appendToChatBox(getChannel(arr[0]), arr[1] + "\n");
 								SYMCSound.playDing();

@@ -1,4 +1,4 @@
-alpha - build 106 - client repository only
+alpha - build 107 - client repository only
 
 please feel free to post any issues/requests to the git.
 
