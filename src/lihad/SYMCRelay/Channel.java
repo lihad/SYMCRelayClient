@@ -36,22 +36,19 @@ public class Channel {
 		field = new JTextArea();
 		field.setEnabled(false);
 		field.addKeyListener(new KeyListener() {
-			public void actionPerformed(ActionEvent e) {
-				String s = field.getText();
-				if (!s.equals("")) { SYMCColor.decodeTextPaneFormat(pane.getStyledDocument(), Client.username+": "+SYMCColor.encodeTextPaneFormat(s, Client.format) + "\n");  field.setText(null);
-				// send the string
-				Client.sendString(SYMCColor.encodeTextPaneFormat(name+Client.CHANNEL+s, Client.format));
-				}
-			}
-
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if(e.getKeyCode() == KeyEvent.VK_ENTER){
 					String s = field.getText();
-					if (!s.equals("")) { SYMCColor.decodeTextPaneFormat(pane.getStyledDocument(), Client.username+": "+SYMCColor.encodeTextPaneFormat(s, Client.format) + "\n");  field.setText(null);
-					// send the string
-					Client.sendString(SYMCColor.encodeTextPaneFormat(name+Client.CHANNEL+s, Client.format));
-					}				
+					if(s.contentEquals("\r\n") || s.contentEquals("\n") || s.contentEquals("\r")){
+						field.setText(null);
+					}else{
+						if (!s.equals("")) { SYMCColor.decodeTextPaneFormat(pane.getStyledDocument(), Client.username+": "+SYMCColor.encodeTextPaneFormat(s, Client.format) + "\n");  field.setText(null);
+						// send the string
+						Client.sendString(SYMCColor.encodeTextPaneFormat(name+Client.CHANNEL+s, Client.format));
+						}
+					}		
+					e.consume();
 				}
 			}
 

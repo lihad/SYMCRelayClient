@@ -27,11 +27,20 @@ public class SYMCColor {
 					}
 				}
 			}else{
+			
 				try {
 					doc.insertString(doc.getLength(), str_arr[i], key);
+					/**
+					if(doc.getLength() > 1000){
+						System.out.println("removing is: "+(doc.getLength()-5000));
+						try { doc.remove(0, (doc.getLength()-5000));
+						} catch (BadLocationException e1) { e1.printStackTrace(); }
+					}
+						*/
 				} catch (BadLocationException e) {
 					e.printStackTrace();
 				}
+			
 			}
 		}
 	}

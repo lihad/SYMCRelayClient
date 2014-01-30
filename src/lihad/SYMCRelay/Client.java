@@ -14,7 +14,7 @@ import javax.swing.text.BadLocationException;
 
 public class Client implements Runnable {
 
-	protected final static double build = 107;
+	protected final static double build = 108;
 	protected final static double config_build = 104;
 
 	// connect status constants
@@ -98,7 +98,9 @@ public class Client implements Runnable {
 	/////////////////////////////////////////////////////////////////
 
 	// checks the current client state and sets the enables/disables accordingly
-	public void run() {gui.updateFields();}
+	public void run() {
+		gui.updateFields();
+	}
 
 	/////////////////////////////////////////////////////////////////
 
@@ -199,9 +201,7 @@ public class Client implements Runnable {
 					}
 
 					// receive data
-					System.out.println("waiting....");
 					if (in.ready()) {
-						System.out.println("packet incoming...");
 
 						s = in.readLine();
 						if ((s != null) &&  (s.length() != 0)) {
@@ -213,7 +213,6 @@ public class Client implements Runnable {
 							}
 							// if server wants to notify the client of users connected
 							if (s.contains(CONNECTED_USERS)) {
-								System.out.println("connected received. ["+s+"]");
 								appendToUserBox(s.replace(" ", "\n").replace(CONNECTED_USERS, ""));
 								if(toAppendUser.length() >= 0){
 									gui.userText.setText(null);
@@ -224,7 +223,6 @@ public class Client implements Runnable {
 							}
 							// all else is received as text
 							else {
-								System.out.println("chat received. ["+s+"]");
 								String[] arr = s.split(CHANNEL);
 								appendToChatBox(getChannel(arr[0]), arr[1] + "\n");
 								SYMCSound.playDing();

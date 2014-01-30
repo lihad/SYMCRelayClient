@@ -29,6 +29,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.BadLocationException;
 
 public class Interface {
 
@@ -447,6 +448,7 @@ public class Interface {
 		for(Map.Entry<Channel, StringBuffer> e : Client.toAppend.entrySet()){
 			if(e.getValue().length() > 0){
 				SYMCColor.decodeTextPaneFormat(e.getKey().pane.getStyledDocument(), e.getValue().toString());
+				
 				for(int i = 0; i < tabbedPane.getTabCount(); i++){
 					if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(e.getKey().name)){
 						flash_on(i);
@@ -467,8 +469,11 @@ public class Interface {
 		else {Client.statusString = Client.statusMessages[Client.NULL];}
 
 		// error-handling and GUI-update thread
+		/**
 		if(safe)SwingUtilities.invokeLater(client);
-		else client.run();
+		else client.run();'
+	*/
+		client.run();
 	}
 
 	/////////////////////////////////////////////////////////////////
