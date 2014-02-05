@@ -14,7 +14,7 @@ import javax.swing.text.BadLocationException;
 
 public class Client implements Runnable {
 
-	protected final static double build = 109;
+	protected final static double build = 110;
 	protected final static double config_build = 104;
 
 	// connect status constants
@@ -70,6 +70,8 @@ public class Client implements Runnable {
 	public static BufferedReader in = null;
 	public static PrintWriter out = null;
 	private static int hearbeat_count = 0;
+	private static int internal_hearbeat_count = 0;
+
 
 	// GUI Interface Instance
 	public static Interface gui = null;
@@ -173,6 +175,12 @@ public class Client implements Runnable {
 			// run everything in this while loop ~10 ms + processing time
 			try { Thread.sleep(10); }catch (InterruptedException e) {e.printStackTrace();}
 
+			if(internal_hearbeat_count > 500 && connectionStatus == CONNECTED){
+				gui.changeStatusTS(DISCONNECTING, true, true);
+			}
+			internal_hearbeat_count++;
+			
+			
 			switch (connectionStatus) {
 			case BEGIN_CONNECT:
 				try {
@@ -235,6 +243,7 @@ public class Client implements Runnable {
 							}
 							// if server wants to notify the client of users connected
 							if (s.contains(CONNECTED_USERS)) {
+								internal_hearbeat_count = 0;
 								appendToUserBox(s.replace(" ", "\n").replace(CONNECTED_USERS, ""));
 								if(toAppendUser.length() >= 0 && !gui.userText.getText().replaceAll("\r", "").equalsIgnoreCase(toAppendUser.toString())){
 									gui.userText.setText(null);
