@@ -1,10 +1,18 @@
 package lihad.SYMCRelay;
 
+import java.awt.AWTException;
 import java.awt.BorderLayout;
+import java.awt.CheckboxMenuItem;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Menu;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
+import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -12,6 +20,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
@@ -54,6 +63,24 @@ public class Interface {
 	// class
 	public Interface(Client c){client = c;}
 
+
+	// system tray
+	public void loadTray(){
+		if (!SystemTray.isSupported()) {
+			System.out.println("SystemTray is not supported");
+			return;
+		}
+		final TrayIcon trayIcon =
+				new TrayIcon((new ImageIcon("http://siliconflorist.com/wp-content/uploads/2011/04/timbers-axe.jpg", "SYMCRelay")).getImage());
+		final SystemTray tray = SystemTray.getSystemTray();
+		
+		try {
+			tray.add(trayIcon);
+		} catch (AWTException e) {
+			System.out.println("TrayIcon could not be added.");
+		}
+
+	}
 	// initialize channel pane
 	private JPanel initChannelPane() {
 		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -80,7 +107,7 @@ public class Interface {
 		return pane;
 	}
 
-	// initialize options pane
+	// initialize color pane
 	private JPanel initColorPane() {
 		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		pane.add(new JLabel("Hex Color:"));
@@ -352,6 +379,7 @@ public class Interface {
 
 
 	public void initGUI() {
+		 loadTray();
 		// set status bar
 		statusField = new JLabel();
 		statusField.setText(Client.statusMessages[Client.DISCONNECTED]);
@@ -383,7 +411,7 @@ public class Interface {
 				flash_off(tabbedPane.getSelectedIndex());
 			}
 		});
-		
+
 		// set main pane
 		JPanel mainPane = new JPanel(new BorderLayout());
 		mainPane.add(statusBar, BorderLayout.SOUTH);
@@ -422,6 +450,8 @@ public class Interface {
 
 	// connectButton, disconnectButton, ipField, portField, usernameField, chatLine_text, chatLine_boolean, statusColor
 	private void updateFieldsHelpers(boolean cb, boolean db, boolean ipf, boolean pf, boolean uf, String clt, boolean clb, boolean f, boolean cha, Color c){
+		Client.previousStatus = Client.connectionStatus;
+
 		connectItem.setEnabled(cb);
 		disconnectItem.setEnabled(db);
 		channelJoinItem.setEnabled(cha);
@@ -444,11 +474,12 @@ public class Interface {
 		case Client.BEGIN_CONNECT: updateFieldsHelpers(false, false, false, false, false, null, false, false, false, Color.orange); break;
 		}
 
+
 		statusField.setText(Client.statusString);		
 		for(Map.Entry<Channel, StringBuffer> e : Client.toAppend.entrySet()){
 			if(e.getValue().length() > 0){
-				SYMCColor.decodeTextPaneFormat(e.getKey().pane.getStyledDocument(), e.getValue().toString());
-				
+				SYMCColor.decodeTextPaneFormat(e.getKey().pane.getStyledDocument(), e.getValue().toString(), true);
+
 				for(int i = 0; i < tabbedPane.getTabCount(); i++){
 					if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(e.getKey().name)){
 						flash_on(i);
@@ -457,7 +488,7 @@ public class Interface {
 			}
 			e.getValue().setLength(0);
 		}
-		mainFrame.toFront();
+
 	}
 
 	/////////////////////////////////////////////////////////////////
@@ -469,11 +500,8 @@ public class Interface {
 		else {Client.statusString = Client.statusMessages[Client.NULL];}
 
 		// error-handling and GUI-update thread
-		/**
 		if(safe)SwingUtilities.invokeLater(client);
-		else client.run();'
-	*/
-		client.run();
+		else client.run();
 	}
 
 	/////////////////////////////////////////////////////////////////

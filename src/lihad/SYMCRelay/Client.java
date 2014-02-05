@@ -14,12 +14,11 @@ import javax.swing.text.BadLocationException;
 
 public class Client implements Runnable {
 
-	protected final static double build = 108;
+	protected final static double build = 109;
 	protected final static double config_build = 104;
 
 	// connect status constants
 	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
-
 	// connection state info
 	public static String hostIP = "localhost", channel = "lobby";
 	public static int port = 80;
@@ -52,11 +51,14 @@ public class Client implements Runnable {
 	CHANNEL = new Character((char)3).toString(), // this is always followed by a format code, followed by the format request
 	CHANNEL_JOIN = new Character((char)4).toString()+"\n",
 	CHANNEL_LEAVE = new Character((char)5).toString()+"\n",
+	RETURN = new Character((char)6).toString(),
 	FORMAT = new Character((char)8).toString(); // this is always followed by a format code, followed by the format request
+	
 
 
 	// variables and stuff
 	public static int connectionStatus = DISCONNECTED;
+	public static int previousStatus = connectionStatus;
 	public static String statusString = statusMessages[connectionStatus];
 	public static Map<Channel, StringBuffer> toAppend = new HashMap<Channel, StringBuffer>();
 	public static StringBuffer toAppendUser = new StringBuffer("");
@@ -125,6 +127,26 @@ public class Client implements Runnable {
 	}
 	// main procedure
 	public static void main(String args[]) {
+		//open program and check for updates
+		
+		if(args.length > 0 && args[0].equalsIgnoreCase("launch")){
+			//program is launching
+			
+		}else{
+			//program will check for updates and reexecute
+			try {
+				System.out.println(Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString());
+				Runtime.getRuntime().exec("javaw -Xms20m -Xmx45m -jar "+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "")+ " launch");
+			} catch (IOException | URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.exit(0);
+		}	
+		
+		
+		
+		
 		String s;
 		//read any previous ip entered
 		if(Arrays.asList(new File("C:\\temp").list()).contains("symcrelayclient.cfg")){
@@ -214,11 +236,13 @@ public class Client implements Runnable {
 							// if server wants to notify the client of users connected
 							if (s.contains(CONNECTED_USERS)) {
 								appendToUserBox(s.replace(" ", "\n").replace(CONNECTED_USERS, ""));
-								if(toAppendUser.length() >= 0){
+								if(toAppendUser.length() >= 0 && !gui.userText.getText().replaceAll("\r", "").equalsIgnoreCase(toAppendUser.toString())){
 									gui.userText.setText(null);
 									gui.userText.getDocument().insertString(gui.userText.getDocument().getLength(), toAppendUser.toString(), null);
 									toAppendUser.setLength(0);
 									gui.mainFrame.repaint();
+								}else{
+									toAppendUser.setLength(0);
 								}
 							}
 							// all else is received as text
