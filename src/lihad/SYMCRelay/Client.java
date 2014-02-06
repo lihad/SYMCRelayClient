@@ -14,7 +14,7 @@ import javax.swing.text.BadLocationException;
 
 public class Client implements Runnable {
 
-	protected final static double build = 110;
+	protected final static double build = 111;
 	protected final static double config_build = 104;
 
 	// connect status constants
@@ -177,7 +177,7 @@ public class Client implements Runnable {
 
 			if(internal_hearbeat_count > 500 && connectionStatus == CONNECTED){
 				gui.changeStatusTS(DISCONNECTING, true, true);
-			}
+			}else if(connectionStatus != CONNECTED)internal_hearbeat_count = 0;
 			internal_hearbeat_count++;
 			
 			
