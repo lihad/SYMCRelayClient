@@ -56,6 +56,8 @@ public class SYMCColor {
 		}
 	}
 	public static String encodeTextPaneFormat(String string, String format){
+		String[] arr = string.split(Client.CHANNEL);
+		if(arr.length > 1)Client.logger.info("["+arr[0]+"]"+Client.username+": "+arr[1]);
 		return Client.FORMAT+format+Client.FORMAT+string.replaceAll("\r", Client.RETURN).replaceAll("\n", Client.RETURN);
 	}
 }

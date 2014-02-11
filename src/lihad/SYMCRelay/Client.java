@@ -2,7 +2,6 @@ package lihad.SYMCRelay;
 
 import java.io.*;
 import java.net.*;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,17 +10,20 @@ import java.util.Properties;
 
 import javax.swing.text.BadLocationException;
 
+import lihad.SYMCRelay.Logger.Logger;
+
 
 public class Client implements Runnable {
 
-	protected final static double build = 111;
+	protected final static double build = 112;
 	protected final static double config_build = 104;
 
 	// connect status constants
 	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
 	// connection state info
-	public static String hostIP = "localhost", channel = "lobby";
-	public static int port = 80;
+	public static String hostIP = "localhost", hostPort = "80", channel = "lobby";
+
+	//public static int port = 80;
 	public static String username = System.getProperty("user.name");
 
 	// status messages to client
@@ -37,12 +39,14 @@ public class Client implements Runnable {
 	public static String format = "000000";
 	public static String window = null;
 
-
 	// save config
-	private static String s_f = "C:\\temp\\symcrelayclient.cfg";
-	private static File file = new File(s_f);
+	private static File file = new File(System.getenv("ProgramFiles")+"\\Relay\\symcrelayclient.cfg");
 	private static Properties config;
-	
+
+	private static File log = new File(System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay.log");
+
+	public static Logger logger;
+
 	//these are the characters received by the client/server to tell certain requests apart.
 	public final static String 
 	END_CHAT_SESSION = new Character((char)0).toString()+"\n", // indicates the end of a session
@@ -53,8 +57,6 @@ public class Client implements Runnable {
 	CHANNEL_LEAVE = new Character((char)5).toString()+"\n",
 	RETURN = new Character((char)6).toString(),
 	FORMAT = new Character((char)8).toString(); // this is always followed by a format code, followed by the format request
-	
-
 
 	// variables and stuff
 	public static int connectionStatus = DISCONNECTED;
@@ -73,7 +75,7 @@ public class Client implements Runnable {
 	private static int internal_hearbeat_count = 0;
 
 
-	// GUI Interface Instance
+	// GUI interface instance
 	public static Interface gui = null;
 
 	/////////////////////////////////////////////////////////////////
@@ -115,7 +117,7 @@ public class Client implements Runnable {
 	protected static void channelJoinRequest(String chan){ out.print(chan+CHANNEL_JOIN); out.flush();}
 
 	protected static void channelLeaveRequest(String chan){ out.print(chan+CHANNEL_LEAVE); out.flush();}
-	
+
 	// sends notification to the server that client is still actively using socket
 	private static void heartbeat(){ out.print(HEARTBEAT); out.flush();}
 
@@ -129,40 +131,49 @@ public class Client implements Runnable {
 	}
 	// main procedure
 	public static void main(String args[]) {
+		//create logger and check for file path consistency
+		log.getParentFile().mkdirs();
+		logger = new Logger(log);
+
 		//open program and check for updates
-		
 		if(args.length > 0 && args[0].equalsIgnoreCase("launch")){
-			//program is launching
-			
+			logger.buff(2);
+			logger.info("client is currently spinning up... launch argument found!");
+			logger.info("----------------------------");
+			logger.info("welcome to Relay.  build: "+build);
+			logger.info("----------------------------");
 		}else{
+			logger.buff(2);
+			logger.info("client is currently spinning up... no launch argument found.");
 			//program will check for updates and reexecute
 			try {
-				System.out.println(Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString());
-				Runtime.getRuntime().exec("javaw -Xms20m -Xmx45m -jar "+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "")+ " launch");
+				logger.info("this is the instance i am using: "+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString());
+				Runtime.getRuntime().exec("javaw -Xms20m -Xmx45m -jar \""+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "").replace("%20", " ")+ "\" launch");
+				logger.info("spawning child. killing parent.");
 			} catch (IOException | URISyntaxException e) {
-				// TODO Auto-generated catch block
+				logger.info("bad instance... dying");
 				e.printStackTrace();
 			}
 			System.exit(0);
 		}	
-		
-		
-		
-		
+
+
+
+
 		String s;
 		//read any previous ip entered
-		if(Arrays.asList(new File("C:\\temp").list()).contains("symcrelayclient.cfg")){
-			try {
-				System.out.println("loading previous... ");
-				config = new Properties();
-				if(!file.exists())file.createNewFile();
-				config.load(new BufferedReader(new FileReader(file)));
-				System.out.println(config.getProperty("build"));
-				hostIP = config.getProperty("ip");
-				format = config.getProperty("format");
-				window = config.getProperty("window");
-			}catch(Exception e){e.printStackTrace();}
-		}
+		logger.info("reading configuration data off: DEFAULT");
+		try {
+			logger.info("loading configuration... ");
+			config = new Properties();
+			if(!file.exists())file.createNewFile();
+			config.load(new BufferedReader(new FileReader(file)));
+			hostIP = config.getProperty("ip");
+			hostPort = config.getProperty("port");
+			format = config.getProperty("format");
+			window = config.getProperty("window");
+			logger.info("ip: "+hostIP+" | port: "+hostPort+" | color: "+format+" | window size: "+window);
+		}catch(Exception e){e.printStackTrace(); gui.changeStatusTS(DISCONNECTING, false, true);}
 
 
 		//create and initialize gui
@@ -179,19 +190,18 @@ public class Client implements Runnable {
 				gui.changeStatusTS(DISCONNECTING, true, true);
 			}else if(connectionStatus != CONNECTED)internal_hearbeat_count = 0;
 			internal_hearbeat_count++;
-			
-			
+
+
 			switch (connectionStatus) {
 			case BEGIN_CONNECT:
 				try {
-
 					// create socket
-					socket = new Socket(hostIP, port);
+					socket = new Socket(hostIP, Integer.parseInt(hostPort));
 					in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out = new PrintWriter(socket.getOutputStream(), true);
 					//TODO:  temp fix to update data on "connected" bar.
 					/////////////////////
-					statusMessages[4] = (" Connected to "+hostIP);
+					statusMessages[4] = (" Connected to "+hostIP+":"+hostPort);
 					/////////////////////
 
 					gui.changeStatusTS(CONNECTED, true, true);
@@ -201,16 +211,22 @@ public class Client implements Runnable {
 					out.flush();
 
 					gui.createGUIChannel("lobby");
+					logger.debug("there are haz channels: "+channels.size()+" | ");
+					for(Channel c : channels) logger.debug(c.name);
+
+
 
 					//save file
+					logger.info("saving... ip: "+hostIP+" | port: "+hostPort);
 					save("ip", hostIP);
+					save("port", hostPort);
 
 				}
 				// error will fail connection
-				catch (IOException e) {
+				catch (IOException | NumberFormatException e) {
 					e.printStackTrace();
 					cleanup();
-					gui.changeStatusTS(DISCONNECTED, false, true);
+					gui.changeStatusTS(DISCONNECTING, true, true);
 				}
 				break;
 
@@ -258,6 +274,7 @@ public class Client implements Runnable {
 							else {
 								String[] arr = s.split(CHANNEL);
 								appendToChatBox(getChannel(arr[0]), arr[1] + "\n");
+								if(arr[1].split(FORMAT).length > 2)logger.info("["+arr[0]+"]"+arr[1].split(FORMAT)[0]+arr[1].split(FORMAT)[2]);
 								SYMCSound.playDing();
 								gui.changeStatusTS(NULL, true, true);
 							}
@@ -272,9 +289,19 @@ public class Client implements Runnable {
 				break;
 
 			case DISCONNECTING:
-
 				// tell the server the client is gracefully disconnecting
 				out.print(END_CHAT_SESSION); out.flush();
+
+				//close all tabs
+				logger.info("closing tabs");
+				while(gui.tabbedPane.getTabCount() > 0){
+					gui.tabbedPane.remove(0);
+				}
+				Client.channels.clear();
+
+
+				//clear user field
+				gui.userText.setText(null);
 
 				// close all streams/sockets
 				cleanup();

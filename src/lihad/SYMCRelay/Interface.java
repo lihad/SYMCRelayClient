@@ -170,19 +170,18 @@ public class Interface {
 		pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		pane.add(new JLabel("Port:"));
 		portField = new JTextField(10); portField.setEditable(true);
-		portField.setText((new Integer(Client.port)).toString());
+		portField.setText(Client.hostPort);
 		portField.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
 				// should be editable only when disconnected
 				if (Client.connectionStatus != Client.DISCONNECTED) {changeStatusTS(Client.NULL, true, false);}
 				else {
-					int temp;
 					try {
-						temp = Integer.parseInt(portField.getText());
-						Client.port = temp;
+						Integer.parseInt(portField.getText());
+						Client.hostPort = portField.getText();
 					}
 					catch (NumberFormatException nfe) {
-						portField.setText((new Integer(Client.port)).toString());
+						portField.setText(Client.hostPort);
 						mainFrame.repaint();
 					}
 				}
@@ -260,7 +259,11 @@ public class Interface {
 					connectPaneDialog.setVisible(true);
 				}
 				else{
-					for(;tabbedPane.getTabCount() > 0;)tabbedPane.remove(tabbedPane.getTabCount() - 1);
+					for(;tabbedPane.getTabCount() > 0;){
+						Client.channelLeaveRequest(tabbedPane.getTitleAt(tabbedPane.getTabCount()-1).replace("#", ""));
+						Client.channels.remove(Client.getChannel(tabbedPane.getTitleAt(tabbedPane.getTabCount()-1).replace("#", "")));
+						tabbedPane.remove((tabbedPane.getTabCount() - 1));
+					}
 					changeStatusTS(Client.DISCONNECTING, true, false);
 				}
 			}
@@ -299,6 +302,7 @@ public class Interface {
 				}
 				else{
 					Client.channelLeaveRequest(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()).replace("#", ""));
+					Client.channels.remove(Client.getChannel(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()).replace("#", "")));
 					tabbedPane.remove(tabbedPane.getSelectedIndex());
 				}
 			}
@@ -408,7 +412,10 @@ public class Interface {
 		//set tabbed pane
 		tabbedPane.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent arg0) {
+				//the following if was added as disconnecting with tabs would throw an out of bounds exception with -1
+				if(tabbedPane.getSelectedIndex() != -1){
 				flash_off(tabbedPane.getSelectedIndex());
+				}
 			}
 		});
 
@@ -444,6 +451,7 @@ public class Interface {
 	}
 
 	protected void flash_off(int index){
+		Client.logger.debug("[flash_off] index: "+index);
 		tabbedPane.setForegroundAt(index, Color.black);
 		updateFields();
 	}
