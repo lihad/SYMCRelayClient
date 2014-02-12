@@ -2,17 +2,12 @@ package lihad.SYMCRelay;
 
 import java.awt.AWTException;
 import java.awt.BorderLayout;
-import java.awt.CheckboxMenuItem;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.awt.Menu;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
-import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -38,7 +33,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.text.BadLocationException;
 
 public class Interface {
 
@@ -50,7 +44,7 @@ public class Interface {
 	public JTextField statusColor = null;
 	public JTextField ipField = null, portField = null, usernameField = null, hexColor = null, channel = null;
 	public JButton connectButton = null, colorSetButton = null, channelJoinButton = null;
-	public JMenuItem connectItem = null, disconnectItem = null, exitItem = null, soundToggleItem = null, colorChangeItem = null,
+	public JMenuItem connectItem = null, disconnectItem = null, exitItem = null, soundToggleItem = null, logToggleItem = null, colorChangeItem = null,
 			channelJoinItem = null, channelLeaveItem = null;
 	public JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), channelPaneDialog = new JDialog();
 	public JTabbedPane tabbedPane = new JTabbedPane();
@@ -73,7 +67,7 @@ public class Interface {
 		final TrayIcon trayIcon =
 				new TrayIcon((new ImageIcon("http://siliconflorist.com/wp-content/uploads/2011/04/timbers-axe.jpg", "SYMCRelay")).getImage());
 		final SystemTray tray = SystemTray.getSystemTray();
-		
+
 		try {
 			tray.add(trayIcon);
 		} catch (AWTException e) {
@@ -81,6 +75,7 @@ public class Interface {
 		}
 
 	}
+	
 	// initialize channel pane
 	private JPanel initChannelPane() {
 		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -307,6 +302,17 @@ public class Interface {
 				}
 			}
 		};
+		
+		ActionAdapter toggleListener = new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				Client.log_toggle = logToggleItem.isSelected();
+				Client.switch_logger(Client.log_toggle);
+				Client.sound_toggle = soundToggleItem.isSelected();
+				Client.save("log_toggle", String.valueOf(Client.log_toggle));
+				Client.save("sound_toggle", String.valueOf(Client.sound_toggle));
+			}
+		};
+
 
 		//build 'exit' option listener
 		ActionAdapter exitListener = new ActionAdapter() {
@@ -371,9 +377,15 @@ public class Interface {
 
 		soundToggleItem = new JCheckBoxMenuItem("Sound On");
 		soundToggleItem.setMnemonic(KeyEvent.VK_S);
-		soundToggleItem.setSelected(true);
+		soundToggleItem.setSelected(Client.sound_toggle);
+		soundToggleItem.addActionListener(toggleListener);
 		customize.add(soundToggleItem);		
-
+		
+		logToggleItem = new JCheckBoxMenuItem("Logging On");
+		logToggleItem.setSelected(Client.log_toggle);
+		logToggleItem.addActionListener(toggleListener);
+		customize.add(logToggleItem);	
+		
 		colorChangeItem = new JMenuItem("Color..."); 
 		colorChangeItem.addActionListener(colorListener);
 		customize.add(colorChangeItem);	
@@ -383,7 +395,7 @@ public class Interface {
 
 
 	public void initGUI() {
-		 loadTray();
+		loadTray();
 		// set status bar
 		statusField = new JLabel();
 		statusField.setText(Client.statusMessages[Client.DISCONNECTED]);
@@ -414,7 +426,7 @@ public class Interface {
 			public void stateChanged(ChangeEvent arg0) {
 				//the following if was added as disconnecting with tabs would throw an out of bounds exception with -1
 				if(tabbedPane.getSelectedIndex() != -1){
-				flash_off(tabbedPane.getSelectedIndex());
+					flash_off(tabbedPane.getSelectedIndex());
 				}
 			}
 		});
@@ -465,7 +477,6 @@ public class Interface {
 		channelJoinItem.setEnabled(cha);
 		channelLeaveItem.setEnabled(cha);
 
-
 		if(clt != null)for(Channel ch : Client.channels) ch.field.setText(clt); 
 		if(f) Client.channels.get(0).field.grabFocus();
 		for(Channel ch : Client.channels) ch.field.setEnabled(clb);
@@ -481,13 +492,11 @@ public class Interface {
 		case Client.CONNECTED: updateFieldsHelpers(false, true, false, false, false, null, true, false, true, Color.green); break;
 		case Client.BEGIN_CONNECT: updateFieldsHelpers(false, false, false, false, false, null, false, false, false, Color.orange); break;
 		}
-
-
 		statusField.setText(Client.statusString);		
 		for(Map.Entry<Channel, StringBuffer> e : Client.toAppend.entrySet()){
 			if(e.getValue().length() > 0){
-				SYMCColor.decodeTextPaneFormat(e.getKey().pane.getStyledDocument(), e.getValue().toString(), true);
-
+				SYMCColor.decodeTextPaneFormat(e.getKey(),e.getKey().pane.getStyledDocument(), e.getValue().toString(), true);
+ 
 				for(int i = 0; i < tabbedPane.getTabCount(); i++){
 					if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(e.getKey().name)){
 						flash_on(i);

@@ -9,13 +9,14 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.swing.text.BadLocationException;
+import javax.swing.text.StyledDocument;
 
 import lihad.SYMCRelay.Logger.Logger;
 
 
 public class Client implements Runnable {
 
-	protected final static double build = 112;
+	protected final static double build = 113;
 	protected final static double config_build = 104;
 
 	// connect status constants
@@ -23,7 +24,6 @@ public class Client implements Runnable {
 	// connection state info
 	public static String hostIP = "localhost", hostPort = "80", channel = "lobby";
 
-	//public static int port = 80;
 	public static String username = System.getProperty("user.name");
 
 	// status messages to client
@@ -38,6 +38,7 @@ public class Client implements Runnable {
 
 	public static String format = "000000";
 	public static String window = null;
+	public static boolean sound_toggle = true, log_toggle = true;
 
 	// save config
 	private static File file = new File(System.getenv("ProgramFiles")+"\\Relay\\symcrelayclient.cfg");
@@ -46,6 +47,7 @@ public class Client implements Runnable {
 	private static File log = new File(System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay.log");
 
 	public static Logger logger;
+	public static void switch_logger(boolean b){logger.toggle_enabled(b);}
 
 	//these are the characters received by the client/server to tell certain requests apart.
 	public final static String 
@@ -74,7 +76,9 @@ public class Client implements Runnable {
 	private static int hearbeat_count = 0;
 	private static int internal_hearbeat_count = 0;
 
-
+	// user chat formatting
+	private static String last_user = "";
+	
 	// GUI interface instance
 	public static Interface gui = null;
 
@@ -172,6 +176,10 @@ public class Client implements Runnable {
 			hostPort = config.getProperty("port");
 			format = config.getProperty("format");
 			window = config.getProperty("window");
+			if(config.getProperty("sound_toggle") != null) sound_toggle = Boolean.parseBoolean(config.getProperty("sound_toggle"));
+			if(config.getProperty("log_toggle") != null) log_toggle = Boolean.parseBoolean(config.getProperty("log_toggle"));
+			switch_logger(log_toggle);
+
 			logger.info("ip: "+hostIP+" | port: "+hostPort+" | color: "+format+" | window size: "+window);
 		}catch(Exception e){e.printStackTrace(); gui.changeStatusTS(DISCONNECTING, false, true);}
 
@@ -261,11 +269,13 @@ public class Client implements Runnable {
 							if (s.contains(CONNECTED_USERS)) {
 								internal_hearbeat_count = 0;
 								appendToUserBox(s.replace(" ", "\n").replace(CONNECTED_USERS, ""));
-								if(toAppendUser.length() >= 0 && !gui.userText.getText().replaceAll("\r", "").equalsIgnoreCase(toAppendUser.toString())){
+								if(!last_user.equalsIgnoreCase(toAppendUser.toString())){
+									last_user = toAppendUser.toString();
 									gui.userText.setText(null);
-									gui.userText.getDocument().insertString(gui.userText.getDocument().getLength(), toAppendUser.toString(), null);
+									SYMCColor.decodeTextPaneFormat(gui.userText.getStyledDocument(), toAppendUser.toString());
 									toAppendUser.setLength(0);
 									gui.mainFrame.repaint();
+									logger.debug("new");
 								}else{
 									toAppendUser.setLength(0);
 								}
@@ -285,7 +295,7 @@ public class Client implements Runnable {
 					e.printStackTrace();
 					cleanup();
 					gui.changeStatusTS(DISCONNECTED, false, true);
-				} catch (BadLocationException e) {e.printStackTrace();}
+				}
 				break;
 
 			case DISCONNECTING:

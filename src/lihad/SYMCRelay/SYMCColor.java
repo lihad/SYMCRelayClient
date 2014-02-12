@@ -12,8 +12,41 @@ import javax.swing.text.StyledDocument;
 public class SYMCColor {
 
 
+	//TODO simplify the two decodes
+	// im using this specifically for the user side
+	public static void decodeTextPaneFormat(StyledDocument doc, String string){
+		SimpleAttributeSet key = null;
+		String[] str_arr = string.split(Client.FORMAT);
+		
+		for(int i = 0; i<str_arr.length; i++){
+			if(i != 0 && i % 2 != 0){
+				key = new SimpleAttributeSet();
+				String[] config = str_arr[i].split(" ");
+				for(String s : config){
+					if(s.length() == 6){
+						StyleConstants.setForeground(key, Color.decode("#"+s));
+					}else{
+						if(s.equalsIgnoreCase("b"))StyleConstants.setBold(key, true);
+						if(s.equalsIgnoreCase("u"))StyleConstants.setUnderline(key, true);
+						if(s.equalsIgnoreCase("i"))StyleConstants.setItalic(key, true);
+						if(s.equalsIgnoreCase("!b"))StyleConstants.setBold(key, false);
+						if(s.equalsIgnoreCase("!u"))StyleConstants.setUnderline(key, false);
+						if(s.equalsIgnoreCase("!i"))StyleConstants.setItalic(key, false);
+					}
+				}
+			}else{
+
+				try {
+					doc.insertString(doc.getLength(), str_arr[i].replaceAll(Client.RETURN, "\r\n"), key);
+				} catch (BadLocationException e) {
+					e.printStackTrace();
+				}
+
+			}
+		}
+	}
 	// the boolean is for tray use
-	public static void decodeTextPaneFormat(StyledDocument doc, String string, boolean pop){
+	public static void decodeTextPaneFormat(Channel c, StyledDocument doc, String string, boolean pop){
 		SimpleAttributeSet key = null;
 		String[] str_arr = string.split(Client.FORMAT);
 		String name = "";
@@ -29,16 +62,21 @@ public class SYMCColor {
 						if(s.equalsIgnoreCase("b"))StyleConstants.setBold(key, true);
 						if(s.equalsIgnoreCase("u"))StyleConstants.setUnderline(key, true);
 						if(s.equalsIgnoreCase("i"))StyleConstants.setItalic(key, true);
+						if(s.equalsIgnoreCase("!b"))StyleConstants.setBold(key, false);
+						if(s.equalsIgnoreCase("!u"))StyleConstants.setUnderline(key, false);
+						if(s.equalsIgnoreCase("!i"))StyleConstants.setItalic(key, false);
 					}
 				}
 			}else{
-
 				try {
 					if(i == 0)name = str_arr[i].replace(":", "");
-
 					if(pop && i > 0 && !Client.gui.mainFrame.isFocused()){
 						SystemTray tray = SystemTray.getSystemTray();
-						if(tray.getTrayIcons().length > 0)tray.getTrayIcons()[0].displayMessage(name, str_arr[i], MessageType.INFO);
+						if(tray.getTrayIcons().length > 0){
+							String s_s = "";
+							if(c != null) s_s = "[#"+c.name+"] "+str_arr[i];
+							tray.getTrayIcons()[0].displayMessage(name, s_s, MessageType.NONE);
+						}
 					}
 					doc.insertString(doc.getLength(), str_arr[i].replaceAll(Client.RETURN, "\r\n"), key);
 					/**
