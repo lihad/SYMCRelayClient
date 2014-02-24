@@ -30,6 +30,9 @@ public class Channel {
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		field = new JTextArea();
 		field.setEnabled(false);
+		Linker handler = new Linker();
+		pane.addMouseListener(handler);
+		pane.addMouseMotionListener(handler);
 		field.addKeyListener(new KeyListener() {
 			@Override
 			public void keyPressed(KeyEvent e) {

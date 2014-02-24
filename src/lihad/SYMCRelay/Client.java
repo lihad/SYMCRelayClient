@@ -14,7 +14,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client implements Runnable {
 
-	protected final static double build = 113;
+	protected final static double build = 114;
 	protected final static double config_build = 104;
 
 	// connect status constants
@@ -156,9 +156,6 @@ public class Client implements Runnable {
 			//program will check for updates and reexecute
 			try {
 				logger.info("this is the instance i am using: "+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString());
-				logger.debug("this is the instance i am using: "+Client.class.getProtectionDomain().getCodeSource().getLocation());
-				logger.debug("this is the instance i am using: "+Client.class.getResource(""));
-
 				Runtime.getRuntime().exec("javaw -Xms20m -Xmx45m -jar \""+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "").replace("%20", " ")+ "\" launch");
 				logger.info("spawning child. killing parent.");
 			} catch (IOException | URISyntaxException e) {
@@ -167,8 +164,6 @@ public class Client implements Runnable {
 			}
 			System.exit(0);
 		}	
-
-
 
 
 		String s;

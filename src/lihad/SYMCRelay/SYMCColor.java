@@ -3,11 +3,14 @@ package lihad.SYMCRelay;
 import java.awt.Color;
 import java.awt.SystemTray;
 import java.awt.TrayIcon.MessageType;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.swing.text.html.HTML;
 
 public class SYMCColor {
 
@@ -17,7 +20,7 @@ public class SYMCColor {
 	public static void decodeTextPaneFormat(StyledDocument doc, String string){
 		SimpleAttributeSet key = null;
 		String[] str_arr = string.split(Client.FORMAT);
-		
+
 		for(int i = 0; i<str_arr.length; i++){
 			if(i != 0 && i % 2 != 0){
 				key = new SimpleAttributeSet();
@@ -50,14 +53,16 @@ public class SYMCColor {
 		SimpleAttributeSet key = null;
 		String[] str_arr = string.split(Client.FORMAT);
 		String name = "";
-		
+		String color = "000000";
+
 		for(int i = 0; i<str_arr.length; i++){
 			if(i != 0 && i % 2 != 0){
 				key = new SimpleAttributeSet();
 				String[] config = str_arr[i].split(" ");
 				for(String s : config){
 					if(s.length() == 6){
-						StyleConstants.setForeground(key, Color.decode("#"+s));
+						color = s;
+						StyleConstants.setForeground(key, Color.decode("#"+color));
 					}else{
 						if(s.equalsIgnoreCase("b"))StyleConstants.setBold(key, true);
 						if(s.equalsIgnoreCase("u"))StyleConstants.setUnderline(key, true);
@@ -78,15 +83,30 @@ public class SYMCColor {
 							tray.getTrayIcons()[0].displayMessage(name, s_s, MessageType.NONE);
 						}
 					}
-					doc.insertString(doc.getLength(), str_arr[i].replaceAll(Client.RETURN, "\r\n"), key);
+
+					if(str_arr[i].contains("http://") || str_arr[i].contains("https://")){
+						for(String s  : str_arr[i].split(" ")){
+							if(s.contains("http://") || s.contains("https://")){
+								key = new SimpleAttributeSet();
+								StyleConstants.setUnderline(key, true);
+								key.addAttribute(HTML.Attribute.HREF, new URL(s).toString());
+							}else{
+								key = new SimpleAttributeSet();
+								StyleConstants.setForeground(key, Color.decode("#"+color));
+							}
+							doc.insertString(doc.getLength(), s.replaceAll(Client.RETURN, "\r\n").concat(" "), key);
+						}
+					}
+					else doc.insertString(doc.getLength(), str_arr[i].replaceAll(Client.RETURN, "\r\n"), key);
+
 					/**
 					if(doc.getLength() > 1000){
 						System.out.println("removing is: "+(doc.getLength()-5000));
 						try { doc.remove(0, (doc.getLength()-5000));
 						} catch (BadLocationException e1) { e1.printStackTrace(); }
 					}
-					*/
-				} catch (BadLocationException e) {
+					 */
+				} catch (BadLocationException | MalformedURLException e) {
 					Client.logger.severe(e.getMessage());
 				}
 			}
