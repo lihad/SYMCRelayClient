@@ -71,7 +71,7 @@ public class Interface {
 		try {
 			tray.add(trayIcon);
 		} catch (AWTException e) {
-			System.out.println("TrayIcon could not be added.");
+			Client.logger.severe(e.getMessage());
 		}
 
 	}

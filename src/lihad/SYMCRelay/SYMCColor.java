@@ -39,7 +39,7 @@ public class SYMCColor {
 				try {
 					doc.insertString(doc.getLength(), str_arr[i].replaceAll(Client.RETURN, "\r\n"), key);
 				} catch (BadLocationException e) {
-					e.printStackTrace();
+					Client.logger.severe(e.getMessage());
 				}
 
 			}
@@ -87,9 +87,8 @@ public class SYMCColor {
 					}
 					*/
 				} catch (BadLocationException e) {
-					e.printStackTrace();
+					Client.logger.severe(e.getMessage());
 				}
-
 			}
 		}
 	}

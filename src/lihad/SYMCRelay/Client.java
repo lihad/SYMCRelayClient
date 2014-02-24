@@ -6,10 +6,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
-
-import javax.swing.text.BadLocationException;
-import javax.swing.text.StyledDocument;
 
 import lihad.SYMCRelay.Logger.Logger;
 
@@ -65,8 +63,7 @@ public class Client implements Runnable {
 	public static int previousStatus = connectionStatus;
 	public static String statusString = statusMessages[connectionStatus];
 	public static Map<Channel, StringBuffer> toAppend = new HashMap<Channel, StringBuffer>();
-	public static StringBuffer toAppendUser = new StringBuffer("");
-	public static StringBuffer toSend = new StringBuffer("");
+	public static StringBuffer toAppendUser = new StringBuffer(""), toSend = new StringBuffer("");
 
 	// TCP components
 	public static ServerSocket hostServer = null;
@@ -102,7 +99,7 @@ public class Client implements Runnable {
 			if (socket != null) {socket.close();socket = null;}
 			if (in != null) {in.close();	in = null;	}
 			if (out != null) {	out.close();out = null;	}
-		}catch (IOException e) { in = null; }
+		}catch (IOException e) {logger.severe(e.getMessage());in = null; }
 	}
 
 	/////////////////////////////////////////////////////////////////
@@ -125,16 +122,22 @@ public class Client implements Runnable {
 	// sends notification to the server that client is still actively using socket
 	private static void heartbeat(){ out.print(HEARTBEAT); out.flush();}
 
+	protected static void save(Map<String, String> map){
+		for(Entry<String, String> e : map.entrySet() ){
+			save(e.getKey(), e.getValue());
+		}
+	}
 	protected static void save(String key, String value){
 		try {
 			config.setProperty(key, value);
 			config.store(new FileOutputStream(file), "");
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.severe(e.getMessage());
 		}
 	}
 	// main procedure
 	public static void main(String args[]) {
+		
 		//create logger and check for file path consistency
 		log.getParentFile().mkdirs();
 		logger = new Logger(log);
@@ -149,14 +152,18 @@ public class Client implements Runnable {
 		}else{
 			logger.buff(2);
 			logger.info("client is currently spinning up... no launch argument found.");
+			
 			//program will check for updates and reexecute
 			try {
 				logger.info("this is the instance i am using: "+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString());
+				logger.debug("this is the instance i am using: "+Client.class.getProtectionDomain().getCodeSource().getLocation());
+				logger.debug("this is the instance i am using: "+Client.class.getResource(""));
+
 				Runtime.getRuntime().exec("javaw -Xms20m -Xmx45m -jar \""+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "").replace("%20", " ")+ "\" launch");
 				logger.info("spawning child. killing parent.");
 			} catch (IOException | URISyntaxException e) {
 				logger.info("bad instance... dying");
-				e.printStackTrace();
+				logger.severe(e.getMessage());
 			}
 			System.exit(0);
 		}	
@@ -181,7 +188,7 @@ public class Client implements Runnable {
 			switch_logger(log_toggle);
 
 			logger.info("ip: "+hostIP+" | port: "+hostPort+" | color: "+format+" | window size: "+window);
-		}catch(Exception e){e.printStackTrace(); gui.changeStatusTS(DISCONNECTING, false, true);}
+		}catch(Exception e){logger.severe(e.getMessage()); gui.changeStatusTS(DISCONNECTING, false, true);}
 
 
 		//create and initialize gui
@@ -218,23 +225,19 @@ public class Client implements Runnable {
 					out.print( build +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName()+"\n"); 
 					out.flush();
 
+					//TODO: create all predefined channels
 					gui.createGUIChannel("lobby");
-					logger.debug("there are haz channels: "+channels.size()+" | ");
-					for(Channel c : channels) logger.debug(c.name);
-
-
 
 					//save file
 					logger.info("saving... ip: "+hostIP+" | port: "+hostPort);
-					save("ip", hostIP);
-					save("port", hostPort);
-
+					
+					save(new HashMap<String, String>(){private static final long serialVersionUID = 1L;{put("ip", hostIP); put("port", hostPort);}});
 				}
 				// error will fail connection
 				catch (IOException | NumberFormatException e) {
-					e.printStackTrace();
+					logger.severe(e.getMessage());
 					cleanup();
-					gui.changeStatusTS(DISCONNECTING, true, true);
+					gui.changeStatusTS(DISCONNECTING, false, true);
 				}
 				break;
 
@@ -256,7 +259,6 @@ public class Client implements Runnable {
 
 					// receive data
 					if (in.ready()) {
-
 						s = in.readLine();
 						if ((s != null) &&  (s.length() != 0)) {
 
@@ -292,13 +294,14 @@ public class Client implements Runnable {
 					}
 				}
 				catch (IOException e) {
-					e.printStackTrace();
+					logger.severe(e.getMessage());
 					cleanup();
 					gui.changeStatusTS(DISCONNECTED, false, true);
 				}
 				break;
 
 			case DISCONNECTING:
+				try{
 				// tell the server the client is gracefully disconnecting
 				out.print(END_CHAT_SESSION); out.flush();
 
@@ -313,6 +316,9 @@ public class Client implements Runnable {
 				//clear user field
 				gui.userText.setText(null);
 
+				}catch(NullPointerException e){
+					e.printStackTrace();
+				}
 				// close all streams/sockets
 				cleanup();
 				gui.changeStatusTS(DISCONNECTED, true, true);
