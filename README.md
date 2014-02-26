@@ -1,5 +1,5 @@
-alpha - build 114 - client repository only
+alpha - build 115 - client repository only
 
 please feel free to post any issues/requests to the git.
 
-client can be downloaded from: bit.ly/Hf5e6r
+client can be directly downloaded from: bit.ly/Hf5e6r

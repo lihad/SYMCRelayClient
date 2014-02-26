@@ -11,16 +11,24 @@ import java.util.Properties;
 
 import lihad.SYMCRelay.Logger.Logger;
 
+//TODO: auto-reconnect?
 
-public class Client implements Runnable {
+/**
+ *  
+ * @author Kyle_Armstrong
+ *
+ */
 
-	protected final static double build = 114;
+public class Client{
+
+	protected final static double build = 115;
 	protected final static double config_build = 104;
+	protected static double server_build = 0;
 
 	// connect status constants
 	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
 	// connection state info
-	public static String hostIP = "localhost", hostPort = "80", channel = "lobby";
+	public static String hostIP = "localhost", hostPort = "80", channel = "lobby", updateIP = "http://10.167.3.82/RelayClient/SYMCRelayClient/";
 
 	public static String username = System.getProperty("user.name");
 
@@ -29,19 +37,18 @@ public class Client implements Runnable {
 		" Error! Could not connect!", " Disconnected",
 		" Disconnecting...", " Connecting...", (" Connected to "+hostIP+" || #"+channel)
 	};
-	// instance
-	public final static Client client = new Client();
 
 	public static List<Channel> channels = new LinkedList<Channel>();
 
 	public static String format = "000000";
 	public static String window = null;
-	public static boolean sound_toggle = true, log_toggle = true;
+	public static boolean sound_toggle = true, log_toggle = true, auto_connect = false, auto_reconnect = false;
+	public static String default_channels_basic = "lobby";
+	public static List<String> default_channels = new LinkedList<String>();
 
 	// save config
 	private static File file = new File(System.getenv("ProgramFiles")+"\\Relay\\symcrelayclient.cfg");
 	private static Properties config;
-
 	private static File log = new File(System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay.log");
 
 	public static Logger logger;
@@ -56,6 +63,7 @@ public class Client implements Runnable {
 	CHANNEL_JOIN = new Character((char)4).toString()+"\n",
 	CHANNEL_LEAVE = new Character((char)5).toString()+"\n",
 	RETURN = new Character((char)6).toString(),
+	VERSION = new Character((char)7).toString(), // denotes a version
 	FORMAT = new Character((char)8).toString(); // this is always followed by a format code, followed by the format request
 
 	// variables and stuff
@@ -75,14 +83,14 @@ public class Client implements Runnable {
 
 	// user chat formatting
 	private static String last_user = "";
-	
+
 	// GUI interface instance
 	public static Interface gui = null;
 
 	/////////////////////////////////////////////////////////////////
 
 	// append to the chat box
-	protected static void appendToChatBox(Channel c, String s) { synchronized (toAppend) { toAppend.put(c, toAppend.get(c).append(s)); }}
+	protected static void appendToChatBox(Channel c, String s) { synchronized (toAppend) { toAppend.put(c, toAppend.get(c).append(s));}}
 
 	// append to the user box
 	protected static void appendToUserBox(String s) {synchronized (toAppendUser) {toAppendUser.append(s);}}
@@ -97,17 +105,12 @@ public class Client implements Runnable {
 		try {
 			if (hostServer != null) {hostServer.close();hostServer = null;}
 			if (socket != null) {socket.close();socket = null;}
-			if (in != null) {in.close();	in = null;	}
-			if (out != null) {	out.close();out = null;	}
-		}catch (IOException e) {logger.severe(e.getMessage());in = null; }
+			if (in != null) {in.close();in = null;	}
+			if (out != null) {out.close();out = null;	}
+		}catch (IOException e) {logger.error(e.toString(),e.getStackTrace());in = null;}
 	}
 
 	/////////////////////////////////////////////////////////////////
-
-	// checks the current client state and sets the enables/disables accordingly
-	public void run() {
-		gui.updateFields();
-	}
 
 	/////////////////////////////////////////////////////////////////
 
@@ -127,17 +130,30 @@ public class Client implements Runnable {
 			save(e.getKey(), e.getValue());
 		}
 	}
+	protected static void save(String key, List<String> value){
+		String s = "";
+		for(String string : value){
+			if(s.length()>0)s=s.concat(","+string);
+			else s=s.concat(string);
+		}
+		logger.debug("saving channels: "+s);
+		try {
+			config.setProperty(key, s);
+			config.store(new FileOutputStream(file), "");
+		} catch (IOException e) {
+			logger.error(e.toString(),e.getStackTrace());
+		}
+	}
 	protected static void save(String key, String value){
 		try {
 			config.setProperty(key, value);
 			config.store(new FileOutputStream(file), "");
 		} catch (IOException e) {
-			logger.severe(e.getMessage());
+			logger.error(e.toString(),e.getStackTrace());
 		}
 	}
 	// main procedure
 	public static void main(String args[]) {
-		
 		//create logger and check for file path consistency
 		log.getParentFile().mkdirs();
 		logger = new Logger(log);
@@ -152,7 +168,7 @@ public class Client implements Runnable {
 		}else{
 			logger.buff(2);
 			logger.info("client is currently spinning up... no launch argument found.");
-			
+
 			//program will check for updates and reexecute
 			try {
 				logger.info("this is the instance i am using: "+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString());
@@ -160,12 +176,10 @@ public class Client implements Runnable {
 				logger.info("spawning child. killing parent.");
 			} catch (IOException | URISyntaxException e) {
 				logger.info("bad instance... dying");
-				logger.severe(e.getMessage());
+				logger.error(e.toString(),e.getStackTrace());
 			}
 			System.exit(0);
 		}	
-
-
 		String s;
 		//read any previous ip entered
 		logger.info("reading configuration data off: DEFAULT");
@@ -178,26 +192,31 @@ public class Client implements Runnable {
 			hostPort = config.getProperty("port");
 			format = config.getProperty("format");
 			window = config.getProperty("window");
+			if(config.getProperty("auto_connect") != null) auto_connect = Boolean.parseBoolean(config.getProperty("auto_connect"));
+			if(config.getProperty("auto_reconnect") != null) auto_reconnect = Boolean.parseBoolean(config.getProperty("auto_reconnect"));
+			if(config.getProperty("channels") != null) default_channels_basic = config.getProperty("channels");
 			if(config.getProperty("sound_toggle") != null) sound_toggle = Boolean.parseBoolean(config.getProperty("sound_toggle"));
 			if(config.getProperty("log_toggle") != null) log_toggle = Boolean.parseBoolean(config.getProperty("log_toggle"));
 			switch_logger(log_toggle);
 
 			logger.info("ip: "+hostIP+" | port: "+hostPort+" | color: "+format+" | window size: "+window);
-		}catch(Exception e){logger.severe(e.getMessage()); gui.changeStatusTS(DISCONNECTING, false, true);}
+		}catch(Exception e){logger.error(e.toString(),e.getStackTrace()); gui.changeStatusTS(DISCONNECTING, false, true);}
 
 
 		//create and initialize gui
-		gui = new Interface(client);
+		gui = new Interface();
 		gui.initGUI();
 
-
+		if(auto_connect)gui.changeStatusTS(BEGIN_CONNECT, true, true);
+		
 		while (true) {
 
 			// run everything in this while loop ~10 ms + processing time
-			try { Thread.sleep(10); }catch (InterruptedException e) {e.printStackTrace();}
+			try { Thread.sleep(10); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
 
 			if(internal_hearbeat_count > 500 && connectionStatus == CONNECTED){
 				gui.changeStatusTS(DISCONNECTING, true, true);
+				logger.warning("Connection to server timed out.");
 			}else if(connectionStatus != CONNECTED)internal_hearbeat_count = 0;
 			internal_hearbeat_count++;
 
@@ -220,17 +239,17 @@ public class Client implements Runnable {
 					out.print( build +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName()+"\n"); 
 					out.flush();
 
-					//TODO: create all predefined channels
-					gui.createGUIChannel("lobby");
-
+					//creates predefined channels
+					for(String dc : default_channels_basic.split(","))gui.createGUIChannel(dc);
+					
 					//save file
 					logger.info("saving... ip: "+hostIP+" | port: "+hostPort);
-					
+
 					save(new HashMap<String, String>(){private static final long serialVersionUID = 1L;{put("ip", hostIP); put("port", hostPort);}});
 				}
 				// error will fail connection
 				catch (IOException | NumberFormatException e) {
-					logger.severe(e.getMessage());
+					logger.error(e.toString(),e.getStackTrace());
 					cleanup();
 					gui.changeStatusTS(DISCONNECTING, false, true);
 				}
@@ -263,7 +282,7 @@ public class Client implements Runnable {
 								gui.changeStatusTS(DISCONNECTING, true, true);
 							}
 							// if server wants to notify the client of users connected
-							if (s.contains(CONNECTED_USERS)) {
+							else if (s.contains(CONNECTED_USERS)) {
 								internal_hearbeat_count = 0;
 								appendToUserBox(s.replace(" ", "\n").replace(CONNECTED_USERS, ""));
 								if(!last_user.equalsIgnoreCase(toAppendUser.toString())){
@@ -277,6 +296,10 @@ public class Client implements Runnable {
 									toAppendUser.setLength(0);
 								}
 							}
+							// if version wants to tell its version
+							else if(s.contains(VERSION)){
+								server_build=Double.parseDouble(s.replaceAll(VERSION, ""));
+							}
 							// all else is received as text
 							else {
 								String[] arr = s.split(CHANNEL);
@@ -289,7 +312,7 @@ public class Client implements Runnable {
 					}
 				}
 				catch (IOException e) {
-					logger.severe(e.getMessage());
+					logger.error(e.toString(),e.getStackTrace());
 					cleanup();
 					gui.changeStatusTS(DISCONNECTED, false, true);
 				}
@@ -297,22 +320,22 @@ public class Client implements Runnable {
 
 			case DISCONNECTING:
 				try{
-				// tell the server the client is gracefully disconnecting
-				out.print(END_CHAT_SESSION); out.flush();
+					// tell the server the client is gracefully disconnecting
+					out.print(END_CHAT_SESSION); out.flush();
 
-				//close all tabs
-				logger.info("closing tabs");
-				while(gui.tabbedPane.getTabCount() > 0){
-					gui.tabbedPane.remove(0);
-				}
-				Client.channels.clear();
+					//close all tabs
+					logger.info("closing tabs");
+					while(gui.tabbedPane.getTabCount() > 0){
+						gui.tabbedPane.remove(0);
+					}
+					Client.channels.clear();
 
 
-				//clear user field
-				gui.userText.setText(null);
+					//clear user field
+					gui.userText.setText(null);
 
 				}catch(NullPointerException e){
-					e.printStackTrace();
+					logger.error(e.toString(),e.getStackTrace());
 				}
 				// close all streams/sockets
 				cleanup();
@@ -321,7 +344,6 @@ public class Client implements Runnable {
 				break;
 
 			default: break; // do nothing
-
 			}
 		}
 	}

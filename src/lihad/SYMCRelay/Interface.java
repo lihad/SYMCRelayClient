@@ -13,10 +13,19 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -34,56 +43,48 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class Interface {
+
+//TODO: clean this whole damn thing up
+public class Interface implements Runnable {
 
 	// GUI components
 	public JFrame mainFrame = null;
 	public JTextPane userText = null;
 	public JPanel statusBar = null;
-	public JLabel statusField = null;
-	public JTextField statusColor = null;
-	public JTextField ipField = null, portField = null, usernameField = null, hexColor = null, channel = null;
-	public JButton connectButton = null, colorSetButton = null, channelJoinButton = null;
-	public JMenuItem connectItem = null, disconnectItem = null, exitItem = null, soundToggleItem = null, logToggleItem = null, colorChangeItem = null,
+	public JLabel statusField = null, current_version_label = null, server_supported_label = null;
+	public JTextField statusColor = null, ipField = null, portField = null, usernameField = null, hexColor = null, channel = null, ipFieldUpdate = null;
+	public JButton connectButton = null, colorSetButton = null, channelJoinButton = null, updateButton = null, updateRefreshButton = null;
+	public JMenuItem connectItem = null, disconnectItem = null, exitItem = null, soundToggleItem = null, logToggleItem = null, colorChangeItem = null, updateItem = null,
 			channelJoinItem = null, channelLeaveItem = null;
-	public JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), channelPaneDialog = new JDialog();
+	public JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), channelPaneDialog = new JDialog(), updatePaneDialog = new JDialog();
 	public JTabbedPane tabbedPane = new JTabbedPane();
+	public JCheckBox autoConnectBox = null;
+	public double able_build = 0;
 
-	// client instance
-	public Client client;
 
 	/////////////////////////////////////////////////////////////////
 
-	// class
-	public Interface(Client c){client = c;}
-
-
 	// system tray
-	public void loadTray(){
-		if (!SystemTray.isSupported()) {
-			System.out.println("SystemTray is not supported");
-			return;
-		}
-		final TrayIcon trayIcon =
-				new TrayIcon((new ImageIcon("http://siliconflorist.com/wp-content/uploads/2011/04/timbers-axe.jpg", "SYMCRelay")).getImage());
+	public void loadTray() throws MalformedURLException, IOException{
+		if (!SystemTray.isSupported()) { Client.logger.severe("SystemTray is not supported"); return; }
+		final TrayIcon trayIcon = new TrayIcon(ImageIO.read(Client.class.getResourceAsStream("Resource/icon_16.png")));
+		trayIcon.setToolTip("this does nothing. congrats");
 		final SystemTray tray = SystemTray.getSystemTray();
-
 		try {
 			tray.add(trayIcon);
 		} catch (AWTException e) {
-			Client.logger.severe(e.getMessage());
+			Client.logger.error(e.toString(),e.getStackTrace());
 		}
 
 	}
-	
+
 	// initialize channel pane
-	private JPanel initChannelPane() {
+	private JPanel initChannelPane(){
 		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
 		pane.add(new JLabel("#"));
 		channel = new JTextField(6); channel.setText("");
 		channel.setEnabled(true);
-
 		// set button
 		JPanel buttonPane = new JPanel(new GridLayout(1,1));
 		ActionAdapter buttonListener = new ActionAdapter() {
@@ -99,6 +100,96 @@ public class Interface {
 		buttonPane.add(channelJoinButton);
 
 		pane.add(buttonPane);
+		return pane;
+	}
+
+	
+	private boolean checkValidBuild(){
+		URL website = null;
+		for(double i = Client.build-1; i < Client.build+100; i++){
+			try {
+				website = new URL(ipFieldUpdate.getText()+"SYMCRelayClient_alpha_"+(int)i+".jar");
+				HttpURLConnection huc =  (HttpURLConnection) website.openConnection();
+				huc.setRequestMethod("GET"); 
+				huc.setConnectTimeout(5);
+				huc.connect(); 
+				if(huc.getResponseCode() == 200){
+					able_build = i;
+					return true;
+				}
+			} catch (Exception e2) {Client.logger.error(e2.toString(),e2.getStackTrace());}
+		}
+		return false;
+	}
+	//TODO: create the update listener
+	// initialize update pane
+	private JPanel initUpdatePane(){
+		boolean able_update = true;
+
+		ipFieldUpdate = new JTextField(); ipFieldUpdate.setText(Client.updateIP);
+		ipFieldUpdate.setEnabled(true);
+
+		able_update = checkValidBuild();
+		//TODO: this is sloppy as fuck.... adhoc bullshit
+		// test to see what version is valid.
+		
+
+		JPanel pane = new JPanel(new BorderLayout());
+		current_version_label = new JLabel("The current version is: "+able_build);
+		server_supported_label = new JLabel("The server supports version: "+Client.server_build);
+		
+		pane.add(current_version_label, BorderLayout.NORTH);
+		pane.add(server_supported_label, BorderLayout.CENTER);
+
+		JPanel buttonPane = new JPanel(new BorderLayout());
+		ActionAdapter buttonListener = new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				// what happens when button is pressed
+				try {
+					changeStatusTS(Client.DISCONNECTING, true, true);
+					
+					URL website = new URL(ipFieldUpdate.getText()+"SYMCRelayClient_alpha_"+(int)able_build+".jar");
+					ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+					FileOutputStream fos = new FileOutputStream(System.getenv("ProgramFiles")+"\\Relay\\SYMCRelayClient.jar");
+					fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+					fos.close();
+					website = new URL(ipFieldUpdate.getText()+"SYMCRelayClient_alpha_"+(int)able_build+".jar");
+					rbc = Channels.newChannel(website.openStream());
+					fos = new FileOutputStream(Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "").replace("%20", " "));
+					fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+					fos.close();
+					
+					Client.logger.info("restarting with new version: "+able_build);
+					
+					//TODO: dup code
+					try { Thread.sleep(500); }catch (InterruptedException e2) {Client.logger.error(e2.toString(),e2.getStackTrace());}
+
+					Runtime.getRuntime().exec("javaw -Xms20m -Xmx45m -jar \""+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "").replace("%20", " ")+ "\" launch");
+					Client.logger.info("spawning child. killing parent.");
+					System.exit(0);					
+					
+				} catch (IOException | URISyntaxException e1) {
+					Client.logger.error(e1.toString(),e1.getStackTrace());
+				}
+			}
+		};
+		ActionAdapter refreshListener = new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				updateButton.setEnabled(checkValidBuild());
+				current_version_label.setText("The current version is: "+able_build);
+			}
+		};
+
+		updateButton = new JButton("Update");
+		updateButton.addActionListener(buttonListener);
+		updateButton.setEnabled(able_update);
+		updateRefreshButton = new JButton("Refresh");
+		updateRefreshButton.addActionListener(refreshListener);
+		buttonPane.add(ipFieldUpdate, BorderLayout.WEST);
+		buttonPane.add(updateRefreshButton, BorderLayout.CENTER);
+		buttonPane.add(updateButton, BorderLayout.EAST);
+
+		pane.add(buttonPane, BorderLayout.SOUTH);
 		return pane;
 	}
 
@@ -143,7 +234,7 @@ public class Interface {
 
 	// initialize options pane
 	private JPanel initOptionsPane() {
-		JPanel optionsPane = new JPanel(new GridLayout(4, 1));
+		JPanel optionsPane = new JPanel(new GridLayout(5, 1));
 
 		// ip address input
 		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -209,12 +300,22 @@ public class Interface {
 		});
 		pane.add(usernameField);
 		optionsPane.add(pane);
+		
+		//auto-connect box
+		pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		pane.add(new JLabel("Auto-Connect:"));
+		autoConnectBox = new JCheckBox();
+		autoConnectBox.setSelected(Client.auto_connect);	
+		pane.add(autoConnectBox);
+		optionsPane.add(pane);
 
 		// connect/disconnect buttons
 		JPanel buttonPane = new JPanel(new GridLayout(1, 2));
 		ActionAdapter buttonListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("connect")){
+					Client.auto_connect = autoConnectBox.isSelected();
+					Client.save("auto_connect",String.valueOf(autoConnectBox.isSelected()));
 					connectPaneDialog.setVisible(false);
 					changeStatusTS(Client.BEGIN_CONNECT, true, false);
 				}
@@ -264,6 +365,24 @@ public class Interface {
 			}
 		};
 
+		//build 'update' option listener
+		ActionAdapter updateListener = new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				JPanel mainPane = new JPanel(new BorderLayout());
+				JPanel updatePane = initUpdatePane();
+
+				mainPane.add(updatePane, BorderLayout.CENTER);
+
+				updatePaneDialog.setContentPane(mainPane);
+				updatePaneDialog.setSize(updatePaneDialog.getPreferredSize());
+				updatePaneDialog.setResizable(false);
+				updatePaneDialog.setTitle("Update");
+				updatePaneDialog.setLocationRelativeTo(mainFrame); 
+				updatePaneDialog.pack();
+				updatePaneDialog.setVisible(true);
+			}
+		};
+
 		//build 'color' option listener
 		ActionAdapter colorListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
@@ -297,12 +416,21 @@ public class Interface {
 				}
 				else{
 					Client.channelLeaveRequest(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()).replace("#", ""));
+					
+					//TODO: similar code
+					String s = "";
+					if(Client.channels.size()>1)s.concat(",");
+					Client.default_channels.remove(s+tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()));
+					Client.save("channels",Client.default_channels);
+					
 					Client.channels.remove(Client.getChannel(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()).replace("#", "")));
 					tabbedPane.remove(tabbedPane.getSelectedIndex());
+					
+
 				}
 			}
 		};
-		
+
 		ActionAdapter toggleListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				Client.log_toggle = logToggleItem.isSelected();
@@ -344,6 +472,13 @@ public class Interface {
 
 		relay.addSeparator();
 
+		updateItem = new JMenuItem("Update...", KeyEvent.VK_U);
+		updateItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, ActionEvent.ALT_MASK));
+		updateItem.addActionListener(updateListener);
+		relay.add(updateItem);
+
+		relay.addSeparator();
+
 		exitItem = new JMenuItem("Exit", KeyEvent.VK_E);
 		exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.ALT_MASK));
 		exitItem.addActionListener(exitListener);
@@ -380,12 +515,12 @@ public class Interface {
 		soundToggleItem.setSelected(Client.sound_toggle);
 		soundToggleItem.addActionListener(toggleListener);
 		customize.add(soundToggleItem);		
-		
+
 		logToggleItem = new JCheckBoxMenuItem("Logging On");
 		logToggleItem.setSelected(Client.log_toggle);
 		logToggleItem.addActionListener(toggleListener);
 		customize.add(logToggleItem);	
-		
+
 		colorChangeItem = new JMenuItem("Color..."); 
 		colorChangeItem.addActionListener(colorListener);
 		customize.add(colorChangeItem);	
@@ -395,7 +530,9 @@ public class Interface {
 
 
 	public void initGUI() {
-		loadTray();
+
+		try { loadTray();} catch (IOException e) {Client.logger.error(e.toString(),e.getStackTrace());}
+		
 		// set status bar
 		statusField = new JLabel();
 		statusField.setText(Client.statusMessages[Client.DISCONNECTED]);
@@ -440,6 +577,9 @@ public class Interface {
 
 		// set main frame
 		mainFrame = new JFrame("SYMCRelay - Build "+Client.build);
+		try {
+			mainFrame.setIconImage(ImageIO.read(Client.class.getResourceAsStream("Resource/icon_32.png")));
+		} catch (IOException e) {Client.logger.error(e.toString(),e.getStackTrace());}
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setContentPane(mainPane);
 		if(Client.window != null)mainFrame.setPreferredSize(new Dimension(Integer.parseInt(Client.window.split(",")[0]),Integer.parseInt(Client.window.split(",")[1])));
@@ -450,7 +590,11 @@ public class Interface {
 		mainFrame.setVisible(true);
 	}
 
+	//TODO: this... needs to not belong here
 	protected void createGUIChannel(String name){
+		for(Channel c : Client.channels)if(c.name.equalsIgnoreCase(name))return;
+		if(!Client.default_channels.contains(name))Client.default_channels.add(name);
+		Client.save("channels",Client.default_channels);
 		Channel chan = new Channel(name);
 		tabbedPane.addTab("#"+chan.name, chan.panel);
 		Client.toAppend.put(chan, new StringBuffer());
@@ -496,7 +640,7 @@ public class Interface {
 		for(Map.Entry<Channel, StringBuffer> e : Client.toAppend.entrySet()){
 			if(e.getValue().length() > 0){
 				SYMCColor.decodeTextPaneFormat(e.getKey(),e.getKey().pane.getStyledDocument(), e.getValue().toString(), true);
- 
+
 				for(int i = 0; i < tabbedPane.getTabCount(); i++){
 					if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(e.getKey().name)){
 						flash_on(i);
@@ -517,8 +661,8 @@ public class Interface {
 		else {Client.statusString = Client.statusMessages[Client.NULL];}
 
 		// error-handling and GUI-update thread
-		if(safe)SwingUtilities.invokeLater(client);
-		else client.run();
+		if(safe)SwingUtilities.invokeLater(this);
+		else this.run();
 	}
 
 	/////////////////////////////////////////////////////////////////
@@ -527,7 +671,10 @@ public class Interface {
 		public void actionPerformed(ActionEvent e) {}
 	}
 
+	@Override
+	public void run() {
+		updateFields();
+	}
+
 	////////////////////////////////////////////////////////////////////
-
-
 }
