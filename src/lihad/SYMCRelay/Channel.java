@@ -41,9 +41,9 @@ public class Channel {
 					if(s.contentEquals("\r\n") || s.contentEquals("\n") || s.contentEquals("\r")){
 						field.setText(null);
 					}else{
-						if (!s.equals("")) { SYMCColor.decodeTextPaneFormat(null, pane.getStyledDocument(), Client.username+": "+SYMCColor.encodeTextPaneFormat(s, Client.format) + "\n",false);  field.setText(null);
+						if (!s.equals("")) {SYMCColor.decodeTextPaneFormat(null, pane.getStyledDocument(), Client.username+": "+SYMCColor.encodeTextPaneFormat(null, s, Client.format) + "\n",false);  field.setText(null);
 						// send the string
-						Client.sendString(SYMCColor.encodeTextPaneFormat(name+Client.CHANNEL+s, Client.format));
+						Client.sendString(SYMCColor.encodeTextPaneFormat(name+Client.CHANNEL, s, Client.format));
 						}
 					}		
 					e.consume();

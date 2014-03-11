@@ -21,7 +21,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	protected final static double build = 115;
+	protected final static double build = 116;
 	protected final static double config_build = 104;
 	protected static double server_build = 0;
 
@@ -56,12 +56,12 @@ public class Client{
 
 	//these are the characters received by the client/server to tell certain requests apart.
 	public final static String 
-	END_CHAT_SESSION = new Character((char)0).toString()+"\n", // indicates the end of a session
-	HEARTBEAT = new Character((char)1).toString()+"\n", // session heartbeat
+	END_CHAT_SESSION = new Character((char)0).toString(), // indicates the end of a session
+	HEARTBEAT = new Character((char)1).toString(), // session heartbeat
 	CONNECTED_USERS = new Character((char)2).toString(), // this is always followed by a list of users, separated by spaces. indicates connected users
 	CHANNEL = new Character((char)3).toString(), // this is always followed by a format code, followed by the format request
-	CHANNEL_JOIN = new Character((char)4).toString()+"\n",
-	CHANNEL_LEAVE = new Character((char)5).toString()+"\n",
+	CHANNEL_JOIN = new Character((char)4).toString(),
+	CHANNEL_LEAVE = new Character((char)5).toString(),
 	RETURN = new Character((char)6).toString(),
 	VERSION = new Character((char)7).toString(), // denotes a version
 	FORMAT = new Character((char)8).toString(); // this is always followed by a format code, followed by the format request
@@ -96,7 +96,7 @@ public class Client{
 	protected static void appendToUserBox(String s) {synchronized (toAppendUser) {toAppendUser.append(s);}}
 
 	// add text to the buffer
-	protected static void sendString(String s) {synchronized (toSend) { toSend.append(s + "\n");}}
+	protected static void sendString(String s) {synchronized (toSend) {toSend.append(s);}}
 
 	/////////////////////////////////////////////////////////////////
 
@@ -105,8 +105,8 @@ public class Client{
 		try {
 			if (hostServer != null) {hostServer.close();hostServer = null;}
 			if (socket != null) {socket.close();socket = null;}
-			if (in != null) {in.close();in = null;	}
-			if (out != null) {out.close();out = null;	}
+			if (in != null) {in.close();in = null;}
+			if (out != null) {out.close();out = null;}
 		}catch (IOException e) {logger.error(e.toString(),e.getStackTrace());in = null;}
 	}
 
@@ -118,12 +118,12 @@ public class Client{
 	protected static Channel getChannel(String name){for(Channel c : channels)if(c.name.equalsIgnoreCase(name)) return c; return null;}
 
 	// notification to the server of join/leave
-	protected static void channelJoinRequest(String chan){ out.print(chan+CHANNEL_JOIN); out.flush();}
+	protected static void channelJoinRequest(String chan){send(out, chan+CHANNEL_JOIN);}
 
-	protected static void channelLeaveRequest(String chan){ out.print(chan+CHANNEL_LEAVE); out.flush();}
+	protected static void channelLeaveRequest(String chan){send(out, chan+CHANNEL_LEAVE);}
 
 	// sends notification to the server that client is still actively using socket
-	private static void heartbeat(){ out.print(HEARTBEAT); out.flush();}
+	private static void heartbeat(){send(out, HEARTBEAT);}
 
 	protected static void save(Map<String, String> map){
 		for(Entry<String, String> e : map.entrySet() ){
@@ -208,7 +208,7 @@ public class Client{
 		gui.initGUI();
 
 		if(auto_connect)gui.changeStatusTS(BEGIN_CONNECT, true, true);
-		
+
 		while (true) {
 
 			// run everything in this while loop ~10 ms + processing time
@@ -236,12 +236,11 @@ public class Client{
 					gui.changeStatusTS(CONNECTED, true, true);
 
 					// format { <version> <username> <ip> <port> }
-					out.print( build +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName()+"\n"); 
-					out.flush();
+					send(out,(build +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName())); 
 
 					//creates predefined channels
 					for(String dc : default_channels_basic.split(","))gui.createGUIChannel(dc);
-					
+
 					//save file
 					logger.info("saving... ip: "+hostIP+" | port: "+hostPort);
 
@@ -266,14 +265,14 @@ public class Client{
 
 					// send data
 					if (toSend.length() != 0) {
-						out.print(toSend); out.flush();
+						send(out, toSend+"");
 						toSend.setLength(0);
 						gui.changeStatusTS(NULL, true, true);
 					}
 
 					// receive data
-					if (in.ready()) {
-						s = in.readLine();
+					if (in.ready()) {						
+						s = decode(in.readLine());
 						if ((s != null) &&  (s.length() != 0)) {
 
 							// if server wants the client to disconnect
@@ -291,7 +290,6 @@ public class Client{
 									SYMCColor.decodeTextPaneFormat(gui.userText.getStyledDocument(), toAppendUser.toString());
 									toAppendUser.setLength(0);
 									gui.mainFrame.repaint();
-									logger.debug("new");
 								}else{
 									toAppendUser.setLength(0);
 								}
@@ -321,7 +319,7 @@ public class Client{
 			case DISCONNECTING:
 				try{
 					// tell the server the client is gracefully disconnecting
-					out.print(END_CHAT_SESSION); out.flush();
+					send(out, (END_CHAT_SESSION));
 
 					//close all tabs
 					logger.info("closing tabs");
@@ -345,6 +343,27 @@ public class Client{
 
 			default: break; // do nothing
 			}
+		}
+	}
+	private static void send(PrintWriter pr, String s){
+		pr.print(encode(s)+"\n"); pr.flush();
+	}
+	private static String encode(String string){
+		byte[] b_a = string.getBytes();
+		String s = "";
+		for(byte b : b_a)s = s.concat(b+".");
+		s = s.substring(0, s.length()-1);
+		return s;
+	}
+	private static String decode(String s){
+		try {
+			String[] s_a = s.split("\\.");
+			byte[] b = new byte [s_a.length];
+			for(int k = 0; k<s_a.length;k++)b[k] = Byte.parseByte(s_a[k]);
+			return new String(b, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return "error";
 		}
 	}
 }

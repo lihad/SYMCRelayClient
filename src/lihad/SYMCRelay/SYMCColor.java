@@ -3,6 +3,7 @@ package lihad.SYMCRelay;
 import java.awt.Color;
 import java.awt.SystemTray;
 import java.awt.TrayIcon.MessageType;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -75,6 +76,14 @@ public class SYMCColor {
 			}else{
 				try {
 					if(i == 0)name = str_arr[i].replace(":", "");
+					/**
+					if(i > 0){
+						String[] s_arr = str_arr[i].split(".");
+						byte[] b = new byte[s_arr.length-1];
+						for(int k = 0; k < s_arr.length; k++)if(!s_arr[k].equalsIgnoreCase(""))b[k] = Byte.parseByte(s_arr[k]);
+						str_arr[i] = new String(b, "UTF-8");
+					}
+					*/
 					if(pop && i > 0 && !Client.gui.mainFrame.isFocused()){
 						SystemTray tray = SystemTray.getSystemTray();
 						if(tray.getTrayIcons().length > 0){
@@ -112,9 +121,9 @@ public class SYMCColor {
 			}
 		}
 	}
-	public static String encodeTextPaneFormat(String string, String format){
-		String[] arr = string.split(Client.CHANNEL);
-		if(arr.length > 1)Client.logger.info("["+arr[0]+"]"+Client.username+": "+arr[1]);
-		return Client.FORMAT+format+Client.FORMAT+string.replaceAll("\r", Client.RETURN).replaceAll("\n", Client.RETURN);
+	public static String encodeTextPaneFormat(String namechan, String string, String format){
+		String[] arr = namechan.split(Client.CHANNEL);
+		if(arr.length > 1)Client.logger.info("["+arr[0]+"]"+Client.username+": "+string);
+		return (Client.FORMAT+format+Client.FORMAT+namechan+string).replaceAll("\r", Client.RETURN).replaceAll("\n", Client.RETURN);
 	}
 }

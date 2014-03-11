@@ -628,7 +628,6 @@ public class Interface implements Runnable {
 	}
 	// update gui fields
 	public void updateFields(){
-
 		//update state-based fields
 		switch (Client.connectionStatus) {
 		case Client.DISCONNECTED: updateFieldsHelpers(true, false, true, true, true, "", false, false, false, Color.red); break;
