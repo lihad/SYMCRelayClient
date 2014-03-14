@@ -21,7 +21,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	protected final static double build = 116;
+	protected final static double build = 117;
 	protected final static double config_build = 104;
 	protected static double server_build = 0;
 
@@ -64,7 +64,8 @@ public class Client{
 	CHANNEL_LEAVE = new Character((char)5).toString(),
 	RETURN = new Character((char)6).toString(),
 	VERSION = new Character((char)7).toString(), // denotes a version
-	FORMAT = new Character((char)8).toString(); // this is always followed by a format code, followed by the format request
+	FORMAT = new Character((char)8).toString(), // this is always followed by a format code, followed by the format request
+	COUNT = new Character((char)9).toString();
 
 	// variables and stuff
 	public static int connectionStatus = DISCONNECTED;
@@ -87,14 +88,16 @@ public class Client{
 	// GUI interface instance
 	public static Interface gui = null;
 
+	// all active channels + count
+	protected static Map<String, Integer> channelcount = new HashMap<String, Integer>();
+	protected static boolean isupdated = true;
+
 	/////////////////////////////////////////////////////////////////
 
 	// append to the chat box
 	protected static void appendToChatBox(Channel c, String s) { synchronized (toAppend) { toAppend.put(c, toAppend.get(c).append(s));}}
-
 	// append to the user box
 	protected static void appendToUserBox(String s) {synchronized (toAppendUser) {toAppendUser.append(s);}}
-
 	// add text to the buffer
 	protected static void sendString(String s) {synchronized (toSend) {toSend.append(s);}}
 
@@ -116,6 +119,9 @@ public class Client{
 
 	// get channel
 	protected static Channel getChannel(String name){for(Channel c : channels)if(c.name.equalsIgnoreCase(name)) return c; return null;}
+
+	//get an updated channel/user map
+	protected static void updatechannelcount(){send(out, COUNT);isupdated = false;}
 
 	// notification to the server of join/leave
 	protected static void channelJoinRequest(String chan){send(out, chan+CHANNEL_JOIN);}
@@ -154,6 +160,7 @@ public class Client{
 	}
 	// main procedure
 	public static void main(String args[]) {
+
 		//create logger and check for file path consistency
 		log.getParentFile().mkdirs();
 		logger = new Logger(log);
@@ -256,7 +263,7 @@ public class Client{
 
 			case CONNECTED:
 				//send heartbeat
-				if(hearbeat_count > 25){
+				if(hearbeat_count > 50){
 					heartbeat();
 					hearbeat_count = 0;
 				}
@@ -277,7 +284,7 @@ public class Client{
 
 							// if server wants the client to disconnect
 							if (s.equals(END_CHAT_SESSION.replace("\n", ""))) {
-								System.out.println("force received. ["+s+"]");
+								logger.info("force received. ["+s+"]");
 								gui.changeStatusTS(DISCONNECTING, true, true);
 							}
 							// if server wants to notify the client of users connected
@@ -298,6 +305,19 @@ public class Client{
 							else if(s.contains(VERSION)){
 								server_build=Double.parseDouble(s.replaceAll(VERSION, ""));
 							}
+							else if (s.contains(COUNT)) {
+								channelcount.clear();
+								s = s.replaceAll(COUNT, "").replaceAll("\\{", "");
+								String[] arr = s.split("}");
+								for(int i = 0; i<arr.length; i++){
+									if(getChannel(arr[i].split("\\|")[0]) == null){
+										logger.debug(arr[i].split("\\|")[0]+"|"+arr[i].split("\\|")[1]); 
+										channelcount.put(arr[i].split("\\|")[0], Integer.parseInt(arr[i].split("\\|")[1]));
+									}
+								}
+								isupdated = true;
+								logger.debug("is true");
+							}								
 							// all else is received as text
 							else {
 								String[] arr = s.split(CHANNEL);
@@ -318,6 +338,7 @@ public class Client{
 
 			case DISCONNECTING:
 				try{
+					last_user = "";
 					// tell the server the client is gracefully disconnecting
 					send(out, (END_CHAT_SESSION));
 

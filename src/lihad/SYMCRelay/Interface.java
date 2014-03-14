@@ -21,7 +21,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -30,6 +32,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -59,6 +62,7 @@ public class Interface implements Runnable {
 	public JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), channelPaneDialog = new JDialog(), updatePaneDialog = new JDialog();
 	public JTabbedPane tabbedPane = new JTabbedPane();
 	public JCheckBox autoConnectBox = null;
+	public JList channelListPane = null;
 	public double able_build = 0;
 
 
@@ -79,27 +83,40 @@ public class Interface implements Runnable {
 	}
 
 	// initialize channel pane
+	//TODO: all those sizes need to be addressed
+	
 	private JPanel initChannelPane(){
-		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-
-		pane.add(new JLabel("#"));
-		channel = new JTextField(6); channel.setText("");
-		channel.setEnabled(true);
+		JPanel pane = new JPanel(new BorderLayout());
+		JScrollPane scrollPane = new JScrollPane();
+		String[] a = new String[Client.channelcount.size()];
+		int count = 0;
+		for(Entry<String, Integer> entry : Client.channelcount.entrySet()){
+			a[count] = (entry.getKey()+" {"+entry.getValue()+"}");
+			count++;
+		}
+		Arrays.sort(a);
+		channelListPane = new JList(a);
+		//TODO: uhh...
+		channelListPane.setPrototypeCellValue("00000000000000000000000000000000");
+		scrollPane.getViewport().add(channelListPane);
+		
 		// set button
-		JPanel buttonPane = new JPanel(new GridLayout(1,1));
+		JPanel buttonPane = new JPanel(new BorderLayout());
 		ActionAdapter buttonListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				createGUIChannel(channel.getText());
+				//TODO: not [0] will return user count in tab field... interesting idea
+				createGUIChannel(channelListPane.getSelectedValue().toString().split(" ")[0]);
 				channelPaneDialog.setVisible(false);
 			}
 		};
-
-		pane.add(channel);
+		pane.add(scrollPane, BorderLayout.WEST);
 		channelJoinButton = new JButton("Join");
 		channelJoinButton.addActionListener(buttonListener);
-		buttonPane.add(channelJoinButton);
+		if(a.length == 0) channelJoinButton.setEnabled(false);
+		buttonPane.add(channelJoinButton, BorderLayout.SOUTH);
 
-		pane.add(buttonPane);
+		pane.add(buttonPane, BorderLayout.EAST);
+		pane.setSize(500,500);
 		return pane;
 	}
 
@@ -394,6 +411,7 @@ public class Interface implements Runnable {
 				colorPaneDialog.setContentPane(mainPane);
 				colorPaneDialog.setSize(colorPaneDialog.getPreferredSize());
 				colorPaneDialog.setLocationRelativeTo(mainFrame); 
+				colorPaneDialog.setTitle("Color");
 				colorPaneDialog.pack();
 				colorPaneDialog.setVisible(true);
 			}
@@ -403,14 +421,18 @@ public class Interface implements Runnable {
 		ActionAdapter channelListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("join")){
+					//get an updated channel list
+					Client.updatechannelcount();
+					//TODO: literally will hang errything.  need safety
+					while(!Client.isupdated){Client.logger.debug(Client.isupdated+"");}					
 					JPanel mainPane = new JPanel(new BorderLayout());
 					JPanel channelPane = initChannelPane();
 
 					mainPane.add(channelPane, BorderLayout.CENTER);
 
 					channelPaneDialog.setContentPane(mainPane);
-					channelPaneDialog.setSize(channelPaneDialog.getPreferredSize());
 					channelPaneDialog.setLocationRelativeTo(mainFrame); 
+					channelPaneDialog.setTitle("Color");
 					channelPaneDialog.pack();
 					channelPaneDialog.setVisible(true);
 				}
@@ -418,14 +440,13 @@ public class Interface implements Runnable {
 					Client.channelLeaveRequest(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()).replace("#", ""));
 					
 					//TODO: similar code
-					String s = "";
-					if(Client.channels.size()>1)s.concat(",");
-					Client.default_channels.remove(s+tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()));
-					Client.save("channels",Client.default_channels);
+				
+					Client.default_channels.remove(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()).replace("#", ""));
 					
 					Client.channels.remove(Client.getChannel(tabbedPane.getTitleAt(tabbedPane.getSelectedIndex()).replace("#", "")));
 					tabbedPane.remove(tabbedPane.getSelectedIndex());
 					
+					Client.save("channels",Client.default_channels);
 
 				}
 			}

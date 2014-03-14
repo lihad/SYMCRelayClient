@@ -3,7 +3,6 @@ package lihad.SYMCRelay;
 import java.awt.Color;
 import java.awt.SystemTray;
 import java.awt.TrayIcon.MessageType;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -122,8 +121,8 @@ public class SYMCColor {
 		}
 	}
 	public static String encodeTextPaneFormat(String namechan, String string, String format){
-		String[] arr = namechan.split(Client.CHANNEL);
-		if(arr.length > 1)Client.logger.info("["+arr[0]+"]"+Client.username+": "+string);
+		if(namechan == null)namechan = "";
+		else Client.logger.info("["+namechan.split(Client.CHANNEL)[0]+"]"+Client.username+": "+string);
 		return (Client.FORMAT+format+Client.FORMAT+namechan+string).replaceAll("\r", Client.RETURN).replaceAll("\n", Client.RETURN);
 	}
 }
