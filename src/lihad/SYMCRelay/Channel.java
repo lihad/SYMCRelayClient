@@ -3,6 +3,7 @@ package lihad.SYMCRelay;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -24,12 +25,14 @@ public class Channel {
 		pane = new JTextPane();
 		pane.setEditable(false);
 		pane.setForeground(Color.black);
-		
+		pane.setFont(Client.font);
+
 		JScrollPane chatTextPane = new JScrollPane(pane,
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		field = new JTextArea();
 		field.setEnabled(false);
+		field.setFont(Client.font);
 		Linker handler = new Linker();
 		pane.addMouseListener(handler);
 		pane.addMouseMotionListener(handler);

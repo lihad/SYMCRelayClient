@@ -5,6 +5,8 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon.MessageType;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
@@ -14,6 +16,7 @@ import javax.swing.text.html.HTML;
 
 public class SYMCColor {
 
+	static SimpleDateFormat dateformat = new SimpleDateFormat("HH:mm:ss");
 
 	//TODO simplify the two decodes
 	// im using this specifically for the user side
@@ -55,7 +58,16 @@ public class SYMCColor {
 		String name = "";
 		String color = "000000";
 
+		try {
+			key = new SimpleAttributeSet();
+			StyleConstants.setItalic(key, true);
+			doc.insertString(doc.getLength(), "["+dateformat.format(Calendar.getInstance().getTime())+"] ", key);
+			StyleConstants.setItalic(key, false);
+		} catch (BadLocationException e1) {
+			e1.printStackTrace();
+		}
 		for(int i = 0; i<str_arr.length; i++){
+			//"["+dateformat.format(Calendar.getInstance().getTime())+"]"+
 			if(i != 0 && i % 2 != 0){
 				key = new SimpleAttributeSet();
 				String[] config = str_arr[i].split(" ");
@@ -88,11 +100,12 @@ public class SYMCColor {
 						if(tray.getTrayIcons().length > 0){
 							String s_s = "";
 							if(c != null) s_s = "[#"+c.name+"] "+str_arr[i];
-							tray.getTrayIcons()[0].displayMessage(name, s_s, MessageType.NONE);
+							if(Client.bubble_toggle)tray.getTrayIcons()[0].displayMessage(name, s_s, MessageType.NONE);
 						}
 					}
 
 					if(str_arr[i].contains("http://") || str_arr[i].contains("https://")){
+						boolean space = false;
 						for(String s  : str_arr[i].split(" ")){
 							if(s.contains("http://") || s.contains("https://")){
 								key = new SimpleAttributeSet();
@@ -102,7 +115,10 @@ public class SYMCColor {
 								key = new SimpleAttributeSet();
 								StyleConstants.setForeground(key, Color.decode("#"+color));
 							}
-							doc.insertString(doc.getLength(), s.replaceAll(Client.RETURN, "\r\n").concat(" "), key);
+							
+							if(space)doc.insertString(doc.getLength(), " "+s.replaceAll(Client.RETURN, "\r\n"), key);
+							else doc.insertString(doc.getLength(), s.replaceAll(Client.RETURN, "\r\n"), key);
+							space = true;
 						}
 					}
 					else doc.insertString(doc.getLength(), str_arr[i].replaceAll(Client.RETURN, "\r\n"), key);

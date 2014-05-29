@@ -24,6 +24,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -57,7 +58,7 @@ public class Interface implements Runnable {
 	public JLabel statusField = null, current_version_label = null, server_supported_label = null;
 	public JTextField statusColor = null, ipField = null, portField = null, usernameField = null, hexColor = null, channel = null, ipFieldUpdate = null;
 	public JButton connectButton = null, colorSetButton = null, channelJoinButton = null, updateButton = null, updateRefreshButton = null;
-	public JMenuItem connectItem = null, disconnectItem = null, exitItem = null, soundToggleItem = null, logToggleItem = null, colorChangeItem = null, updateItem = null,
+	public JMenuItem connectItem = null, disconnectItem = null, exitItem = null, soundToggleItem = null, logToggleItem = null, bubbleToggleItem = null, colorChangeItem = null, updateItem = null,
 			channelJoinItem = null, channelLeaveItem = null;
 	public JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), channelPaneDialog = new JDialog(), updatePaneDialog = new JDialog();
 	public JTabbedPane tabbedPane = new JTabbedPane();
@@ -123,12 +124,12 @@ public class Interface implements Runnable {
 	
 	private boolean checkValidBuild(){
 		URL website = null;
-		for(double i = Client.build-1; i < Client.build+100; i++){
+		for(double i = Client.build-1; i < Client.build+20; i++){
 			try {
 				website = new URL(ipFieldUpdate.getText()+"SYMCRelayClient_alpha_"+(int)i+".jar");
 				HttpURLConnection huc =  (HttpURLConnection) website.openConnection();
 				huc.setRequestMethod("GET"); 
-				huc.setConnectTimeout(5);
+				huc.setConnectTimeout(25);
 				huc.connect(); 
 				if(huc.getResponseCode() == 200){
 					able_build = i;
@@ -356,7 +357,6 @@ public class Interface implements Runnable {
 
 		//create the menu bar.
 		JMenuBar menuBar = new JMenuBar();
-
 		//build 'connect...' option listener
 		ActionAdapter connectListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
@@ -432,7 +432,7 @@ public class Interface implements Runnable {
 
 					channelPaneDialog.setContentPane(mainPane);
 					channelPaneDialog.setLocationRelativeTo(mainFrame); 
-					channelPaneDialog.setTitle("Color");
+					channelPaneDialog.setTitle("Channel");
 					channelPaneDialog.pack();
 					channelPaneDialog.setVisible(true);
 				}
@@ -457,8 +457,10 @@ public class Interface implements Runnable {
 				Client.log_toggle = logToggleItem.isSelected();
 				Client.switch_logger(Client.log_toggle);
 				Client.sound_toggle = soundToggleItem.isSelected();
+				Client.bubble_toggle = bubbleToggleItem.isSelected();
 				Client.save("log_toggle", String.valueOf(Client.log_toggle));
 				Client.save("sound_toggle", String.valueOf(Client.sound_toggle));
+				Client.save("bubble_toggle", String.valueOf(Client.bubble_toggle));
 			}
 		};
 
@@ -542,6 +544,11 @@ public class Interface implements Runnable {
 		logToggleItem.addActionListener(toggleListener);
 		customize.add(logToggleItem);	
 
+		bubbleToggleItem = new JCheckBoxMenuItem("Bubble On");
+		bubbleToggleItem.setSelected(Client.bubble_toggle);
+		bubbleToggleItem.addActionListener(toggleListener);
+		customize.add(bubbleToggleItem);	
+		
 		colorChangeItem = new JMenuItem("Color..."); 
 		colorChangeItem.addActionListener(colorListener);
 		customize.add(colorChangeItem);	
@@ -669,7 +676,6 @@ public class Interface implements Runnable {
 			}
 			e.getValue().setLength(0);
 		}
-
 	}
 
 	/////////////////////////////////////////////////////////////////

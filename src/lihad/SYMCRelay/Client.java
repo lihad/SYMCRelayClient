@@ -1,5 +1,7 @@
 package lihad.SYMCRelay;
 
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.io.*;
 import java.net.*;
 import java.util.HashMap;
@@ -21,7 +23,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	protected final static double build = 117;
+	protected final static double build = 118.1;
 	protected final static double config_build = 104;
 	protected static double server_build = 0;
 
@@ -42,7 +44,7 @@ public class Client{
 
 	public static String format = "000000";
 	public static String window = null;
-	public static boolean sound_toggle = true, log_toggle = true, auto_connect = false, auto_reconnect = false;
+	public static boolean sound_toggle = true, log_toggle = true, bubble_toggle = true, auto_connect = false, auto_reconnect = false;
 	public static String default_channels_basic = "lobby";
 	public static List<String> default_channels = new LinkedList<String>();
 
@@ -84,6 +86,7 @@ public class Client{
 
 	// user chat formatting
 	private static String last_user = "";
+	public static Font font = new Font("Monospaced", Font.PLAIN, 12);
 
 	// GUI interface instance
 	public static Interface gui = null;
@@ -110,6 +113,13 @@ public class Client{
 			if (socket != null) {socket.close();socket = null;}
 			if (in != null) {in.close();in = null;}
 			if (out != null) {out.close();out = null;}
+			hearbeat_count = 0;
+			internal_hearbeat_count = 0;
+			last_user = "";
+			channelcount.clear();
+			toAppend.clear();
+			toAppendUser = new StringBuffer("");
+			toSend = new StringBuffer("");
 		}catch (IOException e) {logger.error(e.toString(),e.getStackTrace());in = null;}
 	}
 
@@ -161,6 +171,15 @@ public class Client{
 	// main procedure
 	public static void main(String args[]) {
 
+		
+		GraphicsEnvironment g;
+        g = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        String[] fonts = g.getAvailableFontFamilyNames();
+        for(String f : fonts)
+        {
+            System.out.println(f);
+        }
+
 		//create logger and check for file path consistency
 		log.getParentFile().mkdirs();
 		logger = new Logger(log);
@@ -204,6 +223,7 @@ public class Client{
 			if(config.getProperty("channels") != null) default_channels_basic = config.getProperty("channels");
 			if(config.getProperty("sound_toggle") != null) sound_toggle = Boolean.parseBoolean(config.getProperty("sound_toggle"));
 			if(config.getProperty("log_toggle") != null) log_toggle = Boolean.parseBoolean(config.getProperty("log_toggle"));
+			if(config.getProperty("bubble_toggle") != null) bubble_toggle = Boolean.parseBoolean(config.getProperty("bubble_toggle"));
 			switch_logger(log_toggle);
 
 			logger.info("ip: "+hostIP+" | port: "+hostPort+" | color: "+format+" | window size: "+window);
