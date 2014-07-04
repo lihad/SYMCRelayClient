@@ -5,6 +5,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
@@ -13,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -22,14 +25,18 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.Scanner;
 
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,6 +49,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -54,16 +62,17 @@ public class Interface implements Runnable {
 	// GUI components
 	public JFrame mainFrame = null;
 	public JTextPane userText = null;
-	public JPanel statusBar = null;
+	public JPanel statusBar = null, userPane = null;
 	public JLabel statusField = null, current_version_label = null, server_supported_label = null;
 	public JTextField statusColor = null, ipField = null, portField = null, usernameField = null, hexColor = null, channel = null, ipFieldUpdate = null;
-	public JButton connectButton = null, colorSetButton = null, channelJoinButton = null, updateButton = null, updateRefreshButton = null;
+	public JButton connectButton = null, colorSetButton = null, channelJoinButton = null, updateButton = null, updateRefreshButton = null, downloadLNFButton = null, installLNFButton = null;
 	public JMenuItem connectItem = null, disconnectItem = null, exitItem = null, soundToggleItem = null, logToggleItem = null, bubbleToggleItem = null, colorChangeItem = null, updateItem = null,
-			channelJoinItem = null, channelLeaveItem = null;
-	public JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), channelPaneDialog = new JDialog(), updatePaneDialog = new JDialog();
+			channelJoinItem = null, channelLeaveItem = null, reconnectToggleItem = null, undecoratedToggleItem = null, lnfItem = null;
+	public JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), channelPaneDialog = new JDialog(), updatePaneDialog = new JDialog(), lnfPaneDialog = new JDialog();;
 	public JTabbedPane tabbedPane = new JTabbedPane();
 	public JCheckBox autoConnectBox = null;
 	public JList channelListPane = null;
+	public JComboBox instList = null, appList = null;
 	public double able_build = 0;
 
 
@@ -80,7 +89,6 @@ public class Interface implements Runnable {
 		} catch (AWTException e) {
 			Client.logger.error(e.toString(),e.getStackTrace());
 		}
-
 	}
 
 	// initialize channel pane
@@ -124,18 +132,23 @@ public class Interface implements Runnable {
 	
 	private boolean checkValidBuild(){
 		URL website = null;
-		for(double i = Client.build-1; i < Client.build+20; i++){
+		for(double i = Client.build-1; i < Client.build+10; i++){
 			try {
 				website = new URL(ipFieldUpdate.getText()+"SYMCRelayClient_alpha_"+(int)i+".jar");
 				HttpURLConnection huc =  (HttpURLConnection) website.openConnection();
 				huc.setRequestMethod("GET"); 
-				huc.setConnectTimeout(25);
+				huc.setConnectTimeout(1000);
+				Client.logger.debug("[UPDATE] looking for version ["+i+"]. "+ipFieldUpdate.getText()+"SYMCRelayClient_alpha_"+(int)i+".jar");
+
 				huc.connect(); 
 				if(huc.getResponseCode() == 200){
 					able_build = i;
 					return true;
 				}
-			} catch (Exception e2) {Client.logger.error(e2.toString(),e2.getStackTrace());}
+			} catch (Exception e2) {
+				Client.logger.error(e2.toString(),e2.getStackTrace());
+			}
+
 		}
 		return false;
 	}
@@ -182,7 +195,7 @@ public class Interface implements Runnable {
 					//TODO: dup code
 					try { Thread.sleep(500); }catch (InterruptedException e2) {Client.logger.error(e2.toString(),e2.getStackTrace());}
 
-					Runtime.getRuntime().exec("javaw -Xms20m -Xmx45m -jar \""+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "").replace("%20", " ")+ "\" launch");
+					Runtime.getRuntime().exec(Client.runtime);
 					Client.logger.info("spawning child. killing parent.");
 					System.exit(0);					
 					
@@ -249,6 +262,104 @@ public class Interface implements Runnable {
 		pane.add(buttonPane);
 		return pane;
 	}
+	
+	// initialize Look and Feel pane
+		private JPanel initLNFPane() {
+			JPanel pane = new JPanel(new BorderLayout());
+			JPanel download_pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+			List<String> downloadable = new LinkedList<String>();
+			try {
+				URL website = new URL(Client.lnfIP+"/loaded.txt");
+				Scanner s = new Scanner(website.openStream());
+				while(s.hasNext()){
+					downloadable.add(s.nextLine());
+				}
+				s.close();
+			} catch (IOException e2) {e2.printStackTrace();}
+
+			download_pane.add(new JLabel("Available LNFs to Download: "));
+			instList = new JComboBox(downloadable.toArray());
+			download_pane.add(instList);
+			
+			ActionAdapter downloadbuttonListener = new ActionAdapter() {
+				public void actionPerformed(ActionEvent e) {
+					try{
+						URL website = new URL(Client.lnfIP+"/"+instList.getSelectedItem().toString()+".jar");
+						ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+						FileOutputStream fos = new FileOutputStream(System.getenv("ProgramFiles")+"\\Relay\\LNF\\"+instList.getSelectedItem().toString()+".jar");
+						fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+						fos.close();
+						appList.removeAllItems();
+						for(String s : new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\").list())appList.addItem(s);
+					}catch(NumberFormatException | IOException e1){
+						
+					}			
+				}
+			};
+
+			downloadLNFButton = new JButton("download");
+			downloadLNFButton.addActionListener(downloadbuttonListener);
+			download_pane.add(downloadLNFButton);
+			pane.add(download_pane, BorderLayout.NORTH);
+
+			JPanel apply_pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+			apply_pane.add(new JLabel("Available LNFs to Apply: "));
+			new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\").mkdirs();
+			appList = new JComboBox(new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\").list());
+			apply_pane.add(appList);
+			
+			ActionAdapter installbuttonListener = new ActionAdapter() {
+				public void actionPerformed(ActionEvent e) {
+					Client.save("lnf", String.valueOf(appList.getSelectedItem().toString()));
+					
+					try {
+						Runtime.getRuntime().exec(Client.runtime);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+					Client.logger.info("spawning child. killing parent.");
+					System.exit(0);			
+				}
+			};
+			
+			pane.add(apply_pane, BorderLayout.SOUTH);
+			installLNFButton = new JButton("install");
+			installLNFButton.addActionListener(installbuttonListener);
+			apply_pane.add(installLNFButton);
+
+			return pane;
+
+
+			/**
+			File file = new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\");
+			if(!file.exists())file.mkdir();
+			JComboBox instList = new JComboBox(file.list());
+			JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+			pane.add(instList);
+
+			// download button
+			JPanel buttonPane = new JPanel(new GridLayout(1,1));
+			ActionAdapter buttonListener = new ActionAdapter() {
+				public void actionPerformed(ActionEvent e) {
+					try{
+						Color.decode("#"+hexColor.getText());
+						Client.format = hexColor.getText();
+						Client.save("format", Client.format);
+						colorPaneDialog.setVisible(false);
+					}catch(NumberFormatException e1){
+						hexColor.setText("invali");
+					}			
+				}
+			};
+
+			colorSetButton = new JButton("Set");
+			colorSetButton.addActionListener(buttonListener);
+			buttonPane.add(colorSetButton);
+
+			pane.add(buttonPane);
+			*/
+		}
 
 	// initialize options pane
 	private JPanel initOptionsPane() {
@@ -417,6 +528,23 @@ public class Interface implements Runnable {
 			}
 		};
 
+		//build 'look and feel' option listener
+		ActionAdapter lnfListener = new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				JPanel mainPane = new JPanel(new BorderLayout());
+				JPanel lnfPane = initLNFPane();
+
+				mainPane.add(lnfPane, BorderLayout.CENTER);
+
+				lnfPaneDialog.setContentPane(mainPane);
+				lnfPaneDialog.setSize(lnfPaneDialog.getPreferredSize());
+				lnfPaneDialog.setLocationRelativeTo(mainFrame); 
+				lnfPaneDialog.setTitle("Look and Feel");
+				lnfPaneDialog.pack();
+				lnfPaneDialog.setVisible(true);
+			}
+		};
+
 		//build 'channel' option listener
 		ActionAdapter channelListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
@@ -452,15 +580,25 @@ public class Interface implements Runnable {
 			}
 		};
 
+		//TODO: give it an action desc, and it doesnt have to set all every time.
 		ActionAdapter toggleListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				Client.log_toggle = logToggleItem.isSelected();
 				Client.switch_logger(Client.log_toggle);
 				Client.sound_toggle = soundToggleItem.isSelected();
 				Client.bubble_toggle = bubbleToggleItem.isSelected();
+				Client.auto_reconnect = reconnectToggleItem.isSelected();
+				Client.undecorated = undecoratedToggleItem.isSelected();
 				Client.save("log_toggle", String.valueOf(Client.log_toggle));
 				Client.save("sound_toggle", String.valueOf(Client.sound_toggle));
 				Client.save("bubble_toggle", String.valueOf(Client.bubble_toggle));
+				Client.save("auto_reconnect", String.valueOf(Client.auto_reconnect));
+				Client.save("undecorated", String.valueOf(Client.undecorated));
+				
+				//mainFrame.dispose();
+				//mainFrame.setUndecorated(Client.undecorated);
+				//mainFrame.pack();
+
 			}
 		};
 
@@ -478,6 +616,7 @@ public class Interface implements Runnable {
 		/////////////////////////////////////////////////////////////
 		JMenu relay = new JMenu("Relay");
 		relay.setMnemonic(KeyEvent.VK_A);
+		//relay.setFont(Client.font);
 		menuBar.add(relay);
 
 		connectItem = new JMenuItem("Connect...", KeyEvent.VK_C);
@@ -493,6 +632,14 @@ public class Interface implements Runnable {
 		disconnectItem.setEnabled(false);
 		relay.add(disconnectItem);
 
+		relay.addSeparator();
+		
+		//TODO: reconnect item
+		reconnectToggleItem = new JCheckBoxMenuItem("Auto-Reconn");
+		reconnectToggleItem.addActionListener(toggleListener);
+		reconnectToggleItem.setSelected(Client.auto_reconnect);
+		
+		relay.add(reconnectToggleItem);		
 		relay.addSeparator();
 
 		updateItem = new JMenuItem("Update...", KeyEvent.VK_U);
@@ -511,6 +658,7 @@ public class Interface implements Runnable {
 		// channel menu drop
 		/////////////////////////////////////////////////////////////
 		JMenu channel = new JMenu("Channel");
+		//channel.setFont(Client.font);
 		menuBar.add(channel);
 
 		channelJoinItem = new JMenuItem("Join...", KeyEvent.VK_J);
@@ -531,6 +679,7 @@ public class Interface implements Runnable {
 		/////////////////////////////////////////////////////////////
 
 		JMenu customize = new JMenu("Customize");
+		//customize.setFont(Client.font);
 		menuBar.add(customize);
 
 		soundToggleItem = new JCheckBoxMenuItem("Sound On");
@@ -549,10 +698,33 @@ public class Interface implements Runnable {
 		bubbleToggleItem.addActionListener(toggleListener);
 		customize.add(bubbleToggleItem);	
 		
+		customize.addSeparator();
+
 		colorChangeItem = new JMenuItem("Color..."); 
 		colorChangeItem.addActionListener(colorListener);
 		customize.add(colorChangeItem);	
+		
+		customize.addSeparator();
 
+		undecoratedToggleItem = new JCheckBoxMenuItem("Undecorated");
+		undecoratedToggleItem.setSelected(Client.undecorated);
+		undecoratedToggleItem.addActionListener(toggleListener);
+		customize.add(undecoratedToggleItem);	
+		
+		lnfItem = new JMenuItem("Look & Feel..."); 
+		lnfItem.addActionListener(lnfListener);
+		customize.add(lnfItem);
+		
+		// about menu drop
+		/////////////////////////////////////////////////////////////
+
+		JMenu about = new JMenu("About");
+		//about.setFont(Client.font);
+		menuBar.add(about);
+		
+		JMenuItem version = new JMenuItem("Build: "+Client.build);
+		about.add(version);
+		
 		return menuBar;
 	}
 
@@ -573,9 +745,10 @@ public class Interface implements Runnable {
 
 		// set menu pane
 		JMenuBar menuPane = initMenuPane();
-
+		JPanel eastpanel = new JPanel(new BorderLayout());
+		
 		// set user pane
-		JPanel userPane = new JPanel(new BorderLayout());
+		userPane = new JPanel(new BorderLayout());
 		userText = new JTextPane();
 		userText.setEditable(false);
 		userText.setForeground(Color.black);
@@ -585,7 +758,20 @@ public class Interface implements Runnable {
 
 		userPane.add(userTextPane, BorderLayout.CENTER);
 		userPane.setPreferredSize(new Dimension(100, 200));
+		userPane.setVisible(false);
 
+		
+		final RotatedButton superButton = new RotatedButton("expand user list", false);
+		
+		ActionAdapter buttonListener = new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				superButton.setVisible(false);
+				userPane.setVisible(true);
+			}
+		};
+		
+		superButton.addActionListener(buttonListener);
+		
 		//set tabbed pane
 		tabbedPane.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent arg0) {
@@ -596,13 +782,16 @@ public class Interface implements Runnable {
 			}
 		});
 
+		eastpanel.add(userPane, BorderLayout.EAST);
+		eastpanel.add(superButton, BorderLayout.WEST);
 		// set main pane
 		JPanel mainPane = new JPanel(new BorderLayout());
 		mainPane.add(statusBar, BorderLayout.SOUTH);
 		mainPane.add(menuPane, BorderLayout.NORTH);
 		mainPane.add(tabbedPane, BorderLayout.CENTER);
-		mainPane.add(userPane, BorderLayout.EAST);
+		mainPane.add(eastpanel, BorderLayout.EAST);
 
+		
 		// set main frame
 		mainFrame = new JFrame("SYMCRelay - Build "+Client.build);
 		try {
@@ -613,7 +802,7 @@ public class Interface implements Runnable {
 		if(Client.window != null)mainFrame.setPreferredSize(new Dimension(Integer.parseInt(Client.window.split(",")[0]),Integer.parseInt(Client.window.split(",")[1])));
 		else mainFrame.setPreferredSize(new Dimension(750,275));
 		mainFrame.setLocation(200, 200);
-		mainFrame.setUndecorated(false);
+		mainFrame.setUndecorated(Client.undecorated);
 		mainFrame.pack();
 		mainFrame.setVisible(true);
 	}
@@ -624,6 +813,7 @@ public class Interface implements Runnable {
 		if(!Client.default_channels.contains(name))Client.default_channels.add(name);
 		Client.save("channels",Client.default_channels);
 		Channel chan = new Channel(name);
+		//tabbedPane.setFont(Client.font);
 		tabbedPane.addTab("#"+chan.name, chan.panel);
 		Client.toAppend.put(chan, new StringBuffer());
 		Client.channels.add(chan);
@@ -662,6 +852,8 @@ public class Interface implements Runnable {
 		case Client.DISCONNECTING: updateFieldsHelpers(false, false, false, false, false, null, false, false, false, Color.orange); break;
 		case Client.CONNECTED: updateFieldsHelpers(false, true, false, false, false, null, true, false, true, Color.green); break;
 		case Client.BEGIN_CONNECT: updateFieldsHelpers(false, false, false, false, false, null, false, false, false, Color.orange); break;
+		case Client.DESYNC: updateFieldsHelpers(false, true, false, false, false, null, false, false, true, Color.yellow); break;
+
 		}
 		statusField.setText(Client.statusString);		
 		for(Map.Entry<Channel, StringBuffer> e : Client.toAppend.entrySet()){
@@ -704,3 +896,47 @@ public class Interface implements Runnable {
 
 	////////////////////////////////////////////////////////////////////
 }
+
+class RotatedButton extends JButton {
+	   
+	   XButton template;
+	   boolean clockwise;
+	   
+	   RotatedButton(String text, boolean clockwise) {
+	      template = new XButton(text);
+	      this.clockwise = clockwise;
+	      
+	      Dimension d = template.getPreferredSize();
+	      setPreferredSize(new Dimension(d.height, d.width));
+	   }
+	   
+	   @Override
+	   protected void paintComponent(Graphics g) {
+	      Graphics2D g2 = (Graphics2D) g.create();
+	      
+	      Dimension d = getSize();
+	      template.setSize(d.height, d.width);
+	      
+	      if (clockwise) {
+	         g2.rotate(Math.PI / 2.0);
+	         g2.translate(0, -getSize().width);
+	      } else {
+	         g2.translate(0, getSize().height);
+	         g2.rotate(- Math.PI / 2.0);
+	      }
+	      template.setSelected(this.getModel().isPressed());
+	      template.paintComponent(g2);
+	      g2.dispose();
+	   }
+	   
+	   private class XButton extends JToggleButton {
+	      XButton(String text) {
+	         super(text);
+	      }
+	      
+	      @Override
+	      public void paintComponent(Graphics g) {
+	         super.paintComponent(g);
+	      }
+	   }
+	}

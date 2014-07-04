@@ -1,7 +1,6 @@
 package lihad.SYMCRelay;
 
 import java.awt.Font;
-import java.awt.GraphicsEnvironment;
 import java.io.*;
 import java.net.*;
 import java.util.HashMap;
@@ -11,9 +10,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import lihad.SYMCRelay.Logger.Logger;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
-//TODO: auto-reconnect?
+import lihad.SYMCRelay.Logger.Logger;
 
 /**
  *  
@@ -23,28 +23,32 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	protected final static double build = 118.1;
+	protected final static double build = 119;
 	protected final static double config_build = 104;
 	protected static double server_build = 0;
 
 	// connect status constants
-	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4;
+	public final static int NULL = 0, DISCONNECTED = 1,  DISCONNECTING = 2, BEGIN_CONNECT = 3, CONNECTED = 4, DESYNC = 5;
+	
+	public static String runtime;
+
 	// connection state info
-	public static String hostIP = "localhost", hostPort = "80", channel = "lobby", updateIP = "http://10.167.3.82/RelayClient/SYMCRelayClient/";
+	public static String hostIP = "localhost", hostPort = "80", channel = "lobby", 
+			updateIP = "http://10.167.3.82/RelayClient/SYMCRelayClient/", lnfIP = "http://10.167.3.82/RelayClient/LNF/";
 
 	public static String username = System.getProperty("user.name");
 
 	// status messages to client
 	public final static String statusMessages[] = {
 		" Error! Could not connect!", " Disconnected",
-		" Disconnecting...", " Connecting...", (" Connected to "+hostIP+" || #"+channel)
+		" Disconnecting...", " Connecting...", (" Connected to "+hostIP+" || #"+channel), "Desynchronized, where did my server go?..."
 	};
 
 	public static List<Channel> channels = new LinkedList<Channel>();
 
 	public static String format = "000000";
 	public static String window = null;
-	public static boolean sound_toggle = true, log_toggle = true, bubble_toggle = true, auto_connect = false, auto_reconnect = false;
+	public static boolean sound_toggle = true, log_toggle = true, bubble_toggle = true, auto_connect = false, auto_reconnect = false, undecorated = false;
 	public static String default_channels_basic = "lobby";
 	public static List<String> default_channels = new LinkedList<String>();
 
@@ -81,8 +85,9 @@ public class Client{
 	public static Socket socket = null;
 	public static BufferedReader in = null;
 	public static PrintWriter out = null;
-	private static int hearbeat_count = 0;
+	private static int hearbeat_count = 0, desync_count = 0;
 	private static int internal_hearbeat_count = 0;
+	private static boolean d_on_d = false; //disconnecting_on_desync
 
 	// user chat formatting
 	private static String last_user = "";
@@ -90,6 +95,7 @@ public class Client{
 
 	// GUI interface instance
 	public static Interface gui = null;
+	public static String lnf;
 
 	// all active channels + count
 	protected static Map<String, Integer> channelcount = new HashMap<String, Integer>();
@@ -170,24 +176,46 @@ public class Client{
 	}
 	// main procedure
 	public static void main(String args[]) {
-
 		
-		GraphicsEnvironment g;
-        g = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        String[] fonts = g.getAvailableFontFamilyNames();
-        for(String f : fonts)
-        {
-            System.out.println(f);
-        }
-
 		//create logger and check for file path consistency
-		log.getParentFile().mkdirs();
-		logger = new Logger(log);
+        log.getParentFile().mkdirs();
+        logger = new Logger(log);
 
-		//open program and check for updates
-		if(args.length > 0 && args[0].equalsIgnoreCase("launch")){
-			logger.buff(2);
-			logger.info("client is currently spinning up... launch argument found!");
+        //read any previous ip entered
+        logger.info("reading configuration data off: DEFAULT");
+        try {
+        	logger.info("loading configuration... ");
+        	config = new Properties();
+        	if(!file.exists())file.createNewFile();
+        	config.load(new BufferedReader(new FileReader(file)));
+        	hostIP = config.getProperty("ip");
+        	hostPort = config.getProperty("port");
+        	format = config.getProperty("format");
+        	window = config.getProperty("window");
+        	if(config.getProperty("auto_connect") != null) auto_connect = Boolean.parseBoolean(config.getProperty("auto_connect"));
+        	if(config.getProperty("auto_reconnect") != null) auto_reconnect = Boolean.parseBoolean(config.getProperty("auto_reconnect"));
+        	if(config.getProperty("channels") != null) default_channels_basic = config.getProperty("channels");
+        	if(config.getProperty("sound_toggle") != null) sound_toggle = Boolean.parseBoolean(config.getProperty("sound_toggle"));
+        	if(config.getProperty("log_toggle") != null) log_toggle = Boolean.parseBoolean(config.getProperty("log_toggle"));
+        	if(config.getProperty("bubble_toggle") != null) bubble_toggle = Boolean.parseBoolean(config.getProperty("bubble_toggle"));
+        	if(config.getProperty("undecorated") != null) undecorated = Boolean.parseBoolean(config.getProperty("undecorated"));
+        	if(config.getProperty("lnf") != null) lnf = config.getProperty("lnf");
+
+        	switch_logger(log_toggle);
+
+        	logger.info("ip: "+hostIP+" | port: "+hostPort+" | color: "+format+" | window size: "+window);
+        }catch(Exception e){logger.error(e.toString(),e.getStackTrace()); gui.changeStatusTS(DISCONNECTING, false, true);}
+
+
+		try {
+			runtime = "java -Xms20m -Xmx45m -cp \""+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "").replace("%20", " ")+ "\""+((lnf != null && lnf.length()>0) ? ";"+"\""+System.getenv("ProgramFiles")+"\\Relay\\LNF\\"+lnf+"\"" : "")+" lihad.SYMCRelay.Client launch";
+		} catch (URISyntaxException e1) {
+			e1.printStackTrace();
+		}
+        //open program and check for updates
+        if(args.length > 0 && args[0].equalsIgnoreCase("launch")){
+        	logger.buff(2);
+        	logger.info("client is currently spinning up... launch argument found!");
 			logger.info("----------------------------");
 			logger.info("welcome to Relay.  build: "+build);
 			logger.info("----------------------------");
@@ -198,7 +226,8 @@ public class Client{
 			//program will check for updates and reexecute
 			try {
 				logger.info("this is the instance i am using: "+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString());
-				Runtime.getRuntime().exec("javaw -Xms20m -Xmx45m -jar \""+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "").replace("%20", " ")+ "\" launch");
+				logger.info(runtime);
+				Runtime.getRuntime().exec(runtime);
 				logger.info("spawning child. killing parent.");
 			} catch (IOException | URISyntaxException e) {
 				logger.info("bad instance... dying");
@@ -207,29 +236,14 @@ public class Client{
 			System.exit(0);
 		}	
 		String s;
-		//read any previous ip entered
-		logger.info("reading configuration data off: DEFAULT");
+		
 		try {
-			logger.info("loading configuration... ");
-			config = new Properties();
-			if(!file.exists())file.createNewFile();
-			config.load(new BufferedReader(new FileReader(file)));
-			hostIP = config.getProperty("ip");
-			hostPort = config.getProperty("port");
-			format = config.getProperty("format");
-			window = config.getProperty("window");
-			if(config.getProperty("auto_connect") != null) auto_connect = Boolean.parseBoolean(config.getProperty("auto_connect"));
-			if(config.getProperty("auto_reconnect") != null) auto_reconnect = Boolean.parseBoolean(config.getProperty("auto_reconnect"));
-			if(config.getProperty("channels") != null) default_channels_basic = config.getProperty("channels");
-			if(config.getProperty("sound_toggle") != null) sound_toggle = Boolean.parseBoolean(config.getProperty("sound_toggle"));
-			if(config.getProperty("log_toggle") != null) log_toggle = Boolean.parseBoolean(config.getProperty("log_toggle"));
-			if(config.getProperty("bubble_toggle") != null) bubble_toggle = Boolean.parseBoolean(config.getProperty("bubble_toggle"));
-			switch_logger(log_toggle);
-
-			logger.info("ip: "+hostIP+" | port: "+hostPort+" | color: "+format+" | window size: "+window);
-		}catch(Exception e){logger.error(e.toString(),e.getStackTrace()); gui.changeStatusTS(DISCONNECTING, false, true);}
-
-
+			UIManager.setLookAndFeel ("com.alee.laf.WebLookAndFeel");
+		} catch (ClassNotFoundException | InstantiationException
+				| IllegalAccessException | UnsupportedLookAndFeelException e1) {
+			e1.printStackTrace();
+		}
+		
 		//create and initialize gui
 		gui = new Interface();
 		gui.initGUI();
@@ -242,8 +256,10 @@ public class Client{
 			try { Thread.sleep(10); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
 
 			if(internal_hearbeat_count > 500 && connectionStatus == CONNECTED){
-				gui.changeStatusTS(DISCONNECTING, true, true);
-				logger.warning("Connection to server timed out.");
+				gui.changeStatusTS(DESYNC, true, true);
+				desync_count = 0;
+				logger.warning("Connection to server desync'd.");
+				internal_hearbeat_count = 0;
 			}else if(connectionStatus != CONNECTED)internal_hearbeat_count = 0;
 			internal_hearbeat_count++;
 
@@ -266,12 +282,13 @@ public class Client{
 					send(out,(build +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName())); 
 
 					//creates predefined channels
-					for(String dc : default_channels_basic.split(","))gui.createGUIChannel(dc);
+					if(!d_on_d)for(String dc : default_channels_basic.split(","))gui.createGUIChannel(dc);
 
 					//save file
 					logger.info("saving... ip: "+hostIP+" | port: "+hostPort);
 
 					save(new HashMap<String, String>(){private static final long serialVersionUID = 1L;{put("ip", hostIP); put("port", hostPort);}});
+					d_on_d = false;
 				}
 				// error will fail connection
 				catch (IOException | NumberFormatException e) {
@@ -357,6 +374,9 @@ public class Client{
 				break;
 
 			case DISCONNECTING:
+				if (d_on_d && auto_reconnect){
+					gui.changeStatusTS(BEGIN_CONNECT, true, true);
+				}
 				try{
 					last_user = "";
 					// tell the server the client is gracefully disconnecting
@@ -382,6 +402,23 @@ public class Client{
 				SYMCSound.playDisconnect();
 				break;
 
+			case DESYNC:				
+				logger.info("okay, im dsynchronized.  lets see if i can find the server... attempt ["+desync_count+"]");
+				
+				try {
+					if (in.ready()){gui.changeStatusTS(CONNECTED, true, true);}
+				} catch (IOException e) {
+					logger.error(e.toString(),e.getStackTrace());
+				}
+				if(desync_count > 50){
+					gui.changeStatusTS(DISCONNECTING, true, true);
+					d_on_d = true;
+				}
+				desync_count++;
+
+				break;
+
+				
 			default: break; // do nothing
 			}
 		}
