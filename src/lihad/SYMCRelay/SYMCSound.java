@@ -18,7 +18,7 @@ public class SYMCSound {
 
 	
 	private static void play(File file){
-		if(!Client.gui.soundToggleItem.isSelected()) return;
+		if(!Client.gui.menuPane.getSoundItem().isSelected()) return;
 		try {
 			Clip clip = AudioSystem.getClip();
 			clip.open(AudioSystem.getAudioInputStream(file));

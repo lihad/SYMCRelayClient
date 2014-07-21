@@ -12,7 +12,7 @@ public class Logger {
 	SimpleDateFormat dateformat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	boolean enabled = true;
 	
-	public Logger(File file){loadLog(file);}
+	public Logger(File file){ file.getParentFile().mkdirs(); loadLog(file);}
 	public void loadLog(File file){
 		try {
 			writer = new BufferedWriter(new FileWriter(file, true));
@@ -22,6 +22,7 @@ public class Logger {
 		}
 	}
 	public void toggle_enabled(boolean t){ warning("[logging has been changed = "+t+"]"); enabled = t; }
+	
 	public void buff(int x){
 		if(enabled) try {for(int i = 0;i<x;i++){writer.newLine();} writer.flush();} catch (IOException e){error(e.toString(),e.getStackTrace());}
 	}

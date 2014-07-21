@@ -11,15 +11,18 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 
+import lihad.SYMCRelay.GUI.FormatColor;
 
 public class Channel {
 
-	String name;
-	JPanel panel;
-	JTextPane pane;
-	JTextArea field;
+	public String name;
+	public JPanel panel;
+	public JTextPane pane;
+	public JTextArea field;
+	public Channel channel;
 	
-	Channel(final String n){
+	public Channel(final String n){
+		channel = this;
 		name = n;
 		pane = new JTextPane();
 		pane.setEditable(false);
@@ -32,6 +35,7 @@ public class Channel {
 		field = new JTextArea();
 		field.setEnabled(false);
 		field.setFont(Client.font);
+		field.setLineWrap(true);
 		Linker handler = new Linker();
 		pane.addMouseListener(handler);
 		pane.addMouseMotionListener(handler);
@@ -43,9 +47,9 @@ public class Channel {
 					if(s.contentEquals("\r\n") || s.contentEquals("\n") || s.contentEquals("\r")){
 						field.setText(null);
 					}else{
-						if (!s.equals("")) {SYMCColor.decodeTextPaneFormat(null, pane.getStyledDocument(), Client.username+": "+SYMCColor.encodeTextPaneFormat(null, s, Client.format) + "\n",false);  field.setText(null);
+						if (!s.equals("")) {FormatColor.decodeTextPaneFormat(channel, pane.getStyledDocument(), Client.username+": "+FormatColor.encodeTextPaneFormat(null, s, Client.getRelayConfiguration().getFormat()) + "\n",false);  field.setText(null);
 						// send the string
-						Client.sendString(SYMCColor.encodeTextPaneFormat(name+Client.CHANNEL, s, Client.format));
+						Client.sendString(FormatColor.encodeTextPaneFormat(name+Client.CHANNEL, s, Client.getRelayConfiguration().getFormat()));
 						}
 					}		
 					e.consume();
@@ -64,7 +68,6 @@ public class Channel {
 		panel.add(chatTextPane, BorderLayout.CENTER);
 		panel.setPreferredSize(new Dimension(500, 200));
 
-		
 		Client.channelJoinRequest(name);	
 	}
 }
