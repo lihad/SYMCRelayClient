@@ -23,7 +23,6 @@ public class ColorPane extends JPanel implements ChangeListener{
 		cc.getSelectionModel().addChangeListener(this);
 
 		this.add(cc);
-		//this.add(buttonPane);
 	}
 
 	@Override

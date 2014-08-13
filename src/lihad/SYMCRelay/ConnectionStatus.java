@@ -6,7 +6,7 @@ public enum ConnectionStatus {
 	DISCONNECTED(" Disconnected"), 
 	DISCONNECTING(" Disconnecting..."), 
 	BEGIN_CONNECT(" Connecting..."), 
-	CONNECTED(" Connected to "+getHostIP()+" ||"), 
+	CONNECTED(" Connected to "), 
 	DESYNC("Desynchronized, where did my server go?...");
 
 	private String status;

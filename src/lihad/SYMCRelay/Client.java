@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+
+import com.alee.laf.WebLookAndFeel;
 
 import lihad.SYMCRelay.Configuration.RelayConfiguration;
 import lihad.SYMCRelay.GUI.FormatColor;
@@ -26,7 +26,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	public final static double build = 120;
+	public final static double build = 121;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -40,9 +40,12 @@ public class Client{
 
 	public static List<Channel> channels = new LinkedList<Channel>();
 
+	// log file
+	public static String log_file = System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay.log";
+	
 	// save config
 	private static RelayConfiguration config;
-	
+
 	public static RelayConfiguration getRelayConfiguration(){ return config; }
 
 	public static Logger logger;
@@ -68,12 +71,10 @@ public class Client{
 	public static StringBuffer toAppendUser = new StringBuffer(""), toSend = new StringBuffer("");
 
 	// TCP components
-	public static ServerSocket hostServer = null;
-	public static Socket socket = null;
-	public static BufferedReader in = null;
-	public static PrintWriter out = null;
-	private static int hearbeat_count = 0, desync_count = 0;
-	private static int internal_hearbeat_count = 0;
+	public static Socket socket;
+	public static BufferedReader in;
+	public static PrintWriter out;
+	private static int hearbeat_count = 0, desync_count = 0, internal_hearbeat_count = 0;
 	private static boolean d_on_d = false; //disconnecting_on_desync
 
 	// user chat formatting
@@ -81,9 +82,9 @@ public class Client{
 	public static Font font = new Font("Monospaced", Font.PLAIN, 12);
 
 	// GUI interface instance
-	public static Interface gui = null;
+	public static Interface gui;
 
-	// all active channels + count
+	// all active channels + count; related to ChannelPane
 	public static Map<String, Integer> channelcount = new HashMap<String, Integer>();
 	public static boolean isupdated = true;
 
@@ -101,7 +102,6 @@ public class Client{
 	// cleanup for disconnect
 	private static void cleanup() {
 		try {
-			if (hostServer != null) {hostServer.close();hostServer = null;}
 			if (socket != null) {socket.close();socket = null;}
 			if (in != null) {in.close();in = null;}
 			if (out != null) {out.close();out = null;}
@@ -132,77 +132,44 @@ public class Client{
 
 	// sends notification to the server that client is still actively using socket
 	private static void heartbeat(){send(out, HEARTBEAT);}
-	
+
 	// main procedure
 	public static void main(String args[]) {
-		
-		
-		//create logger and check for file path consistency
-        logger = new Logger(new File(System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay.log"));
 
-        //read any previous ip entered
-        logger.info("reading configuration data");
-        config = new RelayConfiguration(new File(System.getenv("ProgramFiles")+"\\Relay\\symcrelayclient.cfg"));
-        
-		try {
-			runtime = "java -Xms20m -Xmx45m -cp \""+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "").replace("%20", " ")+ "\""+((getRelayConfiguration().getLNF() != null && getRelayConfiguration().getLNF().length()>0) ? ";"+"\""+System.getenv("ProgramFiles")+"\\Relay\\LNF\\"+getRelayConfiguration().getLNF()+"\"" : "")+" lihad.SYMCRelay.Client launch";
-		} catch (URISyntaxException e1) {
-			e1.printStackTrace();
-		}
-        //open program and check for updates
-        if(args.length > 0 && args[0].equalsIgnoreCase("launch")){
-        	logger.buff(2);
-        	logger.info("client is currently spinning up... launch argument found!");
-        	logger.info("----------------------------");
-        	logger.info("welcome to Relay.  build: "+build);
-        	logger.info("----------------------------");
-        }else{
-        	logger.buff(2);
-        	logger.info("client is currently spinning up... no launch argument found.");
+		//create logger object and a new log (renaming the previous)
+		if(new File(log_file).exists() && args.length == 0) new File(log_file).renameTo(new File(System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay_"+System.currentTimeMillis()+".log"));
+		logger = new Logger(new File(log_file));
 
-        	//program will check for updates / LNF and reexecute'
+		//create the RelayConfiguration object
+		logger.info("reading configuration data");
+		config = new RelayConfiguration(new File(System.getenv("ProgramFiles")+"\\Relay\\symcrelayclient.cfg"));
 
-        	if(!new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\weblaf-complete-1.28"+".jar").exists()){
-        		PreInterface preinterface = new PreInterface();
+		//launch the program, or re-launch with other parameters
+		try { launcher(args); } catch (IOException | URISyntaxException e2) { logger.error(e2.toString(), e2.getStackTrace()); }    
 
-        		while(!preinterface.finished){
-        			try { Thread.sleep(10); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
-        		}
-        	}
+		//install WebLaF - this needs to happen before the JFrame component is built on the next line...
+		WebLookAndFeel.install();
 
-
-        	try {
-        		logger.info("this is the instance i am using: "+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString());
-        		logger.info(runtime);
-        		Runtime.getRuntime().exec(runtime);
-        		logger.info("spawning child. killing parent.");
-        	} catch (IOException | URISyntaxException e) {
-        		logger.info("bad instance... dying");
-        		logger.error(e.toString(),e.getStackTrace());
-			}
-			System.exit(0);
-		}	
-		String s;
-		
-		
-		
-		try {
-			UIManager.setLookAndFeel ("com.alee.laf.WebLookAndFeel");
-		} catch (ClassNotFoundException | InstantiationException
-				| IllegalAccessException | UnsupportedLookAndFeelException e1) {
-			e1.printStackTrace();
-		}
-		
-		//create and initialize gui
+		//create and initialize main GUI, which is a JFrame
 		gui = new Interface();
 
+		//if the user has auto-connect on launch set, then set ConnectionStatus to BEGIN_CONNECT
 		if(getRelayConfiguration().getAutoConnect())changeStatusTS(ConnectionStatus.BEGIN_CONNECT, true, true);
 
-		while (true) {
+		/**
+		 * THE MAIN THREAD.  This Thread handles all packets (incoming and outgoing), GUI updates and connection state switches.
+		 * If this thread breaks, then Relay dies.
+		 * 
+		 * 
+		 * initial state of connectionStatus is DISCONNECTED unless auto_connect is true.
+		 * 
+		 */
 
-			// run everything in this while loop ~10 ms + processing time
+		while (true) {
+			// delay set so CPU isn't taken advantage of - set to 10 ms + processing time
 			try { Thread.sleep(10); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
 
+			//internal heartbeat tracks if the client stops getting responses from the server
 			if(internal_hearbeat_count > 500 && connectionStatus == ConnectionStatus.CONNECTED){
 				changeStatusTS(ConnectionStatus.DESYNC, true, true);
 				desync_count = 0;
@@ -212,25 +179,33 @@ public class Client{
 			internal_hearbeat_count++;
 
 
+
+			//TODO: NULL is unspecified.... should it be?
 			switch (connectionStatus) {
 			case BEGIN_CONNECT:
 				try {
-					// create socket
+					// create socket and connection
 					socket = new Socket(getRelayConfiguration().getHostIP(), Integer.parseInt(getRelayConfiguration().getHostPort()));
 					in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out = new PrintWriter(socket.getOutputStream(), true);
 
+					// if no error is thrown, then we must be connected
 					changeStatusTS(ConnectionStatus.CONNECTED, true, true);
 
-					// format { <version> <username> <ip> <port> }
+					// let the server know we've connected - format { <version> <username> <ip> <port> }
 					send(out,(build +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName())); 
 
-					//creates predefined channels
-					if(!d_on_d)for(String dc : getRelayConfiguration().getDefaultChannels())gui.createGUIChannel(dc);
-
-					d_on_d = false;
+					// creates predefined channels (if not already open)
+					for(String dc : getRelayConfiguration().getDefaultChannels()){
+						if(!channels.contains(dc)) createGUIChannel(dc);
+					}	
+					// let the server know the channels we've opened
+					for(Channel channelname : channels){
+						Client.channelJoinRequest(channelname.name);
+					}
+					
 				}
-				// error will fail connection
+				// if an error was thrown, then clean up any connection attempt made, and set to DISCONNECTING
 				catch (IOException | NumberFormatException e) {
 					logger.error(e.toString(),e.getStackTrace());
 					cleanup();
@@ -239,32 +214,37 @@ public class Client{
 				break;
 
 			case CONNECTED:
-				//send heartbeat
-				if(hearbeat_count > 50){
-					heartbeat();
-					hearbeat_count = 0;
-				}
-				hearbeat_count++;
-				try {
+				//send heartbeat to let the server know we are still there (once every 500 milliseconds)
+				if(hearbeat_count > 50){ heartbeat(); hearbeat_count = 0;} else hearbeat_count++;
 
-					// send data
+				try {
+					// if there is data to send, then send data
 					if (toSend.length() != 0) {
 						send(out, toSend+"");
 						toSend.setLength(0);
+
+						//TODO: why am i NULLing? because we want to update fields, tho connection status stays CONNECTED.  may need a better naming convention
 						changeStatusTS(ConnectionStatus.NULL, true, true);
 					}
 
-					// receive data
-					if (in.ready()) {						
-						s = decode(in.readLine());
-						if ((s != null) &&  (s.length() != 0)) {
+					// if there is data to receive, then receive data
+					if (in.ready()) {
+						//data is going to be encoded, so decode it
+						String s = decode(in.readLine());
 
-							// if server wants the client to disconnect
+						/**
+						 * If the incoming string is indeed something, then we need to figure out what it is.
+						 * The following block handles any type of incoming requests, and acts accordingly
+						 * 
+						 */
+						if ((s != null) &&  (s.length() != 0)) {
+							// if server wants the client to disconnect, then we shall disconnect
 							if (s.equals(END_CHAT_SESSION.replace("\n", ""))) {
-								logger.info("force received. ["+s+"]");
+								logger.info("force disconnection received. ["+s+"]");
 								changeStatusTS(ConnectionStatus.DISCONNECTING, true, true);
 							}
-							// if server wants to notify the client of users connected
+							// if server wants to notify the client of users connected. the server sends this request at a given interval,
+							//  so this is also used to drive the internal heartbeat
 							else if (s.contains(CONNECTED_USERS)) {
 								internal_hearbeat_count = 0;
 								appendToUserBox(s.replace(" ", "\n").replace(CONNECTED_USERS, ""));
@@ -278,23 +258,23 @@ public class Client{
 									toAppendUser.setLength(0);
 								}
 							}
-							// if version wants to tell its version
+							// if the server wants to tell its version
 							else if(s.contains(VERSION)){
 								server_build=Double.parseDouble(s.replaceAll(VERSION, ""));
 							}
+
+							// if the server receive a COUNT request (used in channel viewer), then populate the channel/usercount map
 							else if (s.contains(COUNT)) {
 								channelcount.clear();
 								s = s.replaceAll(COUNT, "").replaceAll("\\{", "");
 								String[] arr = s.split("}");
 								for(int i = 0; i<arr.length; i++){
 									if(getChannel(arr[i].split("\\|")[0]) == null){
-										logger.debug(arr[i].split("\\|")[0]+"|"+arr[i].split("\\|")[1]); 
 										channelcount.put(arr[i].split("\\|")[0], Integer.parseInt(arr[i].split("\\|")[1]));
 									}
 								}
 								isupdated = true;
-								logger.debug("is true");
-							}								
+							}					
 							// all else is received as text
 							else {
 								String[] arr = s.split(CHANNEL);
@@ -314,22 +294,10 @@ public class Client{
 				break;
 
 			case DISCONNECTING:
-				if (d_on_d && getRelayConfiguration().getAutoReconnect()){
-					changeStatusTS(ConnectionStatus.BEGIN_CONNECT, true, true);
-					break;
-				}
 				try{
 					last_user = "";
 					// tell the server the client is gracefully disconnecting
 					send(out, (END_CHAT_SESSION));
-
-					//close all tabs
-					logger.info("closing tabs");
-					while(gui.tabbedPane.getTabCount() > 0){
-						gui.tabbedPane.remove(0);
-					}
-					Client.channels.clear();
-
 
 					//clear user field
 					gui.userPane.getUserText().setText(null);
@@ -343,6 +311,13 @@ public class Client{
 				SYMCSound.playDisconnect();
 				break;
 
+			case DISCONNECTED:
+				if (d_on_d && getRelayConfiguration().getAutoReconnect()){
+					changeStatusTS(ConnectionStatus.BEGIN_CONNECT, true, true);
+					d_on_d = false;
+				}
+				break;
+				
 			case DESYNC:				
 				logger.info("[CLIENT.DESYNC] okay, im desynchronized.  lets see if i can find the server... attempt ["+desync_count+"]");
 
@@ -363,10 +338,12 @@ public class Client{
 
 				break;
 
-				
+
 			default: break; // do nothing
 			}
 		}
+
+		//relay has exited its main loop... which is not a good thing, and should be impossible
 	}
 	private static void send(PrintWriter pr, String s){
 		pr.print(encode(s)+"\n"); pr.flush();
@@ -398,6 +375,51 @@ public class Client{
 		// error-handling and GUI-update thread
 		if(safe)SwingUtilities.invokeLater(gui);
 		else gui.run();
+	}
+	
+	public static void createGUIChannel(String name){
+		for(Channel c : Client.channels)if(c.name.equalsIgnoreCase(name))return;
+		if(!getRelayConfiguration().containsDefaultChannel(name))getRelayConfiguration().addDefaultChannel(name);
+		Channel chan = new Channel(name);
+		gui.tabbedPane.addTab("#"+chan.name, chan.panel);
+		toAppend.put(chan, new StringBuffer());
+		channels.add(chan);
+		changeStatusTS(ConnectionStatus.NULL, true, true);
+	}
+	private static void launcher(String[] args) throws URISyntaxException, IOException{
+
+		runtime = "java -Xms20m -Xmx45m -cp \""+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "").replace("%20", " ")+ "\""+((getRelayConfiguration().getLNF() != null && getRelayConfiguration().getLNF().length()>0) ? ";"+"\""+System.getenv("ProgramFiles")+"\\Relay\\LNF\\"+getRelayConfiguration().getLNF()+"\"" : "")+" lihad.SYMCRelay.Client launch";
+
+		//open program and check for updates
+		if(args.length > 0 && args[0].equalsIgnoreCase("launch")){
+			logger.buff(2);
+			logger.info("client is currently spinning up... launch argument found!");
+			logger.info("----------------------------");
+			logger.info("welcome to Relay.  build: "+build);
+			logger.info("----------------------------");
+		}else{
+			logger.buff(2);
+			logger.info("client is currently spinning up... no launch argument found.");
+
+			//program will check for updates / LNF and reexecute'
+
+			while(!new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\weblaf-complete-1.28"+".jar").exists()){
+				PreInterface preinterface = new PreInterface();
+
+				while(!preinterface.finished){
+					try { Thread.sleep(10); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
+				}
+				try { Thread.sleep(1000); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
+			}
+
+			logger.info("this is the instance i am using: "+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString());
+			logger.info(runtime);
+			Runtime.getRuntime().exec(runtime);
+			logger.info("spawning child. killing parent.");
+			logger.info("bad instance... dying");
+
+			System.exit(0);
+		}	
 	}
 }
 

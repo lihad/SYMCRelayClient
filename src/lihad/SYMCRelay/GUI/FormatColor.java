@@ -28,7 +28,6 @@ import lihad.SYMCRelay.Client;
 public class FormatColor {
 
 	//format used for timestamps shown in channel pane.  Hour (military) : Minutes : Seconds
-
 	static SimpleDateFormat dateformat = new SimpleDateFormat("HH:mm:ss");
 
 	/**

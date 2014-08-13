@@ -2,15 +2,17 @@ package lihad.SYMCRelay.GUI.Pane;
 
 import java.awt.Color;
 
-import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class TabPane extends JTabbedPane implements ChangeListener{
+import lihad.SYMCRelay.GUI.ColorScheme;
+
+import com.alee.laf.tabbedpane.WebTabbedPane;
+
+public class TabPane extends WebTabbedPane implements ChangeListener{
 
 	private static final long serialVersionUID = -3629700175117007156L;
 	
-
 	public TabPane(){ 
 		this.addChangeListener(this);
 	}

@@ -69,6 +69,20 @@ public class Interface extends JFrame implements Runnable {
 		// create user pane
 		userPane = new UserPane();	
 		
+		
+		/**
+		 * TODO:
+		 * RANDON WORKSPACE FOR COLORS :D
+		 * 
+		 */
+		
+		tabbedPane.setSelectedTopBg(ColorScheme.DEFAULT.getTabSelectedColor());
+		tabbedPane.setTopBg(ColorScheme.DEFAULT.getTabUnselectedColor());
+		menuPane.setBackground(ColorScheme.DEFAULT.getTabSelectedColor());
+		menuPane.getRelayMenu().setSelectedTopBg(ColorScheme.DEFAULT.getTabUnselectedColor());
+		
+		
+		
 		// create main pane
 		JPanel mainPane = new JPanel(new BorderLayout());
 		mainPane.add(statusPane, BorderLayout.SOUTH);
@@ -101,18 +115,6 @@ public class Interface extends JFrame implements Runnable {
 		this.setVisible(true);
 	}
 
-	//TODO: this... needs to not belong here
-	public void createGUIChannel(String name){
-		for(Channel c : Client.channels)if(c.name.equalsIgnoreCase(name))return;
-		if(!Client.getRelayConfiguration().containsDefaultChannel(name))Client.getRelayConfiguration().addDefaultChannel(name);
-		Channel chan = new Channel(name);
-		//tabbedPane.setFont(Client.font);
-		tabbedPane.addTab("#"+chan.name, chan.panel);
-		Client.toAppend.put(chan, new StringBuffer());
-		Client.channels.add(chan);
-		updateFields();
-	}
-
 	// connectButton, disconnectButton, ipField, portField, usernameField, chatLine_text, chatLine_boolean, statusColor
 	private void updateFieldsHelpers(boolean cb, boolean db, boolean ipf, boolean pf, boolean uf, String clt, boolean clb, boolean f, boolean cha, Color c){
 		Client.previousStatus = Client.connectionStatus;
@@ -139,7 +141,7 @@ public class Interface extends JFrame implements Runnable {
 		case NULL: break;
 
 		}
-		statusPane.getStatusField().setText(Client.connectionStatus.getStatus());		
+		statusPane.getStatusField().setText(Client.connectionStatus.getStatus()+((Client.connectionStatus == ConnectionStatus.CONNECTED) ? Client.getRelayConfiguration().getHostIP() : ""));		
 		for(Map.Entry<Channel, StringBuffer> e : Client.toAppend.entrySet()){
 			if(e.getValue().length() > 0){
 				FormatColor.decodeTextPaneFormat(e.getKey(),e.getKey().pane.getStyledDocument(), e.getValue().toString(), true);

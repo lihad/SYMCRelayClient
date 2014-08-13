@@ -5,10 +5,11 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+
+import com.alee.laf.button.WebButton;
 
 import lihad.SYMCRelay.GUI.ActionAdapter;
 import lihad.SYMCRelay.GUI.RotatedButton;
@@ -35,7 +36,7 @@ public class UserPane extends JPanel {
 		
 		
 		final RotatedButton expandButton = new RotatedButton("expand user list", false);
-		final JButton shrinkButton = new JButton("shrink user list");
+		final WebButton shrinkButton = new WebButton("shrink user list");
 
 		shrinkButton.setVisible(false);
 		

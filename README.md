@@ -1,5 +1,3 @@
-alpha - build 120 - client repository only
+alpha - build 121 - client repository only
 
 please feel free to post any issues/requests to the git.
-
-client can be directly downloaded from: bit.ly/Hf5e6r

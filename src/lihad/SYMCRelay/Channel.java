@@ -68,6 +68,5 @@ public class Channel {
 		panel.add(chatTextPane, BorderLayout.CENTER);
 		panel.setPreferredSize(new Dimension(500, 200));
 
-		Client.channelJoinRequest(name);	
 	}
 }

@@ -3,28 +3,42 @@ package lihad.SYMCRelay.GUI.Pane;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
 
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+
+import com.alee.laf.menu.WebMenuBar;
+import com.alee.laf.menu.WebMenuItem;
+import com.alee.laf.menu.WebCheckBoxMenuItem;
+import com.alee.laf.menu.WebMenu;
+
+
+
 
 import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.ConnectionStatus;
 import lihad.SYMCRelay.GUI.ActionAdapter;
 
-public class MenuPane extends JMenuBar {
+public class MenuPane extends WebMenuBar {
 
 	private static final long serialVersionUID = 4452654864959142763L;
 
-	private JMenuItem soundToggleItem, logToggleItem, bubbleToggleItem, colorChangeItem, undecoratedToggleItem, lnfItem, exitItem, updateItem, channelJoinItem,
-	channelLeaveItem, connectItem, disconnectItem, reconnectToggleItem, flashToggleItem;
+	private WebMenuItem colorChangeItem,  lnfItem, exitItem, updateItem, channelJoinItem, channelLeaveItem, connectItem, disconnectItem, openlogItem;
+	private WebCheckBoxMenuItem soundToggleItem, logToggleItem, bubbleToggleItem, undecoratedToggleItem, reconnectToggleItem, flashToggleItem;
+	private WebMenu relay, channel, customize, about;
 	private JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), updatePaneDialog = new JDialog(), lnfPaneDialog = new JDialog(), channelPaneDialog = new JDialog();
 
-
+	public WebMenu getRelayMenu(){ return relay; }
+	
+	public WebMenu getChannelMenu(){ return channel; }
+	
+	public WebMenu getCustomizeMenu(){ return customize; }
+	
+	public WebMenu getAboutMenu(){ return about; }
+	
 	public JDialog getConnectDialog(){ return connectPaneDialog; }
 
 	public JDialog getColorDialog(){ return colorPaneDialog; }
@@ -35,15 +49,15 @@ public class MenuPane extends JMenuBar {
 
 	public JDialog getChannelDialog(){ return channelPaneDialog; }
 
-	public JMenuItem getSoundItem(){ return soundToggleItem; }
+	public WebCheckBoxMenuItem getSoundItem(){ return soundToggleItem; }
 
-	public JMenuItem getChannelJoinItem(){  return channelJoinItem; }
+	public WebMenuItem getChannelJoinItem(){  return channelJoinItem; }
 
-	public JMenuItem getChannelLeaveItem(){  return channelLeaveItem; }
+	public WebMenuItem getChannelLeaveItem(){  return channelLeaveItem; }
 
-	public JMenuItem getConnectItem(){  return connectItem; }
+	public WebMenuItem getConnectItem(){  return connectItem; }
 
-	public JMenuItem getDisconnectItem(){  return disconnectItem; }
+	public WebMenuItem getDisconnectItem(){  return disconnectItem; }
 
 	public MenuPane(){
 
@@ -131,7 +145,6 @@ public class MenuPane extends JMenuBar {
 					//get an updated channel list
 					Client.updatechannelcount();
 					//TODO: literally will hang errything.  need safety
-					while(!Client.isupdated){Client.logger.debug(Client.isupdated+"");}					
 					JPanel mainPane = new JPanel(new BorderLayout());
 					JPanel channelPane = new ChannelPane();
 
@@ -159,18 +172,18 @@ public class MenuPane extends JMenuBar {
 
 		// relay menu drop
 		/////////////////////////////////////////////////////////////
-		JMenu relay = new JMenu("Relay");
+		relay = new WebMenu("Relay");
 		relay.setMnemonic(KeyEvent.VK_A);
 		//relay.setFont(Client.font);
 		this.add(relay);
 
-		connectItem = new JMenuItem("Connect...", KeyEvent.VK_C);
+		connectItem = new WebMenuItem("Connect...", KeyEvent.VK_C);
 		connectItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
 		connectItem.setActionCommand("connect");
 		connectItem.addActionListener(connectListener);
 		relay.add(connectItem);
 
-		disconnectItem = new JMenuItem("Disconnect", KeyEvent.VK_D);
+		disconnectItem = new WebMenuItem("Disconnect", KeyEvent.VK_D);
 		disconnectItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK));
 		disconnectItem.setActionCommand("disconnect");
 		disconnectItem.addActionListener(connectListener);
@@ -179,8 +192,7 @@ public class MenuPane extends JMenuBar {
 
 		relay.addSeparator();
 		
-		//TODO: reconnect item
-		reconnectToggleItem = new JCheckBoxMenuItem("Auto-Reconn");
+		reconnectToggleItem = new WebCheckBoxMenuItem("Auto-Reconn");
 		reconnectToggleItem.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				Client.getRelayConfiguration().setAutoReconnect(reconnectToggleItem.isSelected());;
@@ -191,14 +203,29 @@ public class MenuPane extends JMenuBar {
 		relay.add(reconnectToggleItem);		
 		relay.addSeparator();
 
-		updateItem = new JMenuItem("Update...", KeyEvent.VK_U);
+		updateItem = new WebMenuItem("Update...", KeyEvent.VK_U);
 		updateItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, ActionEvent.ALT_MASK));
 		updateItem.addActionListener(updateListener);
 		relay.add(updateItem);
 
 		relay.addSeparator();
+		
+		openlogItem = new WebMenuItem("Open Log", KeyEvent.VK_O);
+		openlogItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.ALT_MASK));
+		openlogItem.addActionListener(new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					java.awt.Desktop.getDesktop().open(new File(Client.log_file));
+				} catch (IOException e1) {
+					Client.logger.error(e1.toString(), e1.getStackTrace());
+				}
+			}
+		});
+		relay.add(openlogItem);
+		
+		relay.addSeparator();
 
-		exitItem = new JMenuItem("Exit", KeyEvent.VK_E);
+		exitItem = new WebMenuItem("Exit", KeyEvent.VK_E);
 		exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.ALT_MASK));
 		exitItem.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
@@ -212,18 +239,18 @@ public class MenuPane extends JMenuBar {
 
 		// channel menu drop
 		/////////////////////////////////////////////////////////////
-		JMenu channel = new JMenu("Channel");
+		channel = new WebMenu("Channel");
 		//channel.setFont(Client.font);
 		this.add(channel);
 
-		channelJoinItem = new JMenuItem("Join...", KeyEvent.VK_J);
+		channelJoinItem = new WebMenuItem("Join...", KeyEvent.VK_J);
 		channelJoinItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J, ActionEvent.ALT_MASK));
 		channelJoinItem.setActionCommand("join");
 		channelJoinItem.addActionListener(channelListener);
 		channelJoinItem.setEnabled(false);
 		channel.add(channelJoinItem);
 
-		channelLeaveItem = new JMenuItem("Leave", KeyEvent.VK_L);
+		channelLeaveItem = new WebMenuItem("Leave", KeyEvent.VK_L);
 		channelLeaveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.ALT_MASK));
 		channelLeaveItem.setActionCommand("leave");
 		channelLeaveItem.addActionListener(channelListener);
@@ -233,11 +260,11 @@ public class MenuPane extends JMenuBar {
 		// customize menu drop
 		/////////////////////////////////////////////////////////////
 
-		JMenu customize = new JMenu("Customize");
+		customize = new WebMenu("Customize");
 		//customize.setFont(Client.font);
 		this.add(customize);
 
-		soundToggleItem = new JCheckBoxMenuItem("Sound On");
+		soundToggleItem = new WebCheckBoxMenuItem("Sound On");
 		soundToggleItem.setMnemonic(KeyEvent.VK_S);
 		soundToggleItem.setSelected(Client.getRelayConfiguration().getSoundTogglable());
 		soundToggleItem.addActionListener(new ActionAdapter() {
@@ -247,7 +274,7 @@ public class MenuPane extends JMenuBar {
 		});
 		customize.add(soundToggleItem);		
 
-		logToggleItem = new JCheckBoxMenuItem("Logging On");
+		logToggleItem = new WebCheckBoxMenuItem("Logging On");
 		logToggleItem.setSelected(Client.getRelayConfiguration().getLogTogglable());
 		logToggleItem.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
@@ -257,7 +284,7 @@ public class MenuPane extends JMenuBar {
 		});
 		customize.add(logToggleItem);	
 
-		bubbleToggleItem = new JCheckBoxMenuItem("Bubble On");
+		bubbleToggleItem = new WebCheckBoxMenuItem("Bubble On");
 		bubbleToggleItem.setSelected(Client.getRelayConfiguration().getTrayBubbleTogglable());
 		bubbleToggleItem.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
@@ -266,7 +293,7 @@ public class MenuPane extends JMenuBar {
 		});
 		customize.add(bubbleToggleItem);	
 		
-		flashToggleItem = new JCheckBoxMenuItem("Flash On");
+		flashToggleItem = new WebCheckBoxMenuItem("Flash On");
 		flashToggleItem.setSelected(Client.getRelayConfiguration().getFlashTogglable());
 		flashToggleItem.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
@@ -277,13 +304,13 @@ public class MenuPane extends JMenuBar {
 		
 		customize.addSeparator();
 
-		colorChangeItem = new JMenuItem("Color..."); 
+		colorChangeItem = new WebMenuItem("Color..."); 
 		colorChangeItem.addActionListener(colorListener);
 		customize.add(colorChangeItem);	
 		
 		customize.addSeparator();
 
-		undecoratedToggleItem = new JCheckBoxMenuItem("Undecorated");
+		undecoratedToggleItem = new WebCheckBoxMenuItem("Undecorated");
 		undecoratedToggleItem.setSelected(Client.getRelayConfiguration().getUndecoratedTogglable());
 		undecoratedToggleItem.setEnabled(false); //TODO: locked down until I can build out a window move listener
 		undecoratedToggleItem.addActionListener(new ActionAdapter() {
@@ -293,18 +320,18 @@ public class MenuPane extends JMenuBar {
 		});
 		customize.add(undecoratedToggleItem);	
 		
-		lnfItem = new JMenuItem("Look & Feel..."); 
+		lnfItem = new WebMenuItem("Look & Feel..."); 
 		lnfItem.addActionListener(lnfListener);
 		customize.add(lnfItem);
 		
 		// about menu drop
 		/////////////////////////////////////////////////////////////
 
-		JMenu about = new JMenu("About");
+		about = new WebMenu("About");
 		//about.setFont(Client.font);
 		this.add(about);
 		
-		JMenuItem version = new JMenuItem("Build: "+Client.build);
+		WebMenuItem version = new WebMenuItem("Build: "+Client.build);
 		about.add(version);
 		
 	}
