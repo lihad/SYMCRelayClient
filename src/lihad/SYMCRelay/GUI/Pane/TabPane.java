@@ -5,8 +5,6 @@ import java.awt.Color;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import lihad.SYMCRelay.GUI.ColorScheme;
-
 import com.alee.laf.tabbedpane.WebTabbedPane;
 
 public class TabPane extends WebTabbedPane implements ChangeListener{

@@ -80,6 +80,9 @@ public class Interface extends JFrame implements Runnable {
 		tabbedPane.setTopBg(ColorScheme.DEFAULT.getTabUnselectedColor());
 		menuPane.setBackground(ColorScheme.DEFAULT.getTabSelectedColor());
 		menuPane.getRelayMenu().setSelectedTopBg(ColorScheme.DEFAULT.getTabUnselectedColor());
+		menuPane.getRelayMenu().setBackground(ColorScheme.DEFAULT.getTabSelectedColor());
+		menuPane.getDisconnectItem().setSelectedTopBg(ColorScheme.DEFAULT.getTabSelectedColor());
+		this.setBackground(ColorScheme.DEFAULT.getTabSelectedColor());
 		
 		
 		

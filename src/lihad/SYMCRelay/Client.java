@@ -26,7 +26,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	public final static double build = 121;
+	public final static double build = 122;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -127,7 +127,6 @@ public class Client{
 
 	// notification to the server of join/leave
 	public static void channelJoinRequest(String chan){send(out, chan+CHANNEL_JOIN);}
-
 	public static void channelLeaveRequest(String chan){send(out, chan+CHANNEL_LEAVE);}
 
 	// sends notification to the server that client is still actively using socket
@@ -403,13 +402,13 @@ public class Client{
 
 			//program will check for updates / LNF and reexecute'
 
-			while(!new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\weblaf-complete-1.28"+".jar").exists()){
+			if(!new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\weblaf-complete-1.28"+".jar").exists()){
 				PreInterface preinterface = new PreInterface();
 
 				while(!preinterface.finished){
 					try { Thread.sleep(10); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
 				}
-				try { Thread.sleep(1000); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
+				try { Thread.sleep(3000); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
 			}
 
 			logger.info("this is the instance i am using: "+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString());
