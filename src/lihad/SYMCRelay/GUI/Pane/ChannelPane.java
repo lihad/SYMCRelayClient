@@ -41,6 +41,7 @@ public class ChannelPane extends JPanel{
 			public void actionPerformed(ActionEvent e) {
 				//TODO: not [0] will return user count in tab field... interesting idea
 				Client.createGUIChannel(channelListPane.getSelectedValue().toString().split(" ")[0]);
+				Client.channelJoinRequest(channelListPane.getSelectedValue().toString().split(" ")[0]);
 				Client.gui.menuPane.getChannelDialog().setVisible(false);
 			}
 		};

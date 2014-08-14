@@ -101,7 +101,7 @@ public class RelayConfiguration extends Properties{
 		this.default_channels = default_channels.toString().replaceAll("\\]", "").replaceAll("\\[", "").replaceAll(" ", ""); saveDefaultChannels();
 		Client.logger.info("[RELAYCONFIGURATION] Default Channels are now set to ["+this.default_channels.toString()+"]");
 	}
-	public boolean loadDefaultChannels(){ this.default_channels = getProperty("channels", ""); return hasProperty("channels");}
+	public boolean loadDefaultChannels(){ this.default_channels = getProperty("channels", "lobby"); return hasProperty("channels");}
 	public void saveDefaultChannels(){ this.save("channels", this.default_channels);}
 
 	public boolean getSoundTogglable(){ return sound_toggle; }

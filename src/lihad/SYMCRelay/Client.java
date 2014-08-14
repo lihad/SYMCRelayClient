@@ -26,7 +26,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	public final static double build = 124;
+	public final static double build = 125;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
