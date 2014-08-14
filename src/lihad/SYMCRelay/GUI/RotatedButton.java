@@ -4,10 +4,10 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
-import javax.swing.JButton;
-import javax.swing.JToggleButton;
+import com.alee.laf.button.WebButton;
+import com.alee.laf.button.WebToggleButton;
 
-public class RotatedButton extends JButton {
+public class RotatedButton extends WebButton {
 
 	private static final long serialVersionUID = -6269186366137258735L;
 	
@@ -41,7 +41,7 @@ public class RotatedButton extends JButton {
 		g2.dispose();
 	}
 
-	private class XButton extends JToggleButton {
+	private class XButton extends WebToggleButton {
 	
 		private static final long serialVersionUID = 9222232387484118476L;
 

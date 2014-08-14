@@ -10,20 +10,20 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import com.alee.laf.button.WebButton;
+import com.alee.laf.panel.WebPanel;
+import com.alee.laf.text.WebTextField;
+import com.alee.laf.label.WebLabel;
 
 import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.ConnectionStatus;
 import lihad.SYMCRelay.GUI.ActionAdapter;
 
-public class UpdatePane extends JPanel {
+public class UpdatePane extends WebPanel {
 	
-	private JButton updateButton, updateRefreshButton;
-	private JTextField ipFieldUpdate;
-	private JLabel current_version_label = null, server_supported_label = null;
+	private WebButton updateButton, updateRefreshButton;
+	private WebTextField ipFieldUpdate;
+	private WebLabel current_version_label = null, server_supported_label = null;
 	private boolean able_update;
 	private double able_build = 0;
 
@@ -36,7 +36,7 @@ public class UpdatePane extends JPanel {
 	public UpdatePane(){
 		super(new BorderLayout());
 
-		ipFieldUpdate = new JTextField(); ipFieldUpdate.setText(Client.updateIP);
+		ipFieldUpdate = new WebTextField(); ipFieldUpdate.setText(Client.updateIP);
 		ipFieldUpdate.setEnabled(true);
 
 		able_update = checkValidBuild();
@@ -44,13 +44,13 @@ public class UpdatePane extends JPanel {
 		// test to see what version is valid.
 
 
-		current_version_label = new JLabel("The current available version is: "+able_build);
-		server_supported_label = new JLabel("This server supports (at least) version: "+Client.server_build);
+		current_version_label = new WebLabel("The current available version is: "+able_build);
+		server_supported_label = new WebLabel("This server supports (at least) version: "+Client.server_build);
 
 		this.add(current_version_label, BorderLayout.NORTH);
 		this.add(server_supported_label, BorderLayout.CENTER);
 
-		JPanel buttonPane = new JPanel(new BorderLayout());
+		WebPanel buttonPane = new WebPanel(new BorderLayout());
 		ActionAdapter buttonListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				// what happens when button is pressed
@@ -89,10 +89,10 @@ public class UpdatePane extends JPanel {
 			}
 		};
 
-		updateButton = new JButton("Update");
+		updateButton = new WebButton("Update");
 		updateButton.addActionListener(buttonListener);
 		updateButton.setEnabled(able_update);
-		updateRefreshButton = new JButton("Refresh");
+		updateRefreshButton = new WebButton("Refresh");
 		updateRefreshButton.addActionListener(refreshListener);
 		buttonPane.add(ipFieldUpdate, BorderLayout.WEST);
 		buttonPane.add(updateRefreshButton, BorderLayout.CENTER);

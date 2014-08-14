@@ -13,8 +13,9 @@ import java.net.MalformedURLException;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+
+import com.alee.laf.panel.WebPanel;
+import com.alee.laf.rootpane.WebFrame;
 
 import lihad.SYMCRelay.Channel;
 import lihad.SYMCRelay.Client;
@@ -26,7 +27,7 @@ import lihad.SYMCRelay.GUI.Pane.TabPane;
 import lihad.SYMCRelay.GUI.Pane.UserPane;
 
 
-public class Interface extends JFrame implements Runnable {
+public class Interface extends WebFrame implements Runnable {
 
 	private static final long serialVersionUID = -453802812736036450L;
 	
@@ -87,7 +88,7 @@ public class Interface extends JFrame implements Runnable {
 		
 		
 		// create main pane
-		JPanel mainPane = new JPanel(new BorderLayout());
+		WebPanel mainPane = new WebPanel(new BorderLayout());
 		mainPane.add(statusPane, BorderLayout.SOUTH);
 		mainPane.add(menuPane, BorderLayout.NORTH);
 		mainPane.add(tabbedPane, BorderLayout.CENTER);
@@ -101,7 +102,7 @@ public class Interface extends JFrame implements Runnable {
 		this.setPreferredSize(new Dimension(Integer.parseInt(Client.getRelayConfiguration().getWindowSize().split(",")[0]),Integer.parseInt(Client.getRelayConfiguration().getWindowSize().split(",")[1])));
 		this.setLocation(200, 200);
 		this.setUndecorated(Client.getRelayConfiguration().getUndecoratedTogglable());
-		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		this.setDefaultCloseOperation(WebFrame.DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent we) {

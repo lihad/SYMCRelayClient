@@ -5,32 +5,32 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-
 import com.alee.laf.button.WebButton;
+import com.alee.laf.panel.WebPanel;
+import com.alee.laf.scroll.WebScrollPane;
+import com.alee.laf.text.WebTextPane;
 
 import lihad.SYMCRelay.GUI.ActionAdapter;
 import lihad.SYMCRelay.GUI.RotatedButton;
 
-public class UserPane extends JPanel {
+public class UserPane extends WebPanel {
 
 	private static final long serialVersionUID = -8395492876472798137L;
-	private JPanel userPane;
-	private JTextPane userText;
+	private WebPanel userPane;
+	private WebTextPane userText;
 	
-	public JTextPane getUserText(){ return userText; }
+	public WebTextPane getUserText(){ return userText; }
 
 	public UserPane(){
 		super(new BorderLayout());
-		userPane = new JPanel(new BorderLayout());
-		userText = new JTextPane();
+		userPane = new WebPanel(new BorderLayout());
+		userText = new WebTextPane();
 		userText.setEditable(false);
 		userText.setForeground(Color.black);
-		userPane.add(new JScrollPane(userText,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
+		WebScrollPane scrollPane = new WebScrollPane(userText);
+		scrollPane.setVerticalScrollBarPolicy(WebScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.setHorizontalScrollBarPolicy(WebScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		userPane.add(scrollPane, BorderLayout.CENTER);
 		userPane.setPreferredSize(new Dimension(150, 200));
 		userPane.setVisible(false);
 		

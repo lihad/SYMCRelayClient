@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JDialog;
-import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 import com.alee.laf.menu.WebMenuBar;
@@ -17,6 +16,8 @@ import com.alee.laf.menu.WebMenu;
 
 
 
+
+import com.alee.laf.panel.WebPanel;
 
 import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.ConnectionStatus;
@@ -65,8 +66,8 @@ public class MenuPane extends WebMenuBar {
 		ActionAdapter connectListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("connect")){
-					JPanel mainPane = new JPanel(new BorderLayout());
-					JPanel optionsPane = new OptionsPane();
+					WebPanel mainPane = new WebPanel(new BorderLayout());
+					WebPanel optionsPane = new OptionsPane();
 
 					mainPane.add(optionsPane, BorderLayout.CENTER);
 					connectPaneDialog.setContentPane(mainPane);
@@ -89,8 +90,8 @@ public class MenuPane extends WebMenuBar {
 		//build 'update' option listener
 		ActionAdapter updateListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				JPanel mainPane = new JPanel(new BorderLayout());
-				JPanel updatePane = new UpdatePane();
+				WebPanel mainPane = new WebPanel(new BorderLayout());
+				WebPanel updatePane = new UpdatePane();
 
 				mainPane.add(updatePane, BorderLayout.CENTER);
 
@@ -107,8 +108,8 @@ public class MenuPane extends WebMenuBar {
 		//build 'color' option listener
 		ActionAdapter colorListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				JPanel mainPane = new JPanel(new BorderLayout());
-				JPanel colorPane = new ColorPane();
+				WebPanel mainPane = new WebPanel(new BorderLayout());
+				WebPanel colorPane = new ColorPane();
 
 				mainPane.add(colorPane, BorderLayout.CENTER);
 
@@ -124,8 +125,8 @@ public class MenuPane extends WebMenuBar {
 		//build 'look and feel' option listener
 		ActionAdapter lnfListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				JPanel mainPane = new JPanel(new BorderLayout());
-				JPanel lnfPane = new LNFPane();
+				WebPanel mainPane = new WebPanel(new BorderLayout());
+				WebPanel lnfPane = new LNFPane();
 
 				mainPane.add(lnfPane, BorderLayout.CENTER);
 
@@ -145,8 +146,8 @@ public class MenuPane extends WebMenuBar {
 					//get an updated channel list
 					Client.updatechannelcount();
 					//TODO: literally will hang errything.  need safety
-					JPanel mainPane = new JPanel(new BorderLayout());
-					JPanel channelPane = new ChannelPane();
+					WebPanel mainPane = new WebPanel(new BorderLayout());
+					WebPanel channelPane = new ChannelPane();
 
 					mainPane.add(channelPane, BorderLayout.CENTER);
 

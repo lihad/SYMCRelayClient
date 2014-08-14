@@ -26,7 +26,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	public final static double build = 125;
+	public final static double build = 126;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -150,11 +150,11 @@ public class Client{
 		//TODO: logger.info("[RELAYCONFIGURATION] "+getRelayConfiguration().)
 		switch_logger(getRelayConfiguration().getLogTogglable());
 
-		//install WebLaF - this needs to happen before the JFrame component is built on the next line...
+		//install WebLaF - this needs to happen before the WebFrame component is built on the next line...
 		logger.info("loading style");
 		WebLookAndFeel.install();
 
-		//create and initialize main GUI, which is a JFrame
+		//create and initialize main GUI, which is a WebFrame
 		logger.info("launching GUI");
 		gui = new Interface();
 
@@ -213,7 +213,6 @@ public class Client{
 				// if an error was thrown, then clean up any connection attempt made, and set to DISCONNECTING
 				catch (IOException | NumberFormatException e) {
 					logger.error(e.toString(),e.getStackTrace());
-					cleanup();
 					changeStatusTS(ConnectionStatus.DISCONNECTING, false, true);
 				}
 				break;

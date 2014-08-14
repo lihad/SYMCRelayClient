@@ -6,24 +6,24 @@ import java.awt.event.ActionEvent;
 import java.util.Arrays;
 import java.util.Map.Entry;
 
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import com.alee.laf.panel.WebPanel;
+import com.alee.laf.scroll.WebScrollPane;
+import com.alee.laf.button.WebButton;
+import com.alee.laf.list.WebList;
 
 import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.GUI.ActionAdapter;
 
-public class ChannelPane extends JPanel{
+public class ChannelPane extends WebPanel{
 
 	private static final long serialVersionUID = 6774624098614315641L;
-	private JList<String> channelListPane;
-	private JButton channelJoinButton;
+	private WebList channelListPane;
+	private WebButton channelJoinButton;
 
 	public ChannelPane(){
 		super(new BorderLayout());
 		
-		JScrollPane scrollPane = new JScrollPane();
+		WebScrollPane scrollPane = new WebScrollPane(channelListPane);
 		String[] a = new String[Client.channelcount.size()];
 		int count = 0;
 		for(Entry<String, Integer> entry : Client.channelcount.entrySet()){
@@ -31,12 +31,11 @@ public class ChannelPane extends JPanel{
 			count++;
 		}
 		Arrays.sort(a);
-		channelListPane = new JList<String>(a);
+		channelListPane = new WebList(a);
 		scrollPane.setPreferredSize(new Dimension(250, 150));
-		scrollPane.getViewport().add(channelListPane);
 		
 		// set button
-		JPanel buttonPane = new JPanel(new BorderLayout());
+		WebPanel buttonPane = new WebPanel(new BorderLayout());
 		ActionAdapter buttonListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				//TODO: not [0] will return user count in tab field... interesting idea
@@ -46,7 +45,7 @@ public class ChannelPane extends JPanel{
 			}
 		};
 		this.add(scrollPane, BorderLayout.WEST);
-		channelJoinButton = new JButton("Join");
+		channelJoinButton = new WebButton("Join");
 		channelJoinButton.addActionListener(buttonListener);
 		if(a.length == 0) channelJoinButton.setEnabled(false);
 		buttonPane.add(channelJoinButton, BorderLayout.SOUTH);

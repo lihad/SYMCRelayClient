@@ -3,20 +3,20 @@ package lihad.SYMCRelay.GUI.Pane;
 import java.awt.Color;
 import java.awt.FlowLayout;
 
-import javax.swing.JButton;
-import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import com.alee.laf.button.WebButton;
 import com.alee.laf.colorchooser.WebColorChooser;
+import com.alee.laf.panel.WebPanel;
 
 import lihad.SYMCRelay.Client;
 
-public class ColorPane extends JPanel implements ChangeListener{
+public class ColorPane extends WebPanel implements ChangeListener{
 
 	private static final long serialVersionUID = -7667361190633291641L;
 	private WebColorChooser cc;
-	public JButton colorSetButton;
+	public WebButton colorSetButton;
 
 	public ColorPane(){
 		super(new FlowLayout());

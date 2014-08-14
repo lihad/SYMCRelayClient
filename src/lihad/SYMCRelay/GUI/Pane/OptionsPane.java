@@ -7,32 +7,32 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import com.alee.laf.button.WebButton;
+import com.alee.laf.label.WebLabel;
+import com.alee.laf.panel.WebPanel;
+import com.alee.laf.checkbox.WebCheckBox;
+import com.alee.laf.text.WebTextField;
 
 import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.ConnectionStatus;
 import lihad.SYMCRelay.GUI.ActionAdapter;
 
-public class OptionsPane extends JPanel {
+public class OptionsPane extends WebPanel {
 
 	private static final long serialVersionUID = 6357368373942848796L;
 
-	private JButton connectButton;
-	private JTextField ipField, portField, usernameField;
-	private JCheckBox autoConnectBox;
+	private WebButton connectButton;
+	private WebTextField ipField, portField, usernameField;
+	private WebCheckBox autoConnectBox;
 	
 	public OptionsPane(){
 		super(new GridLayout(5, 1));
 		
 		
 		// ip address input
-				JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-				pane.add(new JLabel("Host IP:"));
-				ipField = new JTextField(10); ipField.setText(Client.getRelayConfiguration().getHostIP());
+				WebPanel pane = new WebPanel(new FlowLayout(FlowLayout.RIGHT));
+				pane.add(new WebLabel("Host IP:"));
+				ipField = new WebTextField(10); ipField.setText(Client.getRelayConfiguration().getHostIP());
 				ipField.setEnabled(true);
 				ipField.addFocusListener(new FocusAdapter() {
 					public void focusLost(FocusEvent e) {
@@ -46,9 +46,9 @@ public class OptionsPane extends JPanel {
 				this.add(pane);
 
 				// port input
-				pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-				pane.add(new JLabel("Port:"));
-				portField = new JTextField(10); portField.setEditable(true);
+				pane = new WebPanel(new FlowLayout(FlowLayout.RIGHT));
+				pane.add(new WebLabel("Port:"));
+				portField = new WebTextField(10); portField.setEditable(true);
 				portField.setText(Client.getRelayConfiguration().getHostPort());
 				portField.addFocusListener(new FocusAdapter() {
 					public void focusLost(FocusEvent e) {
@@ -70,9 +70,9 @@ public class OptionsPane extends JPanel {
 				this.add(pane);
 
 				// username input
-				pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-				pane.add(new JLabel("Username:"));
-				usernameField = new JTextField(10); usernameField.setEditable(false);
+				pane = new WebPanel(new FlowLayout(FlowLayout.RIGHT));
+				pane.add(new WebLabel("Username:"));
+				usernameField = new WebTextField(10); usernameField.setEditable(false);
 				usernameField.setText(Client.username);
 				usernameField.addFocusListener(new FocusAdapter() {
 					public void focusLost(FocusEvent e) {
@@ -95,15 +95,15 @@ public class OptionsPane extends JPanel {
 				this.add(pane);
 				
 				//auto-connect box
-				pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-				pane.add(new JLabel("Auto-Connect:"));
-				autoConnectBox = new JCheckBox();
+				pane = new WebPanel(new FlowLayout(FlowLayout.RIGHT));
+				pane.add(new WebLabel("Auto-Connect:"));
+				autoConnectBox = new WebCheckBox();
 				autoConnectBox.setSelected(Client.getRelayConfiguration().getAutoConnect());	
 				pane.add(autoConnectBox);
 				this.add(pane);
 
 				// connect/disconnect buttons
-				JPanel buttonPane = new JPanel(new GridLayout(1, 2));
+				WebPanel buttonPane = new WebPanel(new GridLayout(1, 2));
 				ActionAdapter buttonListener = new ActionAdapter() {
 					public void actionPerformed(ActionEvent e) {
 						if (e.getActionCommand().equals("connect")){
@@ -114,7 +114,7 @@ public class OptionsPane extends JPanel {
 						else Client.changeStatusTS(ConnectionStatus.DISCONNECTING, true, false);
 					}
 				};
-				connectButton = new JButton("Connect");
+				connectButton = new WebButton("Connect");
 				connectButton.setMnemonic(KeyEvent.VK_C);
 				connectButton.setActionCommand("connect");
 				connectButton.addActionListener(buttonListener);

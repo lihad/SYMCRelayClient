@@ -2,37 +2,36 @@ package lihad.SYMCRelay;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextPane;
+import com.alee.laf.panel.WebPanel;
+import com.alee.laf.text.WebTextArea;
+import com.alee.laf.text.WebTextPane;
+import com.alee.laf.scroll.WebScrollPane;
 
 import lihad.SYMCRelay.GUI.FormatColor;
 
 public class Channel {
 
 	public String name;
-	public JPanel panel;
-	public JTextPane pane;
-	public JTextArea field;
+	public WebPanel panel;
+	public WebTextPane pane;
+	public WebTextArea field;
 	public Channel channel;
 	
 	public Channel(final String n){
 		channel = this;
 		name = n;
-		pane = new JTextPane();
+		pane = new WebTextPane();
 		pane.setEditable(false);
 		pane.setForeground(Color.black);
 		pane.setFont(Client.font);
-
-		JScrollPane chatTextPane = new JScrollPane(pane,
-				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		field = new JTextArea();
+		WebScrollPane chatTextPane = new WebScrollPane(pane);
+		chatTextPane.setVerticalScrollBarPolicy(WebScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		chatTextPane.setHorizontalScrollBarPolicy(WebScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		chatTextPane.setAutoscrolls(true);
+		field = new WebTextArea();
 		field.setEnabled(false);
 		field.setFont(Client.font);
 		field.setLineWrap(true);
@@ -63,10 +62,8 @@ public class Channel {
 			public void keyTyped(KeyEvent e) {}
 		});
 
-		panel = new JPanel(new BorderLayout());
+		panel = new WebPanel(new BorderLayout());
 		panel.add(field, BorderLayout.SOUTH);
 		panel.add(chatTextPane, BorderLayout.CENTER);
-		panel.setPreferredSize(new Dimension(500, 200));
-
 	}
 }
