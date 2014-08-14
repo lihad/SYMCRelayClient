@@ -26,7 +26,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	public final static double build = 122;
+	public final static double build = 123;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -145,11 +145,16 @@ public class Client{
 
 		//launch the program, or re-launch with other parameters
 		try { launcher(args); } catch (IOException | URISyntaxException e2) { logger.error(e2.toString(), e2.getStackTrace()); }    
+		
+		//display configuration data
+		//TODO: logger.info("[RELAYCONFIGURATION] "+getRelayConfiguration().)
 
 		//install WebLaF - this needs to happen before the JFrame component is built on the next line...
+		logger.info("loading style");
 		WebLookAndFeel.install();
 
 		//create and initialize main GUI, which is a JFrame
+		logger.info("launching GUI");
 		gui = new Interface();
 
 		//if the user has auto-connect on launch set, then set ConnectionStatus to BEGIN_CONNECT

@@ -35,9 +35,15 @@ public class Linker extends MouseAdapter implements MouseMotionListener{
 		if (pos >= 0){
 			Document doc = editor.getDocument();
 			if (doc instanceof DefaultStyledDocument){
-				if ((String) (((DefaultStyledDocument) doc).getCharacterElement(pos)).getAttributes().getAttribute(HTML.Attribute.HREF) != null)
+				if ((String) (((DefaultStyledDocument) doc).getCharacterElement(pos)).getAttributes().getAttribute(HTML.Attribute.HREF) != null){
 					editor.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else editor.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+					String href = ((String) (((DefaultStyledDocument) doc).getCharacterElement(pos)).getAttributes().getAttribute(HTML.Attribute.HREF));
+					if(href.contains(".jpg") || href.contains(".png") || href.contains(".gif"))editor.setToolTipText("<html><img src=\"" + href + "\">");
+				}
+				else{
+					editor.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+					editor.setToolTipText(null);
+				}
 			}
 		}
 	}
