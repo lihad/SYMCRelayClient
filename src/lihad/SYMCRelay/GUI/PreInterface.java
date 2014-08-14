@@ -28,7 +28,7 @@ public class PreInterface extends JFrame{
 	public static boolean finished = false;
 
 	public PreInterface(){
-		super("SYMCRelay - Build "+Client.build+" | Welcome to SRC... CHUMP");
+		super("SYMCRelay - Build "+Client.build+" | Welcome to SRC... ");
 
 		final JProgressBar progressBar = new JProgressBar(0,100);
 		progressBar.setValue(0);
@@ -57,7 +57,7 @@ public class PreInterface extends JFrame{
 		worker.execute();
 
 		JPanel mainPane = new JPanel(new BorderLayout());
-		JLabel label = new JLabel("Welcome to Relay, build 120.  It doesn't appear that you have weblaf... not giving you a choice.");
+		JLabel label = new JLabel("Welcome to Relay.  It doesn't appear that you have weblaf... not giving you a choice.");
 
 		mainPane.add(label, BorderLayout.NORTH);
 
@@ -85,7 +85,7 @@ class Worker extends SwingWorker<Void, Void> {
 			int totalDataRead = 0;
 
 			BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-			FileOutputStream fos = new FileOutputStream(System.getenv("ProgramFiles")+"\\Relay\\LNF\\weblaf-complete-1.28"+".jar");
+			FileOutputStream fos = new FileOutputStream(System.getenv("ProgramFiles")+"\\Relay\\LNF\\weblaf-complete-1.28.jar");
 			try(BufferedOutputStream bout = new BufferedOutputStream(fos, 1024)){
 				byte[] data = new byte[1024];
 				int i;

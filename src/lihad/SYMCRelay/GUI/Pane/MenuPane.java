@@ -279,7 +279,7 @@ public class MenuPane extends WebMenuBar {
 		logToggleItem.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				Client.switch_logger(logToggleItem.isSelected());
-				Client.getRelayConfiguration().setLogTogglable(logToggleItem.isSelected());;
+				Client.getRelayConfiguration().setLogTogglable(logToggleItem.isSelected());
 			}
 		});
 		customize.add(logToggleItem);	

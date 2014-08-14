@@ -26,7 +26,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	public final static double build = 123;
+	public final static double build = 124;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -148,6 +148,7 @@ public class Client{
 		
 		//display configuration data
 		//TODO: logger.info("[RELAYCONFIGURATION] "+getRelayConfiguration().)
+		switch_logger(getRelayConfiguration().getLogTogglable());
 
 		//install WebLaF - this needs to happen before the JFrame component is built on the next line...
 		logger.info("loading style");
@@ -407,8 +408,10 @@ public class Client{
 
 			//program will check for updates / LNF and reexecute'
 
-			if(!new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\weblaf-complete-1.28"+".jar").exists()){
+			if(!new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\weblaf-complete-1.28.jar").exists()){
+				new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\").mkdirs();
 				PreInterface preinterface = new PreInterface();
+				logger.info("installing weblaf");
 
 				while(!preinterface.finished){
 					try { Thread.sleep(10); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}

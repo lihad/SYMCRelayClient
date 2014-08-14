@@ -42,7 +42,7 @@ public class Linker extends MouseAdapter implements MouseMotionListener{
 				}
 				else{
 					editor.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-					editor.setToolTipText(null);
+					if(editor.getToolTipText() != null) editor.setToolTipText(null);
 				}
 			}
 		}
