@@ -26,7 +26,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	public final static double build = 127;
+	public final static double build = 128;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -38,7 +38,7 @@ public class Client{
 
 	public static String username = System.getProperty("user.name");
 
-	public static List<Channel> channels = new LinkedList<Channel>();
+	public static List<Channel> channels;
 
 	// log file
 	public static String log_file = System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay.log";
@@ -67,7 +67,7 @@ public class Client{
 	// variables and stuff
 	public static ConnectionStatus connectionStatus = ConnectionStatus.DISCONNECTED;
 	public static ConnectionStatus previousStatus = connectionStatus;
-	public static Map<Channel, StringBuffer> toAppend = new HashMap<Channel, StringBuffer>();
+	public static Map<Channel, StringBuffer> toAppend;
 	public static StringBuffer toAppendUser = new StringBuffer(""), toSend = new StringBuffer("");
 
 	// TCP components
@@ -89,7 +89,8 @@ public class Client{
 	public static boolean isupdated = true;
 
 	/////////////////////////////////////////////////////////////////
-
+	/////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
 	// append to the chat box
 	protected static void appendToChatBox(Channel c, String s) { synchronized (toAppend) { toAppend.put(c, toAppend.get(c).append(s));}}
 	// append to the user box
@@ -145,6 +146,10 @@ public class Client{
 
 		//launch the program, or re-launch with other parameters
 		try { launcher(args); } catch (IOException | URISyntaxException e2) { logger.error(e2.toString(), e2.getStackTrace()); }    
+		
+		channels = new LinkedList<Channel>();
+		toAppend = new HashMap<Channel, StringBuffer>();
+		
 		
 		//display configuration data
 		//TODO: logger.info("[RELAYCONFIGURATION] "+getRelayConfiguration().)

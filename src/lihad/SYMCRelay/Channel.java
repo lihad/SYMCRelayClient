@@ -5,7 +5,8 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import com.alee.laf.panel.WebPanel;
+import javax.swing.JPanel;
+
 import com.alee.laf.text.WebTextArea;
 import com.alee.laf.text.WebTextPane;
 import com.alee.laf.scroll.WebScrollPane;
@@ -15,7 +16,7 @@ import lihad.SYMCRelay.GUI.FormatColor;
 public class Channel {
 
 	public String name;
-	public WebPanel panel;
+	public JPanel panel;
 	public WebTextPane pane;
 	public WebTextArea field;
 	public Channel channel;
@@ -63,7 +64,7 @@ public class Channel {
 			public void keyTyped(KeyEvent e) {}
 		});
 
-		panel = new WebPanel(new BorderLayout());
+		panel = new JPanel(new BorderLayout());
 		panel.add(field, BorderLayout.SOUTH);
 		panel.add(chatTextPane, BorderLayout.CENTER);
 	}
