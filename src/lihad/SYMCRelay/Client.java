@@ -26,7 +26,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	public final static double build = 126;
+	public final static double build = 127;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -283,6 +283,8 @@ public class Client{
 							else {
 								String[] arr = s.split(CHANNEL);
 								appendToChatBox(getChannel(arr[0]), arr[1] + "\n");
+								//TODO: this may not belong here
+								getChannel(arr[0]).pane.setCaretPosition(getChannel(arr[0]).pane.getDocument().getLength());
 								if(arr[1].split(FORMAT).length > 2)logger.info("["+arr[0]+"]"+arr[1].split(FORMAT)[0]+arr[1].split(FORMAT)[2]);
 								SYMCSound.playDing();
 								changeStatusTS(ConnectionStatus.NULL, true, true);

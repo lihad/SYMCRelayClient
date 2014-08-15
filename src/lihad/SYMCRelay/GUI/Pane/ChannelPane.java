@@ -23,7 +23,6 @@ public class ChannelPane extends WebPanel{
 	public ChannelPane(){
 		super(new BorderLayout());
 		
-		WebScrollPane scrollPane = new WebScrollPane(channelListPane);
 		String[] a = new String[Client.channelcount.size()];
 		int count = 0;
 		for(Entry<String, Integer> entry : Client.channelcount.entrySet()){
@@ -32,6 +31,9 @@ public class ChannelPane extends WebPanel{
 		}
 		Arrays.sort(a);
 		channelListPane = new WebList(a);
+		
+		WebScrollPane scrollPane = new WebScrollPane(channelListPane);
+
 		scrollPane.setPreferredSize(new Dimension(250, 150));
 		
 		// set button

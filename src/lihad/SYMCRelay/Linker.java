@@ -22,6 +22,8 @@ public class Linker extends MouseAdapter implements MouseMotionListener{
 		WebTextPane editor = (WebTextPane) e.getSource();
 		Document doc =  editor.getDocument();
 		
+		editor.setCaretPosition(editor.getDocument().getLength());
+		
 		int pos = editor.viewToModel(new Point(e.getX(), e.getY()));
 		if (pos >= 0){
 			if (doc instanceof DefaultStyledDocument){

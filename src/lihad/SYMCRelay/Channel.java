@@ -31,6 +31,7 @@ public class Channel {
 		chatTextPane.setVerticalScrollBarPolicy(WebScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		chatTextPane.setHorizontalScrollBarPolicy(WebScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		chatTextPane.setAutoscrolls(true);
+	
 		field = new WebTextArea();
 		field.setEnabled(false);
 		field.setFont(Client.font);

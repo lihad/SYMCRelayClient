@@ -146,6 +146,8 @@ public class MenuPane extends WebMenuBar {
 					//get an updated channel list
 					Client.updatechannelcount();
 					//TODO: literally will hang errything.  need safety
+					while(!Client.isupdated){try { Thread.sleep(10); }catch (InterruptedException e1) {Client.logger.error(e1.toString(),e1.getStackTrace());}}
+					
 					WebPanel mainPane = new WebPanel(new BorderLayout());
 					WebPanel channelPane = new ChannelPane();
 

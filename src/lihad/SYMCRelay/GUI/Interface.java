@@ -6,6 +6,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -115,6 +117,29 @@ public class Interface extends WebFrame implements Runnable {
                 System.exit(0);
             }
         });
+		
+		/**
+		 * 
+		 * 
+		 * TODO: can track user inactivity.  Need inactivity field for users server-side
+		 * 
+		 * 
+		 * 
+		this.addMouseMotionListener(new MouseMotionListener(){
+
+			@Override
+			public void mouseDragged(MouseEvent arg0) {
+				
+			}
+
+			@Override
+			public void mouseMoved(MouseEvent arg0) {
+				
+			}
+			
+		});
+		
+		*/
 		this.pack();
 		this.setVisible(true);
 	}
