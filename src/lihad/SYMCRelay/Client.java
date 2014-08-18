@@ -26,7 +26,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	public final static double build = 129;
+	public final static double build = 130;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -92,7 +92,14 @@ public class Client{
 	/////////////////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////
 	// append to the chat box
-	protected static void appendToChatBox(Channel c, String s) { synchronized (toAppend) { toAppend.put(c, toAppend.get(c).append(s));}}
+	protected static void appendToChatBox(Channel c, String s) { 
+		try{
+			synchronized (toAppend) { 		
+				toAppend.put(c, toAppend.get(c).append(s));
+			}
+		}catch(Exception e){logger.error(e.toString(), e.getStackTrace());}
+	}
+
 	// append to the user box
 	protected static void appendToUserBox(String s) {synchronized (toAppendUser) {toAppendUser.append(s);}}
 	// add text to the buffer
@@ -110,7 +117,6 @@ public class Client{
 			internal_hearbeat_count = 0;
 			last_user = "";
 			channelcount.clear();
-			toAppend.clear();
 			toAppendUser = new StringBuffer("");
 			toSend = new StringBuffer("");
 		}catch (IOException e) {logger.error(e.toString(),e.getStackTrace());in = null;}
@@ -189,21 +195,26 @@ public class Client{
 			internal_hearbeat_count++;
 
 
-
 			//TODO: NULL is unspecified.... should it be?
 			switch (connectionStatus) {
 			case BEGIN_CONNECT:
 				try {
+					logger.debug("beginning connect");
 					// create socket and connection
 					socket = new Socket(getRelayConfiguration().getHostIP(), Integer.parseInt(getRelayConfiguration().getHostPort()));
 					in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out = new PrintWriter(socket.getOutputStream(), true);
+					
+					logger.debug("created socket");
+
 
 					// if no error is thrown, then we must be connected
 					changeStatusTS(ConnectionStatus.CONNECTED, true, true);
 
 					// let the server know we've connected - format { <version> <username> <ip> <port> }
 					send(out,(build +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName())); 
+
+					logger.debug("sent request");
 
 					// creates predefined channels (if not already open)
 					for(String dc : getRelayConfiguration().getDefaultChannels()){
@@ -213,6 +224,9 @@ public class Client{
 					for(Channel channelname : channels){
 						Client.channelJoinRequest(channelname.name);
 					}
+					
+					logger.debug("channels created");
+
 					
 				}
 				// if an error was thrown, then clean up any connection attempt made, and set to DISCONNECTING
@@ -247,6 +261,7 @@ public class Client{
 						 * 
 						 */
 						if ((s != null) &&  (s.length() != 0)) {
+
 							// if server wants the client to disconnect, then we shall disconnect
 							if (s.equals(END_CHAT_SESSION.replace("\n", ""))) {
 								logger.info("force disconnection received. ["+s+"]");
@@ -266,14 +281,18 @@ public class Client{
 								}else{
 									toAppendUser.setLength(0);
 								}
+
 							}
 							// if the server wants to tell its version
 							else if(s.contains(VERSION)){
+
 								server_build=Double.parseDouble(s.replaceAll(VERSION, ""));
 							}
 
+
 							// if the server receive a COUNT request (used in channel viewer), then populate the channel/usercount map
 							else if (s.contains(COUNT)) {
+
 								channelcount.clear();
 								s = s.replaceAll(COUNT, "").replaceAll("\\{", "");
 								String[] arr = s.split("}");
@@ -288,6 +307,7 @@ public class Client{
 							else {
 								String[] arr = s.split(CHANNEL);
 								appendToChatBox(getChannel(arr[0]), arr[1] + "\n");
+
 								//TODO: this may not belong here
 								getChannel(arr[0]).pane.setCaretPosition(getChannel(arr[0]).pane.getDocument().getLength());
 								if(arr[1].split(FORMAT).length > 2)logger.info("["+arr[0]+"]"+arr[1].split(FORMAT)[0]+arr[1].split(FORMAT)[2]);
@@ -300,18 +320,19 @@ public class Client{
 				catch (IOException e) {
 					logger.error(e.toString(),e.getStackTrace());
 					cleanup();
-					changeStatusTS(ConnectionStatus.DISCONNECTED, false, true);
+					changeStatusTS(ConnectionStatus.DISCONNECTING, false, true);
 				}
 				break;
 
 			case DISCONNECTING:
 				try{
 					last_user = "";
-					// tell the server the client is gracefully disconnecting
-					send(out, (END_CHAT_SESSION));
-
+					
 					//clear user field
 					gui.userPane.getUserText().setText(null);
+					
+					// tell the server the client is gracefully disconnecting
+					send(out, (END_CHAT_SESSION));
 
 				}catch(NullPointerException e){
 					logger.error(e.toString(),e.getStackTrace());

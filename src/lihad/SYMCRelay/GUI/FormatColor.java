@@ -98,7 +98,7 @@ public class FormatColor {
 					if(ischannel && (str_arr[i].contains("http://") || str_arr[i].contains("https://"))){
 						boolean space = false;
 						for(String s  : str_arr[i].split(" ")){
-							if(s.contains("http://") || s.contains("https://")){
+							if(s.startsWith("http://") || s.startsWith("https://")){
 								key = new SimpleAttributeSet();
 								StyleConstants.setUnderline(key, true);
 								key.addAttribute(HTML.Attribute.HREF, new URL(s).toString());
