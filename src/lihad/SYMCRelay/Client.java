@@ -26,7 +26,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	public final static double build = 128;
+	public final static double build = 129;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -422,6 +422,7 @@ public class Client{
 				while(!preinterface.finished){
 					try { Thread.sleep(10); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
 				}
+				
 				try { Thread.sleep(3000); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
 			}
 

@@ -12,17 +12,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
-
-import com.alee.laf.label.WebLabel;
-import com.alee.laf.panel.WebPanel;
-import com.alee.laf.rootpane.WebFrame;
-import com.alee.laf.progressbar.WebProgressBar;
-
 
 import lihad.SYMCRelay.Client;
 
-public class PreInterface extends WebFrame{
+public class PreInterface extends JFrame{
 
 
 	private static final long serialVersionUID = -7710177664941204793L;
@@ -32,7 +30,7 @@ public class PreInterface extends WebFrame{
 	public PreInterface(){
 		super("SYMCRelay - Build "+Client.build+" | Welcome to SRC... ");
 
-		final WebProgressBar progressBar = new WebProgressBar(0,100);
+		final JProgressBar progressBar = new JProgressBar(0,100);
 		progressBar.setValue(0);
 		progressBar.setPreferredSize(new Dimension(100,20));
 		progressBar.setStringPainted(true);
@@ -58,8 +56,8 @@ public class PreInterface extends WebFrame{
 		});
 		worker.execute();
 
-		WebPanel mainPane = new WebPanel(new BorderLayout());
-		WebLabel label = new WebLabel("Welcome to Relay.  It doesn't appear that you have weblaf... not giving you a choice.");
+		JPanel mainPane = new JPanel(new BorderLayout());
+		JLabel label = new JLabel("Welcome to Relay.  It doesn't appear that you have weblaf... not giving you a choice.");
 
 		mainPane.add(label, BorderLayout.NORTH);
 
