@@ -1,10 +1,13 @@
 package lihad.SYMCRelay.GUI.Pane;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.swing.JDialog;
 import javax.swing.KeyStroke;
@@ -27,7 +30,7 @@ public class MenuPane extends WebMenuBar {
 
 	private static final long serialVersionUID = 4452654864959142763L;
 
-	private WebMenuItem colorChangeItem,  lnfItem, exitItem, updateItem, channelJoinItem, channelLeaveItem, connectItem, disconnectItem, openlogItem;
+	private WebMenuItem colorChangeItem,  lnfItem, exitItem, updateItem, channelJoinItem, connectItem, disconnectItem, openlogItem;
 	private WebCheckBoxMenuItem soundToggleItem, logToggleItem, bubbleToggleItem, undecoratedToggleItem, reconnectToggleItem, flashToggleItem;
 	private WebMenu relay, channel, customize, about;
 	private JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), updatePaneDialog = new JDialog(), lnfPaneDialog = new JDialog(), channelPaneDialog = new JDialog();
@@ -53,8 +56,6 @@ public class MenuPane extends WebMenuBar {
 	public WebCheckBoxMenuItem getSoundItem(){ return soundToggleItem; }
 
 	public WebMenuItem getChannelJoinItem(){  return channelJoinItem; }
-
-	public WebMenuItem getChannelLeaveItem(){  return channelLeaveItem; }
 
 	public WebMenuItem getConnectItem(){  return connectItem; }
 
@@ -142,34 +143,21 @@ public class MenuPane extends WebMenuBar {
 		//build 'channel' option listener
 		ActionAdapter channelListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				if (e.getActionCommand().equals("join")){
-					//get an updated channel list
-					Client.updatechannelcount();
-					//TODO: literally will hang errything.  need safety
-					while(!Client.isupdated){try { Thread.sleep(10); }catch (InterruptedException e1) {Client.logger.error(e1.toString(),e1.getStackTrace());}}
-					
-					WebPanel mainPane = new WebPanel(new BorderLayout());
-					WebPanel channelPane = new ChannelPane();
+				//get an updated channel list
+				Client.updatechannelcount();
+				//TODO: literally will hang errything.  need safety
+				while(!Client.isupdated){try { Thread.sleep(10); }catch (InterruptedException e1) {Client.logger.error(e1.toString(),e1.getStackTrace());}}
 
-					mainPane.add(channelPane, BorderLayout.CENTER);
+				WebPanel mainPane = new WebPanel(new BorderLayout());
+				WebPanel channelPane = new ChannelPane();
 
-					channelPaneDialog.setContentPane(mainPane);
-					channelPaneDialog.setLocationRelativeTo(Client.gui); 
-					channelPaneDialog.setTitle("Channel");
-					channelPaneDialog.pack();
-					channelPaneDialog.setVisible(true);
-				}
-				else{
-					Client.channelLeaveRequest(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getSelectedIndex()).replace("#", ""));
-					
-					//TODO: similar code
-				
-					Client.getRelayConfiguration().removeDefaultChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getSelectedIndex()).replace("#", ""));
-					
-					Client.channels.remove(Client.getChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getSelectedIndex()).replace("#", "")));
-					Client.gui.tabbedPane.remove(Client.gui.tabbedPane.getSelectedIndex());
-					
-				}
+				mainPane.add(channelPane, BorderLayout.CENTER);
+
+				channelPaneDialog.setContentPane(mainPane);
+				channelPaneDialog.setLocationRelativeTo(Client.gui); 
+				channelPaneDialog.setTitle("Channel");
+				channelPaneDialog.pack();
+				channelPaneDialog.setVisible(true);
 			}
 		};
 
@@ -246,19 +234,11 @@ public class MenuPane extends WebMenuBar {
 		//channel.setFont(Client.font);
 		this.add(channel);
 
-		channelJoinItem = new WebMenuItem("Join...", KeyEvent.VK_J);
+		channelJoinItem = new WebMenuItem("Join/Leave", KeyEvent.VK_J);
 		channelJoinItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J, ActionEvent.ALT_MASK));
-		channelJoinItem.setActionCommand("join");
 		channelJoinItem.addActionListener(channelListener);
 		channelJoinItem.setEnabled(false);
 		channel.add(channelJoinItem);
-
-		channelLeaveItem = new WebMenuItem("Leave", KeyEvent.VK_L);
-		channelLeaveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.ALT_MASK));
-		channelLeaveItem.setActionCommand("leave");
-		channelLeaveItem.addActionListener(channelListener);
-		channelLeaveItem.setEnabled(false);
-		channel.add(channelLeaveItem);
 
 		// customize menu drop
 		/////////////////////////////////////////////////////////////
@@ -337,5 +317,30 @@ public class MenuPane extends WebMenuBar {
 		WebMenuItem version = new WebMenuItem("Build: "+Client.build);
 		about.add(version);
 		
+		about.addSeparator();
+		
+		WebMenuItem enhancement = new WebMenuItem("Enhancement Request");
+		enhancement.addActionListener(new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				Desktop desktop = Desktop.getDesktop(); 
+				try {
+					desktop.mail(new URI("mailto:kyle_armstrong@symantec.com?subject=SYMCRelay%20Enhancement%20Request"));
+				} catch (IOException | URISyntaxException e1) {Client.logger.error(e1.toString(), e1.getStackTrace());}
+			}
+		});
+		about.add(enhancement);
+		
+		WebMenuItem bug = new WebMenuItem("Bug Report");
+		bug.addActionListener(new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				Desktop desktop = Desktop.getDesktop(); 
+				try {
+					desktop.mail(new URI("mailto:kyle_armstrong@symantec.com?subject=SYMCRelay%20Bug%20Report&body=-"+Client.build+"-"+Client.getRelayConfiguration().getFormat()+
+				"-"+Client.getRelayConfiguration().getUndecoratedTogglable()+"-"+Client.getRelayConfiguration().getLogTogglable()+"-"+Client.getRelayConfiguration().getTrayBubbleTogglable()+
+				"-"+Client.getRelayConfiguration().getLNF()+"-"+Client.getRelayConfiguration().getAutoConnect()+"-"+Client.getRelayConfiguration().getAutoReconnect()+"-"));
+				} catch (IOException | URISyntaxException e1) {Client.logger.error(e1.toString(), e1.getStackTrace());}
+			}
+		});
+		about.add(bug);
 	}
 }

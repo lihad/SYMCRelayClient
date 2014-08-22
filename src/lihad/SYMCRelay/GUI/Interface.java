@@ -6,8 +6,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -151,7 +149,6 @@ public class Interface extends WebFrame implements Runnable {
 		menuPane.getConnectItem().setEnabled(cb);
 		menuPane.getDisconnectItem().setEnabled(db);
 		menuPane.getChannelJoinItem().setEnabled(cha);
-		menuPane.getChannelLeaveItem().setEnabled(cha);
 
 		if(clt != null)for(Channel ch : Client.channels) ch.field.setText(clt); 
 		if(f) Client.channels.get(0).field.grabFocus();

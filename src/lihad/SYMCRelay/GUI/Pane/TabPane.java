@@ -32,7 +32,7 @@ public class TabPane extends WebTabbedPane implements ChangeListener{
 					Client.gui.tabbedPane.remove(index);
 				}else if(SwingUtilities.isLeftMouseButton(event)){
 					int index = Client.gui.tabbedPane.indexAtLocation(event.getX(), event.getY());
-					Client.getChannel(Client.gui.tabbedPane.getTitleAt(index).replace("#", "")).field.requestFocusInWindow();
+					if(index > 0)Client.getChannel(Client.gui.tabbedPane.getTitleAt(index).replace("#", "")).field.requestFocusInWindow();
 				}
 			}
 

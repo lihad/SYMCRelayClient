@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 
 import com.alee.laf.WebLookAndFeel;
 
+import lihad.SYMCRelay.Command.CommandHandler;
 import lihad.SYMCRelay.Configuration.RelayConfiguration;
 import lihad.SYMCRelay.GUI.FormatColor;
 import lihad.SYMCRelay.GUI.Interface;
@@ -26,7 +27,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	public final static double build = 130;
+	public final static double build = 131;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -47,6 +48,8 @@ public class Client{
 	private static RelayConfiguration config;
 
 	public static RelayConfiguration getRelayConfiguration(){ return config; }
+	
+	public static CommandHandler handler;
 
 	public static Logger logger;
 	public static void switch_logger(boolean b){logger.toggle_enabled(b);}
@@ -62,7 +65,9 @@ public class Client{
 	RETURN = new Character((char)6).toString(),
 	VERSION = new Character((char)7).toString(), // denotes a version
 	FORMAT = new Character((char)8).toString(), // this is always followed by a format code, followed by the format request
-	COUNT = new Character((char)9).toString();
+	COUNT = new Character((char)9).toString(),
+	COMMAND = new Character((char)11).toString();
+
 
 	// variables and stuff
 	public static ConnectionStatus connectionStatus = ConnectionStatus.DISCONNECTED;
@@ -103,7 +108,7 @@ public class Client{
 	// append to the user box
 	protected static void appendToUserBox(String s) {synchronized (toAppendUser) {toAppendUser.append(s);}}
 	// add text to the buffer
-	protected static void sendString(String s) {synchronized (toSend) {toSend.append(s);}}
+	public static void sendString(String s) {synchronized (toSend) {toSend.append(s);}}
 
 	/////////////////////////////////////////////////////////////////
 
@@ -141,7 +146,7 @@ public class Client{
 
 	// main procedure
 	public static void main(String args[]) {
-
+		
 		//create logger object and a new log (renaming the previous)
 		if(new File(log_file).exists() && args.length == 0) new File(log_file).renameTo(new File(System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay_"+System.currentTimeMillis()+".log"));
 		logger = new Logger(new File(log_file));
@@ -153,9 +158,9 @@ public class Client{
 		//launch the program, or re-launch with other parameters
 		try { launcher(args); } catch (IOException | URISyntaxException e2) { logger.error(e2.toString(), e2.getStackTrace()); }    
 		
+		handler = new CommandHandler();
 		channels = new LinkedList<Channel>();
 		toAppend = new HashMap<Channel, StringBuffer>();
-		
 		
 		//display configuration data
 		//TODO: logger.info("[RELAYCONFIGURATION] "+getRelayConfiguration().)
@@ -207,7 +212,6 @@ public class Client{
 					
 					logger.debug("created socket");
 
-
 					// if no error is thrown, then we must be connected
 					changeStatusTS(ConnectionStatus.CONNECTED, true, true);
 
@@ -226,8 +230,6 @@ public class Client{
 					}
 					
 					logger.debug("channels created");
-
-					
 				}
 				// if an error was thrown, then clean up any connection attempt made, and set to DISCONNECTING
 				catch (IOException | NumberFormatException e) {
@@ -327,20 +329,22 @@ public class Client{
 			case DISCONNECTING:
 				try{
 					last_user = "";
-					
+
 					//clear user field
 					gui.userPane.getUserText().setText(null);
-					
+
 					// tell the server the client is gracefully disconnecting
 					send(out, (END_CHAT_SESSION));
 
-				}catch(NullPointerException e){
+				}catch(Exception e){
+					logger.severe("an exception was thrown while attempting to disconnect...");
 					logger.error(e.toString(),e.getStackTrace());
+				}finally{
+					// close all streams/sockets
+					cleanup();
+					changeStatusTS(ConnectionStatus.DISCONNECTED, true, true);
+					SYMCSound.playDisconnect();
 				}
-				// close all streams/sockets
-				cleanup();
-				changeStatusTS(ConnectionStatus.DISCONNECTED, true, true);
-				SYMCSound.playDisconnect();
 				break;
 
 			case DISCONNECTED:
@@ -349,7 +353,7 @@ public class Client{
 					d_on_d = false;
 				}
 				break;
-				
+
 			case DESYNC:				
 				logger.info("[CLIENT.DESYNC] okay, im desynchronized.  lets see if i can find the server... attempt ["+desync_count+"]");
 

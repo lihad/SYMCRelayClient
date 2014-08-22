@@ -127,7 +127,7 @@ public class FormatColor {
 	 * 
 	 * 
 	 * @param namechan	The name of the channel text was written to
-	 * @param string	The text the was written, needing to be encoded
+	 * @param string	The text that was written, needing to be encoded
 	 * @param format	Any special formatting necessary to the string (i.e. color)
 	 * @return			Returns the encoded version of @param string
 	 */
@@ -135,5 +135,21 @@ public class FormatColor {
 		if(namechan == null)namechan = "";
 		else Client.logger.info("["+namechan.split(Client.CHANNEL)[0]+"]"+Client.username+": "+string);
 		return (Client.FORMAT+format+Client.FORMAT+namechan+string).replaceAll("\r", Client.RETURN).replaceAll("\n", Client.RETURN);
+	}
+	
+	/**
+	 * All commands outgoing to the server are encoded before being sent in a packet.
+	 * Returns an encoded string, ready to be transmitted.
+	 * 
+	 * @param command   The command
+	 * @param namechan	The name of the channel the command addresses
+	 * @param string	The command parameters/text, needing to be encoded
+	 * @param format	Any special formatting necessary to the string (i.e. color)
+	 * @return			Returns the encoded version of @param string
+	 */
+	public static String encodeCommandPaneFormat(String command, String namechan, String string, String format){
+		if(namechan == null)namechan = "";
+		else Client.logger.info("["+namechan.split(Client.CHANNEL)[0]+"][COMMAND]"+command+": "+string);
+		return (command+Client.COMMAND+Client.FORMAT+format+Client.FORMAT+namechan+string).replaceAll("\r", Client.RETURN).replaceAll("\n", Client.RETURN);
 	}
 }

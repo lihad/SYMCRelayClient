@@ -8,18 +8,17 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.net.URI;
 
+import javax.swing.JTextPane;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Document;
 import javax.swing.text.html.HTML;
-
-import com.alee.laf.text.WebTextPane;
 
 public class Linker extends MouseAdapter implements MouseMotionListener{
 
 	public void mouseReleased(MouseEvent e){}
 
 	public void mouseClicked(MouseEvent e){
-		WebTextPane editor = (WebTextPane) e.getSource();
+		JTextPane editor = (JTextPane) e.getSource();
 		Document doc =  editor.getDocument();
 		
 		editor.setCaretPosition(editor.getDocument().getLength());
@@ -36,7 +35,7 @@ public class Linker extends MouseAdapter implements MouseMotionListener{
 		}
 	}
 	public void mouseMoved(MouseEvent e){
-		WebTextPane editor = (WebTextPane) e.getSource();
+		JTextPane editor = (JTextPane) e.getSource();
 		int pos = editor.viewToModel(new Point(e.getX(), e.getY()));
 		if (pos >= 0){
 			Document doc = editor.getDocument();

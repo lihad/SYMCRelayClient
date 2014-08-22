@@ -6,25 +6,26 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.JPanel;
+import javax.swing.JTextPane;
 
 import com.alee.laf.text.WebTextArea;
-import com.alee.laf.text.WebTextPane;
 import com.alee.laf.scroll.WebScrollPane;
 
+import lihad.SYMCRelay.Command.Command;
 import lihad.SYMCRelay.GUI.FormatColor;
 
 public class Channel {
 
 	public String name;
 	public JPanel panel;
-	public WebTextPane pane;
+	public JTextPane pane;
 	public WebTextArea field;
 	public Channel channel;
 	
 	public Channel(final String n){
 		channel = this;
 		name = n;
-		pane = new WebTextPane();
+		pane = new JTextPane();
 		pane.setEditable(false);
 		pane.setForeground(Color.black);
 		pane.setFont(Client.font);
@@ -47,6 +48,11 @@ public class Channel {
 				if(e.getKeyCode() == KeyEvent.VK_ENTER){
 					String s = field.getText();
 					if(s.contentEquals("\r\n") || s.contentEquals("\n") || s.contentEquals("\r")){
+						field.setText(null);
+					}else if(s.startsWith("/")){
+						// is a command
+						String[] s_a = s.split(" ");
+						Client.handler.process(new Command(s, s_a[0], s_a, channel, pane));
 						field.setText(null);
 					}else{
 						if (!s.equals("")) {FormatColor.decodeTextPaneFormat(channel, pane.getStyledDocument(), Client.username+": "+FormatColor.encodeTextPaneFormat(null, s, Client.getRelayConfiguration().getFormat()) + "\n",false);  field.setText(null);
