@@ -16,8 +16,9 @@ import lihad.SYMCRelay.Command.CommandHandler;
 import lihad.SYMCRelay.Configuration.RelayConfiguration;
 import lihad.SYMCRelay.GUI.FormatColor;
 import lihad.SYMCRelay.GUI.Interface;
-import lihad.SYMCRelay.GUI.PreInterface;
 import lihad.SYMCRelay.Logger.Logger;
+import lihad.SYMCRelay.Startup.PreInterfaceSounds;
+import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 /**
  *  
@@ -27,7 +28,7 @@ import lihad.SYMCRelay.Logger.Logger;
 
 public class Client{
 
-	public final static double build = 131;
+	public final static double build = 132;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -35,7 +36,8 @@ public class Client{
 	public static String runtime;
 
 	// connection state info
-	public static String updateIP = "http://10.167.3.82/RelayClient/SYMCRelayClient/", lnfIP = "http://10.167.3.82/RelayClient/LNF/";
+	public static String updateIP = "http://10.167.3.82/RelayClient/SYMCRelayClient/", lnfIP = "http://10.167.3.82/RelayClient/LNF/",
+			soundsIP = "http://10.167.3.82/RelayClient/Sounds/";
 
 	public static String username = System.getProperty("user.name");
 
@@ -321,6 +323,7 @@ public class Client{
 				}
 				catch (IOException e) {
 					logger.error(e.toString(),e.getStackTrace());
+					logger.severe("an error occurred in the main thread.  the main thread is still active, but I'm disconnecting from the server as a precaution.");
 					cleanup();
 					changeStatusTS(ConnectionStatus.DISCONNECTING, false, true);
 				}
@@ -382,7 +385,7 @@ public class Client{
 		//relay has exited its main loop... which is not a good thing, and should be impossible
 	}
 	private static void send(PrintWriter pr, String s){
-		pr.print(encode(s)+"\n"); pr.flush();
+		if(pr != null){pr.print(encode(s)+"\n"); pr.flush();}
 	}
 	private static String encode(String string){
 		byte[] b_a = string.getBytes();
@@ -441,10 +444,25 @@ public class Client{
 
 			if(!new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\weblaf-complete-1.28.jar").exists()){
 				new File(System.getenv("ProgramFiles")+"\\Relay\\LNF\\").mkdirs();
-				PreInterface preinterface = new PreInterface();
+				PreInterfaceWeblaf preinterface_web = new PreInterfaceWeblaf();
 				logger.info("installing weblaf");
 
-				while(!preinterface.finished){
+				while(!preinterface_web.finished){
+					try { Thread.sleep(10); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
+				}
+				
+				try { Thread.sleep(3000); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
+			}
+			
+			//program will check for sound files and reexecute'
+
+			if(!new File(System.getenv("ProgramFiles")+"\\Relay\\Sounds\\ping.wav").exists() || !new File(System.getenv("ProgramFiles")+"\\Relay\\Sounds\\ding.wav").exists() ||
+					!new File(System.getenv("ProgramFiles")+"\\Relay\\Sounds\\connect.wav").exists() || !new File(System.getenv("ProgramFiles")+"\\Relay\\Sounds\\disconnect.wav").exists()){
+				new File(System.getenv("ProgramFiles")+"\\Relay\\Sounds\\").mkdirs();
+				PreInterfaceSounds preinterface_sound = new PreInterfaceSounds();
+				logger.info("installing sounds");
+
+				while(!preinterface_sound.finished){
 					try { Thread.sleep(10); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
 				}
 				

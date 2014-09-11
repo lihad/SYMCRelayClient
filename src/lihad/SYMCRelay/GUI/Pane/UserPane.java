@@ -10,6 +10,8 @@ import com.alee.laf.panel.WebPanel;
 import com.alee.laf.scroll.WebScrollPane;
 import com.alee.laf.text.WebTextPane;
 
+import lihad.SYMCRelay.Client;
+import lihad.SYMCRelay.Configuration.RelayConfiguration;
 import lihad.SYMCRelay.GUI.ActionAdapter;
 import lihad.SYMCRelay.GUI.RotatedButton;
 
@@ -32,19 +34,23 @@ public class UserPane extends WebPanel {
 		scrollPane.setHorizontalScrollBarPolicy(WebScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		userPane.add(scrollPane, BorderLayout.CENTER);
 		userPane.setPreferredSize(new Dimension(150, 200));
-		userPane.setVisible(false);
+		userPane.setVisible(Client.getRelayConfiguration().getUserListExpanded());
+		scrollPane.getVerticalScrollBar().setUnitIncrement(32);
+
 		
 		
 		final RotatedButton expandButton = new RotatedButton("expand user list", false);
 		final WebButton shrinkButton = new WebButton("shrink user list");
 
-		shrinkButton.setVisible(false);
+		shrinkButton.setVisible(Client.getRelayConfiguration().getUserListExpanded());
+		expandButton.setVisible(!Client.getRelayConfiguration().getUserListExpanded());
 		
 		ActionAdapter expandButtonListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				expandButton.setVisible(false);
 				shrinkButton.setVisible(true);
 				userPane.setVisible(true);
+				Client.getRelayConfiguration().setUserListExpanded(true);
 			}
 		};
 		ActionAdapter shrinkButtonListener = new ActionAdapter() {
@@ -52,6 +58,7 @@ public class UserPane extends WebPanel {
 				expandButton.setVisible(true);
 				shrinkButton.setVisible(false);
 				userPane.setVisible(false);
+				Client.getRelayConfiguration().setUserListExpanded(false);
 			}
 		};
 		

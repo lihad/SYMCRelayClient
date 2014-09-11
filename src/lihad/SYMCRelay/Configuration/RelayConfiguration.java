@@ -17,7 +17,7 @@ public class RelayConfiguration extends Properties{
 	private static final long serialVersionUID = -4752504796844276291L;
 	
 	private String hostIP, hostPort, format, window, default_channels, lnf;
-	private boolean auto_connect, auto_reconnect, sound_toggle, log_toggle, bubble_toggle, flash_toggle, undecorated;
+	private boolean auto_connect, auto_reconnect, sound_toggle, log_toggle, bubble_toggle, flash_toggle, undecorated, user_list_expanded;
 	
 	private File file;
 
@@ -41,6 +41,8 @@ public class RelayConfiguration extends Properties{
 			this.loadUndecoratedTogglable();
 			this.loadWindowSize();
 			this.loadFlashTogglable();
+			this.loadUserListExpanded();
+
 			
 		}catch(Exception e){e.printStackTrace();}		
 		
@@ -133,6 +135,11 @@ public class RelayConfiguration extends Properties{
 	public void setFlashTogglable(boolean flash_toggle){ this.flash_toggle = flash_toggle; saveFlashTogglable(); Client.logger.info("[RELAYCONFIGURATION] FlashToggle is now set to ["+this.flash_toggle+"]");}
 	public boolean loadFlashTogglable(){ this.flash_toggle = Boolean.parseBoolean(getProperty("flash_toggle", "true")); return hasProperty("flash_toggle");}
 	public void saveFlashTogglable(){ this.save("flash_toggle", String.valueOf(this.flash_toggle));}
+	
+	public boolean getUserListExpanded(){ return user_list_expanded; }
+	public void setUserListExpanded(boolean user_list_expanded){ this.user_list_expanded = user_list_expanded; saveUserListExpanded(); Client.logger.info("[RELAYCONFIGURATION] User List Expansion is now set to ["+this.user_list_expanded+"]");}
+	public boolean loadUserListExpanded(){ this.user_list_expanded = Boolean.parseBoolean(getProperty("user_list_expanded", "false")); return hasProperty("user_list_expanded");}
+	public void saveUserListExpanded(){ this.save("user_list_expanded", String.valueOf(this.user_list_expanded));}
 	
 	public void save(String key, String value){
 		try {

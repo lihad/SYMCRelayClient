@@ -11,10 +11,10 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public class SYMCSound {
 
 	//TODO:  all sounds need to be copied to a directory controlled by this client
-	public static void playDing(){play(new File("C:\\Windows\\Media\\ding.wav"));}
-	public static void playConnect(){play(new File("C:\\Windows\\Media\\Speech On.wav"));}
-	public static void playDisconnect(){play(new File("C:\\Windows\\Media\\Speech Off.wav"));}
-	public static void playPing(){play(new File("C:\\Windows\\Media\\Windows Print complete.wav"));}
+	public static void playDing(){play(new File(System.getenv("ProgramFiles")+"\\Relay\\Sounds\\ding.wav"));}
+	public static void playConnect(){play(new File(System.getenv("ProgramFiles")+"\\Relay\\Sounds\\connect.wav"));}
+	public static void playDisconnect(){play(new File(System.getenv("ProgramFiles")+"\\Relay\\Sounds\\disconnect.wav"));}
+	public static void playPing(){play(new File(System.getenv("ProgramFiles")+"\\Relay\\Sounds\\ping.wav"));}
 
 	
 	private static void play(File file){

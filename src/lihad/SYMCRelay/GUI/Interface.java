@@ -104,18 +104,20 @@ public class Interface extends WebFrame implements Runnable {
 		this.setUndecorated(Client.getRelayConfiguration().getUndecoratedTogglable());
 		this.setDefaultCloseOperation(WebFrame.DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent we) {
-            	for(;Client.gui.tabbedPane.getTabCount() > 0;){
-					Client.channelLeaveRequest(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", ""));
-					Client.channels.remove(Client.getChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", "")));
-					Client.gui.tabbedPane.remove((Client.gui.tabbedPane.getTabCount() - 1));
-				}
-				Client.changeStatusTS(ConnectionStatus.DISCONNECTING, true, false);
-                System.exit(0);
-            }
-        });
-		
+			@Override
+			public void windowClosing(WindowEvent we) {
+				try{
+					for(;Client.gui.tabbedPane.getTabCount() > 0;){
+						Client.channelLeaveRequest(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", ""));
+						Client.channels.remove(Client.getChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", "")));
+						Client.gui.tabbedPane.remove((Client.gui.tabbedPane.getTabCount() - 1));
+					}
+					Client.changeStatusTS(ConnectionStatus.DISCONNECTING, true, false);
+				}catch(Exception e){}
+				finally{System.exit(0);}
+			}
+		});
+
 		/**
 		 * 
 		 * 

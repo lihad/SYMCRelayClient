@@ -319,6 +319,25 @@ public class MenuPane extends WebMenuBar {
 		
 		about.addSeparator();
 		
+		WebMenuItem legal = new WebMenuItem("Legal");
+		legal.addActionListener(new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				WebPanel mainPane = new WebPanel(new BorderLayout());
+				WebPanel legalPane = new LegalPane();
+
+				mainPane.add(legalPane, BorderLayout.CENTER);
+
+				channelPaneDialog.setContentPane(mainPane);
+				channelPaneDialog.setLocationRelativeTo(Client.gui); 
+				channelPaneDialog.setTitle("Legal");
+				channelPaneDialog.pack();
+				channelPaneDialog.setVisible(true);
+			}
+		});
+		about.add(legal);
+		
+		about.addSeparator();
+		
 		WebMenuItem enhancement = new WebMenuItem("Enhancement Request");
 		enhancement.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
