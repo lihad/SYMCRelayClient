@@ -28,7 +28,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 132;
+	public final static double build = 133;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -41,7 +41,7 @@ public class Client{
 
 	public static String username = System.getProperty("user.name");
 
-	public static List<Channel> channels;
+	public static Map<Channel,List<String>> channels;
 
 	// log file
 	public static String log_file = System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay.log";
@@ -134,7 +134,7 @@ public class Client{
 	/////////////////////////////////////////////////////////////////
 
 	// get channel
-	public static Channel getChannel(String name){for(Channel c : channels)if(c.name.equalsIgnoreCase(name)) return c; return null;}
+	public static Channel getChannel(String name){for(Channel c : channels.keySet())if(c.name.equalsIgnoreCase(name)) return c; return null;}
 
 	//get an updated channel/user map
 	public static void updatechannelcount(){send(out, COUNT);isupdated = false;}
@@ -161,7 +161,7 @@ public class Client{
 		try { launcher(args); } catch (IOException | URISyntaxException e2) { logger.error(e2.toString(), e2.getStackTrace()); }    
 		
 		handler = new CommandHandler();
-		channels = new LinkedList<Channel>();
+		channels = new HashMap<Channel,List<String>>();
 		toAppend = new HashMap<Channel, StringBuffer>();
 		
 		//display configuration data
@@ -224,10 +224,10 @@ public class Client{
 
 					// creates predefined channels (if not already open)
 					for(String dc : getRelayConfiguration().getDefaultChannels()){
-						if(!channels.contains(dc)) createGUIChannel(dc);
+						if(!channels.keySet().contains(dc)) createGUIChannel(dc);
 					}	
 					// let the server know the channels we've opened
-					for(Channel channelname : channels){
+					for(Channel channelname : channels.keySet()){
 						Client.channelJoinRequest(channelname.name);
 					}
 					
@@ -278,8 +278,8 @@ public class Client{
 								appendToUserBox(s.replace(" ", "\n").replace(CONNECTED_USERS, ""));
 								if(!last_user.equalsIgnoreCase(toAppendUser.toString())){
 									last_user = toAppendUser.toString();
-									gui.userPane.getUserText().setText(null);
-									FormatColor.decodeTextPaneFormat(null, gui.userPane.getUserText().getStyledDocument(), toAppendUser.toString(), false);
+									gui.userPane.updateNodes(toAppendUser.toString());
+									
 									toAppendUser.setLength(0);
 									gui.repaint();
 								}else{
@@ -334,7 +334,7 @@ public class Client{
 					last_user = "";
 
 					//clear user field
-					gui.userPane.getUserText().setText(null);
+					//gui.userPane.getUserText().setText(null);
 
 					// tell the server the client is gracefully disconnecting
 					send(out, (END_CHAT_SESSION));
@@ -417,12 +417,12 @@ public class Client{
 	}
 	
 	public static void createGUIChannel(String name){
-		for(Channel c : Client.channels)if(c.name.equalsIgnoreCase(name))return;
+		for(Channel c : Client.channels.keySet())if(c.name.equalsIgnoreCase(name))return;
 		if(!getRelayConfiguration().containsDefaultChannel(name))getRelayConfiguration().addDefaultChannel(name);
 		Channel chan = new Channel(name);
 		gui.tabbedPane.addTab("#"+chan.name, chan.panel);
 		toAppend.put(chan, new StringBuffer());
-		channels.add(chan);
+		channels.put(chan, new LinkedList<String>());
 		changeStatusTS(ConnectionStatus.NULL, true, true);
 	}
 	private static void launcher(String[] args) throws URISyntaxException, IOException{

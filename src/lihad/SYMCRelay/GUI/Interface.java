@@ -152,9 +152,9 @@ public class Interface extends WebFrame implements Runnable {
 		menuPane.getDisconnectItem().setEnabled(db);
 		menuPane.getChannelJoinItem().setEnabled(cha);
 
-		if(clt != null)for(Channel ch : Client.channels) ch.field.setText(clt); 
-		if(f) Client.channels.get(0).field.grabFocus();
-		for(Channel ch : Client.channels) ch.field.setEnabled(clb);
+		if(clt != null)for(Channel ch : Client.channels.keySet()) ch.field.setText(clt); 
+		//if(f) Client.channels.get(0).field.grabFocus();
+		for(Channel ch : Client.channels.keySet()) ch.field.setEnabled(clb);
 		statusPane.getStatusColor().setBackground(c);		
 	}
 	// update gui fields

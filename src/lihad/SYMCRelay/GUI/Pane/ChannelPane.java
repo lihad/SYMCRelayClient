@@ -3,10 +3,6 @@ package lihad.SYMCRelay.GUI.Pane;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
 import java.util.Arrays;
 import java.util.Map.Entry;
 
@@ -50,7 +46,7 @@ public class ChannelPane extends WebPanel{
 		
 		String[] b = new String[Client.channels.size()];
 		int count2 = 0;
-		for(Channel channel : Client.channels){
+		for(Channel channel : Client.channels.keySet()){
 			b[count2] = channel.name;
 			count2++;
 		}
@@ -63,6 +59,8 @@ public class ChannelPane extends WebPanel{
 		
 		WebScrollPane available_channel_pane = new WebScrollPane(channelIncludedList);
 		WebScrollPane existing_channel_pane = new WebScrollPane(channelExistList);
+		available_channel_pane.getVerticalScrollBar().setUnitIncrement(32);
+		existing_channel_pane.getVerticalScrollBar().setUnitIncrement(32);
 
 
 		available_channel_pane.setPreferredSize(new Dimension(250, 150));
