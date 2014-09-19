@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 import com.alee.laf.button.WebButton;
 import com.alee.laf.panel.WebPanel;
@@ -25,8 +26,17 @@ public class UserPane extends WebPanel {
 	private DefaultMutableTreeNode top =
 			new DefaultMutableTreeNode("SYMCRelay User List");
 
-	//public WebList getUserList(){ return webList; }
-
+	public void expandChannel(String string){
+		for(int i = 0; i < top.getChildCount(); i++){
+			//TODO: make this exact, not a contains.  the contains is only there for testing purposes
+			if(top.getChildAt(i).toString().contains(string)){
+				webTree.expandNode((DefaultMutableTreeNode) top.getChildAt(i));
+			}else{
+				webTree.collapsePath(new TreePath(((DefaultMutableTreeNode) top.getChildAt(i)).getPath()));
+			}
+		}
+	}
+	
 	public void updateNodes(String string) {		
 		DefaultMutableTreeNode channel = null;
 		DefaultMutableTreeNode user = null;
@@ -73,8 +83,8 @@ public class UserPane extends WebPanel {
 
 
 
-		final RotatedButton expandButton = new RotatedButton("expand user list", false);
-		final WebButton shrinkButton = new WebButton("shrink user list");
+		final RotatedButton expandButton = new RotatedButton("show user list", false);
+		final WebButton shrinkButton = new WebButton("hide user list");
 
 		shrinkButton.setVisible(Client.getRelayConfiguration().getUserListExpanded());
 		expandButton.setVisible(!Client.getRelayConfiguration().getUserListExpanded());

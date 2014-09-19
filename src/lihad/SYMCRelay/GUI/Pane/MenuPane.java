@@ -32,7 +32,7 @@ public class MenuPane extends WebMenuBar {
 
 	private WebMenuItem colorChangeItem,  lnfItem, exitItem, updateItem, channelJoinItem, connectItem, disconnectItem, openlogItem;
 	private WebCheckBoxMenuItem soundToggleItem, logToggleItem, bubbleToggleItem, undecoratedToggleItem, reconnectToggleItem, flashToggleItem;
-	private WebMenu relay, channel, customize, about;
+	private WebMenu relay, channel, customize, help;
 	private JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), updatePaneDialog = new JDialog(), lnfPaneDialog = new JDialog(), channelPaneDialog = new JDialog();
 
 	public WebMenu getRelayMenu(){ return relay; }
@@ -41,7 +41,7 @@ public class MenuPane extends WebMenuBar {
 	
 	public WebMenu getCustomizeMenu(){ return customize; }
 	
-	public WebMenu getAboutMenu(){ return about; }
+	public WebMenu getHelpMenu(){ return help; }
 	
 	public JDialog getConnectDialog(){ return connectPaneDialog; }
 
@@ -303,21 +303,22 @@ public class MenuPane extends WebMenuBar {
 		});
 		customize.add(undecoratedToggleItem);	
 		
-		lnfItem = new WebMenuItem("Look & Feel..."); 
+		lnfItem = new WebMenuItem("Look & Feel...");
+		lnfItem.setEnabled(false); //TODO: locked down until themes
 		lnfItem.addActionListener(lnfListener);
 		customize.add(lnfItem);
 		
 		// about menu drop
 		/////////////////////////////////////////////////////////////
 
-		about = new WebMenu("About");
+		help = new WebMenu("Help");
 		//about.setFont(Client.font);
-		this.add(about);
+		this.add(help);
 		
 		WebMenuItem version = new WebMenuItem("Build: "+Client.build);
-		about.add(version);
+		help.add(version);
 		
-		about.addSeparator();
+		help.addSeparator();
 		
 		WebMenuItem legal = new WebMenuItem("Legal");
 		legal.addActionListener(new ActionAdapter() {
@@ -334,9 +335,23 @@ public class MenuPane extends WebMenuBar {
 				channelPaneDialog.setVisible(true);
 			}
 		});
-		about.add(legal);
+		help.add(legal);
 		
-		about.addSeparator();
+		help.addSeparator();
+		
+		WebMenuItem new_user = new WebMenuItem("New User Guide");
+		new_user.addActionListener(new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					Desktop.getDesktop().browse(new URI("http://10.167.3.82/RelayClient/Guides/New_User_Guide.pdf"));
+				} catch (IOException | URISyntaxException e1) {
+					Client.logger.error(e1.toString(), e1.getStackTrace());
+				}
+			}
+		});
+		help.add(new_user);
+		
+		help.addSeparator();
 		
 		WebMenuItem enhancement = new WebMenuItem("Enhancement Request");
 		enhancement.addActionListener(new ActionAdapter() {
@@ -347,7 +362,7 @@ public class MenuPane extends WebMenuBar {
 				} catch (IOException | URISyntaxException e1) {Client.logger.error(e1.toString(), e1.getStackTrace());}
 			}
 		});
-		about.add(enhancement);
+		help.add(enhancement);
 		
 		WebMenuItem bug = new WebMenuItem("Bug Report");
 		bug.addActionListener(new ActionAdapter() {
@@ -360,6 +375,6 @@ public class MenuPane extends WebMenuBar {
 				} catch (IOException | URISyntaxException e1) {Client.logger.error(e1.toString(), e1.getStackTrace());}
 			}
 		});
-		about.add(bug);
+		help.add(bug);
 	}
 }

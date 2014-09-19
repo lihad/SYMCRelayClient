@@ -14,7 +14,6 @@ import com.alee.laf.WebLookAndFeel;
 
 import lihad.SYMCRelay.Command.CommandHandler;
 import lihad.SYMCRelay.Configuration.RelayConfiguration;
-import lihad.SYMCRelay.GUI.FormatColor;
 import lihad.SYMCRelay.GUI.Interface;
 import lihad.SYMCRelay.Logger.Logger;
 import lihad.SYMCRelay.Startup.PreInterfaceSounds;
@@ -28,7 +27,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 133;
+	public final static double build = 134;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 

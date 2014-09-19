@@ -47,7 +47,10 @@ public class TabPane extends WebTabbedPane implements ChangeListener{
 					Client.gui.tabbedPane.remove(index);
 				}else if(SwingUtilities.isLeftMouseButton(event)){
 					int index = Client.gui.tabbedPane.indexAtLocation(event.getX(), event.getY());
-					if(index > 0)Client.getChannel(Client.gui.tabbedPane.getTitleAt(index).replace("#", "")).field.requestFocusInWindow();
+					if(index >= 0){
+						Client.getChannel(Client.gui.tabbedPane.getTitleAt(index).replace("#", "")).field.requestFocusInWindow();
+						Client.gui.userPane.expandChannel(Client.gui.tabbedPane.getTitleAt(index));
+					}
 				}
 			}
 
@@ -72,8 +75,8 @@ public class TabPane extends WebTabbedPane implements ChangeListener{
 						insertTab(title, null, component, null, TabPane.this.getTabCount());
 						TabPane.this.setSelectedIndex(TabPane.this.getTabCount()-1);
 					}
+					Client.gui.userPane.expandChannel(title);
 					TabPane.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-
 				}
 
 				dragging = false;
@@ -93,8 +96,6 @@ public class TabPane extends WebTabbedPane implements ChangeListener{
 						draggedTabIndex = tabNumber;
 						Rectangle bounds = getUI().getTabBounds(TabPane.this, tabNumber);
 
-
-
 						// Paint the tabbed pane to a buffer
 						Image totalImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
 						Graphics totalGraphics = totalImage.getGraphics();
@@ -109,7 +110,7 @@ public class TabPane extends WebTabbedPane implements ChangeListener{
 						graphics.drawImage(totalImage, 0, 0, bounds.width, bounds.height, bounds.x, bounds.y, bounds.x + bounds.width, bounds.y+bounds.height, TabPane.this);
 
 						dragging = true;
-						
+
 						component = getComponentAt(draggedTabIndex);
 						title = getTitleAt(draggedTabIndex);
 						removeTabAt(draggedTabIndex);
