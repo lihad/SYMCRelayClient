@@ -27,7 +27,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 134;
+	public final static double build = 135;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -67,8 +67,8 @@ public class Client{
 	VERSION = new Character((char)7).toString(), // denotes a version
 	FORMAT = new Character((char)8).toString(), // this is always followed by a format code, followed by the format request
 	COUNT = new Character((char)9).toString(),
-	COMMAND = new Character((char)11).toString();
-
+	COMMAND = new Character((char)11).toString(),
+	IMPORTANT = new Character((char)12).toString();
 
 	// variables and stuff
 	public static ConnectionStatus connectionStatus = ConnectionStatus.DISCONNECTED;

@@ -20,6 +20,7 @@ import com.alee.laf.rootpane.WebFrame;
 import lihad.SYMCRelay.Channel;
 import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.ConnectionStatus;
+import lihad.SYMCRelay.SYMCSound;
 import lihad.SYMCRelay.GUI.FormatColor;
 import lihad.SYMCRelay.GUI.Pane.MenuPane;
 import lihad.SYMCRelay.GUI.Pane.StatusPane;
@@ -138,10 +139,18 @@ public class Interface extends WebFrame implements Runnable {
 			}
 			
 		});
-		
-		*/
+
+		 */
 		this.pack();
 		this.setVisible(true);
+	}
+
+	public void alert(){
+		this.setAlwaysOnTop(true);
+		this.toFront();
+		this.requestFocus();
+		this.setAlwaysOnTop(false);
+		SYMCSound.playPing();
 	}
 
 	// connectButton, disconnectButton, ipField, portField, usernameField, chatLine_text, chatLine_boolean, statusColor
@@ -157,6 +166,7 @@ public class Interface extends WebFrame implements Runnable {
 		for(Channel ch : Client.channels.keySet()) ch.field.setEnabled(clb);
 		statusPane.getStatusColor().setBackground(c);		
 	}
+	
 	// update gui fields
 	public void updateFields(){
 		//update state-based fields
@@ -172,8 +182,13 @@ public class Interface extends WebFrame implements Runnable {
 		statusPane.getStatusField().setText(Client.connectionStatus.getStatus()+((Client.connectionStatus == ConnectionStatus.CONNECTED) ? Client.getRelayConfiguration().getHostIP() : ""));		
 		for(Map.Entry<Channel, StringBuffer> e : Client.toAppend.entrySet()){
 			if(e.getValue().length() > 0){
+				String s_b = e.getValue().toString();
+				if(s_b.contains(Client.IMPORTANT)){
+					alert();
+					s_b = s_b.replace(Client.IMPORTANT, "");
+				}
+				
 				FormatColor.decodeTextPaneFormat(e.getKey(),e.getKey().pane.getStyledDocument(), e.getValue().toString(), true);
-
 				for(int i = 0; i < tabbedPane.getTabCount(); i++){
 					if(Client.getRelayConfiguration().getFlashTogglable()) this.toFront();
 					if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(e.getKey().name)){

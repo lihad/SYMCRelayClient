@@ -29,7 +29,15 @@ public class CommandHandler {
 					Client.sendString(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.name+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()));
 				}
 				return true;
-
+			case "/i":
+				if (command.parts.length > 1) {	
+					String s_b = command.getRequest().replace("/i", "");
+					
+					FormatColor.decodeTextPaneFormat(command.channel, command.pane.getStyledDocument(), Client.username+": "+FormatColor.encodeTextPaneFormat(null, s_b, Client.getRelayConfiguration().getFormat()+" b") + "\n",false);
+					Client.logger.debug(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.name+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat())+":"+(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.name+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()+" b").contains(Client.COMMAND)));
+					Client.sendString(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.name+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()+" b"));
+				}
+				return true;
 			default: 
 				command.getTextPane().getDocument().insertString(command.getTextPane().getDocument().getLength(), "Invalid Command", null);
 				Client.logger.info("[COMMAND] invalid command"); return false;
