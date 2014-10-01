@@ -3,6 +3,8 @@ package lihad.SYMCRelay.GUI.Pane;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.Map.Entry;
 
@@ -44,6 +46,26 @@ public class ChannelPane extends WebPanel{
 		
 		channelIncludedList = new WebList(m_a);
 		
+		channelIncludedList.addMouseListener(new MouseListener(){
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() >= 2){
+					addChannel();
+				}
+			}
+			@Override
+			public void mouseEntered(MouseEvent e) {}
+
+			@Override
+			public void mouseExited(MouseEvent e) {}
+
+			@Override
+			public void mousePressed(MouseEvent e) {}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {}
+		});
+		
 		String[] b = new String[Client.channels.size()];
 		int count2 = 0;
 		for(Channel channel : Client.channels.keySet()){
@@ -56,6 +78,26 @@ public class ChannelPane extends WebPanel{
 		for(String s : b)m_b.addElement(s);
 		
 		channelExistList = new WebList(m_b);
+		
+		channelExistList.addMouseListener(new MouseListener(){
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() >= 2){
+					removeChannel();
+				}
+			}
+			@Override
+			public void mouseEntered(MouseEvent e) {}
+
+			@Override
+			public void mouseExited(MouseEvent e) {}
+
+			@Override
+			public void mousePressed(MouseEvent e) {}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {}
+		});
 		
 		WebScrollPane available_channel_pane = new WebScrollPane(channelIncludedList);
 		WebScrollPane existing_channel_pane = new WebScrollPane(channelExistList);
@@ -78,23 +120,7 @@ public class ChannelPane extends WebPanel{
 		channelJoinButton = new WebButton(">>");
 		channelJoinButton.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				try{
-				DefaultListModel<String> listFromModel = (DefaultListModel)(channelIncludedList.getModel());
-				DefaultListModel<String> listToModel = (DefaultListModel)(channelExistList.getModel());
-
-				int[] removed_indexes = channelIncludedList.getSelectedIndices();
-
-				for(int i : removed_indexes) listToModel.add(listToModel.size(), listFromModel.remove(i));
-				
-				/**				
-				//TODO: not [0] will return user count in tab field... interesting idea
-				Client.createGUIChannel(channelIncludedList.getSelectedValue().toString().split(" ")[0]);
-				Client.channelJoinRequest(channelIncludedList.getSelectedValue().toString().split(" ")[0]);
-				Client.gui.menuPane.getChannelDialog().setVisible(false);
-				*/
-				}catch(Exception e1){
-					Client.logger.error(e1.toString(), e1.getStackTrace());
-				}
+				addChannel();
 			}
 		});
 		if(a.length == 0) channelJoinButton.setEnabled(false);
@@ -103,23 +129,7 @@ public class ChannelPane extends WebPanel{
 		channelRemoveButton = new WebButton("<<");
 		channelRemoveButton.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				try{
-					DefaultListModel<String> listFromModel = (DefaultListModel)(channelExistList.getModel());
-					DefaultListModel<String> listToModel = (DefaultListModel)(channelIncludedList.getModel());
-
-					int[] removed_indexes = channelExistList.getSelectedIndices();
-
-					for(int i : removed_indexes) listToModel.add(listToModel.size(), listFromModel.remove(i));
-					
-					/**				
-					//TODO: not [0] will return user count in tab field... interesting idea
-					Client.createGUIChannel(channelIncludedList.getSelectedValue().toString().split(" ")[0]);
-					Client.channelJoinRequest(channelIncludedList.getSelectedValue().toString().split(" ")[0]);
-					Client.gui.menuPane.getChannelDialog().setVisible(false);
-					*/
-					}catch(Exception e1){
-						Client.logger.error(e1.toString(), e1.getStackTrace());
-					}
+				removeChannel();
 			}
 		});
 		if(a.length == 0) channelRemoveButton.setEnabled(false);
@@ -181,5 +191,32 @@ public class ChannelPane extends WebPanel{
 		}catch(Exception e){
 			Client.logger.error(e.toString(), e.getStackTrace());
 		}
+	}
+	
+	private void addChannel(){
+		try{
+		DefaultListModel<String> listFromModel = (DefaultListModel)(channelIncludedList.getModel());
+		DefaultListModel<String> listToModel = (DefaultListModel)(channelExistList.getModel());
+
+		int[] removed_indexes = channelIncludedList.getSelectedIndices();
+
+		for(int i : removed_indexes) listToModel.add(listToModel.size(), listFromModel.remove(i));
+
+		}catch(Exception e1){
+			Client.logger.error(e1.toString(), e1.getStackTrace());
+		}
+	}
+	private void removeChannel(){
+		try{
+			DefaultListModel<String> listFromModel = (DefaultListModel)(channelExistList.getModel());
+			DefaultListModel<String> listToModel = (DefaultListModel)(channelIncludedList.getModel());
+
+			int[] removed_indexes = channelExistList.getSelectedIndices();
+
+			for(int i : removed_indexes) listToModel.add(listToModel.size(), listFromModel.remove(i));
+			
+			}catch(Exception e1){
+				Client.logger.error(e1.toString(), e1.getStackTrace());
+			}
 	}
 }

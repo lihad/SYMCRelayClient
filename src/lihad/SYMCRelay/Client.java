@@ -27,7 +27,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 135;
+	public final static double build = 136;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -278,7 +278,6 @@ public class Client{
 								if(!last_user.equalsIgnoreCase(toAppendUser.toString())){
 									last_user = toAppendUser.toString();
 									gui.userPane.updateNodes(toAppendUser.toString());
-									
 									toAppendUser.setLength(0);
 									gui.repaint();
 								}else{

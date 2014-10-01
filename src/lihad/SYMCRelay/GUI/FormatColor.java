@@ -3,6 +3,8 @@ package lihad.SYMCRelay.GUI;
 import java.awt.Color;
 import java.awt.SystemTray;
 import java.awt.TrayIcon.MessageType;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -29,6 +31,7 @@ public class FormatColor {
 
 	//format used for timestamps shown in channel pane.  Hour (military) : Minutes : Seconds
 	static SimpleDateFormat dateformat = new SimpleDateFormat("HH:mm:ss");
+	static Channel lastChannel = null;
 
 	/**
 	 * All incoming text to be displayed utilizes this method, which handles the
@@ -45,6 +48,7 @@ public class FormatColor {
 	 * @param pop 		Whether or not to display text via a pop-up on the TrayIcon
 	 */
 	public static void decodeTextPaneFormat(Channel channel, StyledDocument doc, String string, boolean pop){
+		lastChannel = channel;
 		SimpleAttributeSet key = new SimpleAttributeSet();
 		String[] str_arr = string.split(Client.FORMAT);
 		String name = "", color = "000000";
@@ -91,7 +95,33 @@ public class FormatColor {
 							if(tray.getTrayIcons().length > 0){
 								String s_s = "";
 								if(ischannel) s_s = "[#"+channel.name+"] "+str_arr[i];
-								if(Client.getRelayConfiguration().getTrayBubbleTogglable())tray.getTrayIcons()[0].displayMessage(name, s_s, MessageType.NONE);
+								if(Client.getRelayConfiguration().getTrayBubbleTogglable()){
+									tray.getTrayIcons()[0].displayMessage(name, s_s, MessageType.NONE);
+									tray.getTrayIcons()[0].addMouseListener(new MouseListener(){
+
+										@Override
+										public void mouseClicked(MouseEvent arg0) {
+											Client.gui.setAlwaysOnTop(true);
+											Client.gui.toFront();
+											Client.gui.requestFocus();
+											Client.gui.setAlwaysOnTop(false);
+											
+											Client.gui.tabbedPane.setSelectedIndex(Client.gui.tabbedPane.indexOfTab("#"+FormatColor.lastChannel.name));
+										}
+										
+										@Override
+										public void mouseEntered(MouseEvent arg0) {}
+
+										@Override
+										public void mouseExited(MouseEvent arg0) {}
+
+										@Override
+										public void mousePressed(MouseEvent arg0) {}
+
+										@Override
+										public void mouseReleased(MouseEvent arg0) {}
+									});
+								}
 							}
 						}
 					}

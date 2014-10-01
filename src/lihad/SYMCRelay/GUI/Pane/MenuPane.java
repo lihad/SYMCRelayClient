@@ -230,7 +230,7 @@ public class MenuPane extends WebMenuBar {
 
 		// channel menu drop
 		/////////////////////////////////////////////////////////////
-		channel = new WebMenu("Channel");
+		channel = new WebMenu("Channels");
 		//channel.setFont(Client.font);
 		this.add(channel);
 

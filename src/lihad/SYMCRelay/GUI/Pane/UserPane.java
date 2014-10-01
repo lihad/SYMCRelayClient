@@ -3,6 +3,9 @@ package lihad.SYMCRelay.GUI.Pane;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -28,8 +31,7 @@ public class UserPane extends WebPanel {
 
 	public void expandChannel(String string){
 		for(int i = 0; i < top.getChildCount(); i++){
-			//TODO: make this exact, not a contains.  the contains is only there for testing purposes
-			if(top.getChildAt(i).toString().contains(string)){
+			if(top.getChildAt(i).toString().replaceFirst("#", "").substring(0, top.getChildAt(i).toString().replaceFirst("#", "").lastIndexOf("_")).equalsIgnoreCase(string)){
 				webTree.expandNode((DefaultMutableTreeNode) top.getChildAt(i));
 			}else{
 				webTree.collapsePath(new TreePath(((DefaultMutableTreeNode) top.getChildAt(i)).getPath()));
@@ -55,11 +57,37 @@ public class UserPane extends WebPanel {
 				}
 			}
 		}
+		Enumeration enu = top.children();
+		while(enu.hasMoreElements()){
+			sortchildrenA((DefaultMutableTreeNode)enu.nextElement());
+		}
 		WebTreeModel model = (WebTreeModel) (webTree.getModel()); 
 		model.reload(); 
 		webTree.expandNode(top);
+		if(Client.gui.tabbedPane.getSelectedIndex() >= 0) expandChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getSelectedIndex()).replaceFirst("#", ""));
 	}
-
+	
+	public void sortchildrenA(DefaultMutableTreeNode node){
+		ArrayList children = Collections.list(node.children());
+        // for getting original location
+        ArrayList<String> orgCnames = new ArrayList<String>();
+        // new location
+        ArrayList<String> cNames = new ArrayList<String>();
+        //move the child to here so we can move them back
+        DefaultMutableTreeNode temParent = new DefaultMutableTreeNode();
+        for(Object child:children) {
+            DefaultMutableTreeNode ch = (DefaultMutableTreeNode)child;
+            temParent.insert(ch,0);
+            cNames.add(ch.toString().toUpperCase());
+            orgCnames.add(ch.toString().toUpperCase());
+        }
+        Collections.sort(cNames);
+        for(String name:cNames) {
+            // find the original location to get from children arrayList
+            int indx = orgCnames.indexOf(name);
+            node.insert((DefaultMutableTreeNode)children.get(indx),node.getChildCount());
+        }
+	}
 
 
 	public UserPane(){
