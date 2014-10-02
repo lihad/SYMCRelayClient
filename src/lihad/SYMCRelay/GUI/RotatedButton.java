@@ -22,7 +22,6 @@ public class RotatedButton extends WebButton {
 		setPreferredSize(new Dimension(d.height, d.width));
 	}
 
-	@Override
 	protected void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g.create();
 
@@ -49,7 +48,6 @@ public class RotatedButton extends WebButton {
 			super(text);
 		}
 
-		@Override
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
 		}

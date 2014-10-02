@@ -7,20 +7,20 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import lihad.SYMCRelay.Client;
+import lihad.SYMCRelay.Adapters.ChangeAdapter;
 
 import com.alee.laf.tabbedpane.WebTabbedPane;
 
-public class TabPane extends WebTabbedPane implements ChangeListener{
+public class TabPane extends WebTabbedPane{
 
 	private static final long serialVersionUID = -3629700175117007156L;
 
@@ -32,10 +32,14 @@ public class TabPane extends WebTabbedPane implements ChangeListener{
 	private int draggedTabIndex = 0;
 
 	public TabPane(){
-		this.addChangeListener(this);
-		this.addMouseListener(new MouseListener(){
-
-			@Override
+		this.addChangeListener(new ChangeAdapter(){
+			public void stateChanged(ChangeEvent e) {
+				if(TabPane.this.getSelectedIndex() != -1){
+					setFlash(false, TabPane.this.getSelectedIndex());
+				}
+			}
+		});
+		this.addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent event) {
 				if(SwingUtilities.isRightMouseButton(event)){
 					int index = Client.gui.tabbedPane.indexAtLocation(event.getX(), event.getY());
@@ -53,17 +57,7 @@ public class TabPane extends WebTabbedPane implements ChangeListener{
 					}
 				}
 			}
-
-			@Override
-			public void mouseEntered(MouseEvent arg0) {}
-
-			@Override
-			public void mouseExited(MouseEvent arg0) {}
-
-			@Override
-			public void mousePressed(MouseEvent arg0) {}
-
-			@Override
+			
 			public void mouseReleased(MouseEvent e) {
 				if(dragging) {
 					int tabNumber = getUI().tabForCoordinate(TabPane.this, e.getX(), 10);
@@ -137,14 +131,6 @@ public class TabPane extends WebTabbedPane implements ChangeListener{
 		if(dragging && currentMouseLocation != null && tabImage != null) {
 			// Draw the dragged tab
 			g.drawImage(tabImage, currentMouseLocation.x-30, currentMouseLocation.y-10, this);
-		}
-	}
-
-
-	@Override
-	public void stateChanged(ChangeEvent e) {
-		if(this.getSelectedIndex() != -1){
-			setFlash(false, this.getSelectedIndex());
 		}
 	}
 

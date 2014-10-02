@@ -20,7 +20,7 @@ import com.alee.laf.panel.WebPanel;
 import com.alee.laf.combobox.WebComboBox;
 
 import lihad.SYMCRelay.Client;
-import lihad.SYMCRelay.GUI.ActionAdapter;
+import lihad.SYMCRelay.Adapters.ActionAdapter;
 
 public class LNFPane extends WebPanel{
 

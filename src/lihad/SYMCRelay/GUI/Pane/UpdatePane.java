@@ -17,7 +17,7 @@ import com.alee.laf.label.WebLabel;
 
 import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.ConnectionStatus;
-import lihad.SYMCRelay.GUI.ActionAdapter;
+import lihad.SYMCRelay.Adapters.ActionAdapter;
 
 public class UpdatePane extends WebPanel {
 	

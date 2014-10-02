@@ -3,7 +3,6 @@ package lihad.SYMCRelay.Startup;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -19,6 +18,7 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
 import lihad.SYMCRelay.Client;
+import lihad.SYMCRelay.Adapters.PropertyChangeAdapter;
 
 public class PreInterfaceWeblaf extends JFrame{
 
@@ -36,9 +36,8 @@ public class PreInterfaceWeblaf extends JFrame{
 		progressBar.setStringPainted(true);
 
 		final Worker worker = new Worker();
-		worker.addPropertyChangeListener(new PropertyChangeListener(){
+		worker.addPropertyChangeListener(new PropertyChangeAdapter(){
 
-			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if ("progress".equals(event.getPropertyName())) {
 					progressBar.setValue((Integer) event.getNewValue());

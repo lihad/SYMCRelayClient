@@ -4,9 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,8 +15,9 @@ import javax.swing.JTextPane;
 import com.alee.laf.text.WebTextArea;
 import com.alee.laf.scroll.WebScrollPane;
 
+import lihad.SYMCRelay.Adapters.ActionAdapter;
+import lihad.SYMCRelay.Adapters.KeyAdapter;
 import lihad.SYMCRelay.Command.Command;
-import lihad.SYMCRelay.GUI.ActionAdapter;
 import lihad.SYMCRelay.GUI.FormatColor;
 
 public class Channel {
@@ -53,8 +51,7 @@ public class Channel {
 		Linker handler = new Linker();
 		pane.addMouseListener(handler);
 		pane.addMouseMotionListener(handler);
-		field.addKeyListener(new KeyListener() {
-			@Override
+		field.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {				
 				if(e.getKeyCode() == KeyEvent.VK_ENTER){
 					pingfill = false;
@@ -113,12 +110,6 @@ public class Channel {
 					field.requestFocus();
 				}
 			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {}
-
-			@Override
-			public void keyTyped(KeyEvent e) {}
 		});
 
 		panel = new JPanel(new BorderLayout());

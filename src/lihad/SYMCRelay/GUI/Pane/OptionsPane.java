@@ -15,7 +15,7 @@ import com.alee.laf.text.WebTextField;
 
 import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.ConnectionStatus;
-import lihad.SYMCRelay.GUI.ActionAdapter;
+import lihad.SYMCRelay.Adapters.ActionAdapter;
 
 public class OptionsPane extends WebPanel {
 

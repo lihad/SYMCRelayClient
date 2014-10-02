@@ -15,8 +15,6 @@ import javax.swing.text.html.HTML;
 
 public class Linker extends MouseAdapter implements MouseMotionListener{
 
-	public void mouseReleased(MouseEvent e){}
-
 	public void mouseClicked(MouseEvent e){
 		JTextPane editor = (JTextPane) e.getSource();
 		Document doc =  editor.getDocument();

@@ -24,7 +24,7 @@ import com.alee.laf.panel.WebPanel;
 
 import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.ConnectionStatus;
-import lihad.SYMCRelay.GUI.ActionAdapter;
+import lihad.SYMCRelay.Adapters.ActionAdapter;
 
 public class MenuPane extends WebMenuBar {
 

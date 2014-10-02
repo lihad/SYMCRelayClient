@@ -18,7 +18,7 @@ import com.alee.laf.tree.WebTreeCellRenderer;
 import com.alee.laf.tree.WebTreeModel;
 
 import lihad.SYMCRelay.Client;
-import lihad.SYMCRelay.GUI.ActionAdapter;
+import lihad.SYMCRelay.Adapters.ActionAdapter;
 import lihad.SYMCRelay.GUI.RotatedButton;
 
 public class UserPane extends WebPanel {

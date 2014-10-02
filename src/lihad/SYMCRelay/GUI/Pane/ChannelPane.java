@@ -3,8 +3,8 @@ package lihad.SYMCRelay.GUI.Pane;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.Map.Entry;
 
@@ -18,7 +18,7 @@ import com.alee.laf.list.WebList;
 
 import lihad.SYMCRelay.Channel;
 import lihad.SYMCRelay.Client;
-import lihad.SYMCRelay.GUI.ActionAdapter;
+import lihad.SYMCRelay.Adapters.ActionAdapter;
 
 public class ChannelPane extends WebPanel{
 
@@ -46,24 +46,12 @@ public class ChannelPane extends WebPanel{
 		
 		channelIncludedList = new WebList(m_a);
 		
-		channelIncludedList.addMouseListener(new MouseListener(){
-			@Override
+		channelIncludedList.addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() >= 2){
 					addChannel();
 				}
 			}
-			@Override
-			public void mouseEntered(MouseEvent e) {}
-
-			@Override
-			public void mouseExited(MouseEvent e) {}
-
-			@Override
-			public void mousePressed(MouseEvent e) {}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {}
 		});
 		
 		String[] b = new String[Client.channels.size()];
@@ -79,24 +67,12 @@ public class ChannelPane extends WebPanel{
 		
 		channelExistList = new WebList(m_b);
 		
-		channelExistList.addMouseListener(new MouseListener(){
-			@Override
+		channelExistList.addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() >= 2){
 					removeChannel();
 				}
 			}
-			@Override
-			public void mouseEntered(MouseEvent e) {}
-
-			@Override
-			public void mouseExited(MouseEvent e) {}
-
-			@Override
-			public void mousePressed(MouseEvent e) {}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {}
 		});
 		
 		WebScrollPane available_channel_pane = new WebScrollPane(channelIncludedList);

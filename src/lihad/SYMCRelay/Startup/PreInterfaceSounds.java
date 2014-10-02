@@ -3,7 +3,6 @@ package lihad.SYMCRelay.Startup;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -20,6 +19,7 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
 import lihad.SYMCRelay.Client;
+import lihad.SYMCRelay.Adapters.PropertyChangeAdapter;
 
 public class PreInterfaceSounds extends JFrame{
 
@@ -37,9 +37,7 @@ public class PreInterfaceSounds extends JFrame{
 		progressBar.setStringPainted(true);
 
 		final WorkerSound worker = new WorkerSound();
-		worker.addPropertyChangeListener(new PropertyChangeListener(){
-
-			@Override
+		worker.addPropertyChangeListener(new PropertyChangeAdapter(){
 			public void propertyChange(PropertyChangeEvent event) {
 				if ("progress".equals(event.getPropertyName())) {
 					progressBar.setValue((Integer) event.getNewValue());

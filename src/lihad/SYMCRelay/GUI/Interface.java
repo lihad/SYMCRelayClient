@@ -105,7 +105,6 @@ public class Interface extends WebFrame implements Runnable {
 		this.setUndecorated(Client.getRelayConfiguration().getUndecoratedTogglable());
 		this.setDefaultCloseOperation(WebFrame.DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(new WindowAdapter() {
-			@Override
 			public void windowClosing(WindowEvent we) {
 				try{
 					for(;Client.gui.tabbedPane.getTabCount() > 0;){

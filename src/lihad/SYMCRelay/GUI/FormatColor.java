@@ -3,8 +3,8 @@ package lihad.SYMCRelay.GUI;
 import java.awt.Color;
 import java.awt.SystemTray;
 import java.awt.TrayIcon.MessageType;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -97,9 +97,8 @@ public class FormatColor {
 								if(ischannel) s_s = "[#"+channel.name+"] "+str_arr[i];
 								if(Client.getRelayConfiguration().getTrayBubbleTogglable()){
 									tray.getTrayIcons()[0].displayMessage(name, s_s, MessageType.NONE);
-									tray.getTrayIcons()[0].addMouseListener(new MouseListener(){
+									tray.getTrayIcons()[0].addMouseListener(new MouseAdapter(){
 
-										@Override
 										public void mouseClicked(MouseEvent arg0) {
 											Client.gui.setAlwaysOnTop(true);
 											Client.gui.toFront();
@@ -108,18 +107,6 @@ public class FormatColor {
 											
 											Client.gui.tabbedPane.setSelectedIndex(Client.gui.tabbedPane.indexOfTab("#"+FormatColor.lastChannel.name));
 										}
-										
-										@Override
-										public void mouseEntered(MouseEvent arg0) {}
-
-										@Override
-										public void mouseExited(MouseEvent arg0) {}
-
-										@Override
-										public void mousePressed(MouseEvent arg0) {}
-
-										@Override
-										public void mouseReleased(MouseEvent arg0) {}
 									});
 								}
 							}
