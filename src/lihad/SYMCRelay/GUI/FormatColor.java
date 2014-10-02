@@ -31,7 +31,7 @@ public class FormatColor {
 
 	//format used for timestamps shown in channel pane.  Hour (military) : Minutes : Seconds
 	static SimpleDateFormat dateformat = new SimpleDateFormat("HH:mm:ss");
-	static Channel lastChannel = null;
+	private static Channel lastChannel = null;
 
 	/**
 	 * All incoming text to be displayed utilizes this method, which handles the
@@ -142,6 +142,10 @@ public class FormatColor {
 							space = true;
 						}
 					}
+					if(ischannel && (str_arr[i].contains("@"+Client.username))){
+						Client.gui.alert();
+					}
+					
 					else doc.insertString(doc.getLength(), str_arr[i].replaceAll(Client.RETURN, "\r\n"), key);
 
 				} catch (BadLocationException | MalformedURLException e) {

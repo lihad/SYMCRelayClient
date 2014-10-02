@@ -17,6 +17,7 @@ import com.alee.laf.tree.WebTree;
 import com.alee.laf.tree.WebTreeCellRenderer;
 import com.alee.laf.tree.WebTreeModel;
 
+import lihad.SYMCRelay.Channel;
 import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.GUI.ActionAdapter;
 import lihad.SYMCRelay.GUI.RotatedButton;
@@ -25,9 +26,8 @@ public class UserPane extends WebPanel {
 
 	private static final long serialVersionUID = -8395492876472798137L;
 	private WebPanel userPane;
-	private WebTree webTree;
-	private DefaultMutableTreeNode top =
-			new DefaultMutableTreeNode("SYMCRelay User List");
+	private WebTree<DefaultMutableTreeNode> webTree;
+	private DefaultMutableTreeNode top = new DefaultMutableTreeNode("SYMCRelay User List");
 
 	public void expandChannel(String string){
 		for(int i = 0; i < top.getChildCount(); i++){
@@ -49,18 +49,28 @@ public class UserPane extends WebPanel {
 		for(int i = 0; i<elements.length; i++){
 			if(elements[i].contains("#")){
 				channel = new DefaultMutableTreeNode(elements[i]);
+				try{Client.getChannel(channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_"))).unsync_userlist.clear();}catch(NullPointerException e){
+					Client.logger.debug("UserPane just tried to update a channel user list and got it wrong: "+channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_")));
+				};
 				top.add(channel);
 			}else{
 				if(channel != null){
 					user = new DefaultMutableTreeNode(elements[i]);
 					channel.add(user);
+					if(Client.getChannel(channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_"))) != null){
+						Client.getChannel(channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_"))).unsync_userlist.add(elements[i]);
+					}else{
+						Client.logger.debug("UserPane just tried to update a channel user list and got it wrong: "+channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_")));
+					}
 				}
 			}
 		}
-		Enumeration enu = top.children();
+		@SuppressWarnings("unchecked")
+		Enumeration<DefaultMutableTreeNode> enu = top.children();
 		while(enu.hasMoreElements()){
-			sortchildrenA((DefaultMutableTreeNode)enu.nextElement());
+			sortchildrenA(enu.nextElement());
 		}
+		@SuppressWarnings("rawtypes")
 		WebTreeModel model = (WebTreeModel) (webTree.getModel()); 
 		model.reload(); 
 		webTree.expandNode(top);
@@ -68,7 +78,8 @@ public class UserPane extends WebPanel {
 	}
 	
 	public void sortchildrenA(DefaultMutableTreeNode node){
-		ArrayList children = Collections.list(node.children());
+		@SuppressWarnings("unchecked")
+		ArrayList<DefaultMutableTreeNode> children = Collections.list(node.children());
         // for getting original location
         ArrayList<String> orgCnames = new ArrayList<String>();
         // new location
@@ -85,7 +96,7 @@ public class UserPane extends WebPanel {
         for(String name:cNames) {
             // find the original location to get from children arrayList
             int indx = orgCnames.indexOf(name);
-            node.insert((DefaultMutableTreeNode)children.get(indx),node.getChildCount());
+            node.insert(children.get(indx),node.getChildCount());
         }
 	}
 
@@ -94,7 +105,7 @@ public class UserPane extends WebPanel {
 		super(new BorderLayout());
 		userPane = new WebPanel(new BorderLayout());
 
-		webTree = new WebTree(top);
+		webTree = new WebTree<DefaultMutableTreeNode>(top);
 		((WebTreeCellRenderer) webTree.getCellRenderer()).setOpenIcon(null);
 		((WebTreeCellRenderer) webTree.getCellRenderer()).setClosedIcon(null);
 		((WebTreeCellRenderer) webTree.getCellRenderer()).setLeafIcon(null);

@@ -2,16 +2,24 @@ package lihad.SYMCRelay;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.LinkedList;
+import java.util.List;
 
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextPane;
 
 import com.alee.laf.text.WebTextArea;
 import com.alee.laf.scroll.WebScrollPane;
 
 import lihad.SYMCRelay.Command.Command;
+import lihad.SYMCRelay.GUI.ActionAdapter;
 import lihad.SYMCRelay.GUI.FormatColor;
 
 public class Channel {
@@ -21,7 +29,10 @@ public class Channel {
 	public JTextPane pane;
 	public WebTextArea field;
 	public Channel channel;
-	
+	public List<String> unsync_userlist = new LinkedList<String>(); //TODO: accuracy?... maybe 
+	public boolean pingfill = false;
+	private JPopupMenu autofill = null;
+
 	public Channel(final String n){
 		channel = this;
 		name = n;
@@ -34,7 +45,7 @@ public class Channel {
 		chatTextPane.setHorizontalScrollBarPolicy(WebScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		chatTextPane.setAutoscrolls(true);
 		chatTextPane.getVerticalScrollBar().setUnitIncrement(32);
-	
+
 		field = new WebTextArea();
 		field.setEnabled(false);
 		field.setFont(Client.font);
@@ -44,8 +55,9 @@ public class Channel {
 		pane.addMouseMotionListener(handler);
 		field.addKeyListener(new KeyListener() {
 			@Override
-			public void keyPressed(KeyEvent e) {
+			public void keyPressed(KeyEvent e) {				
 				if(e.getKeyCode() == KeyEvent.VK_ENTER){
+					pingfill = false;
 					String s = field.getText();
 					if(s.contentEquals("\r\n") || s.contentEquals("\n") || s.contentEquals("\r")){
 						field.setText(null);
@@ -61,6 +73,44 @@ public class Channel {
 						}
 					}		
 					e.consume();
+				}
+				if(e.getKeyCode() == KeyEvent.VK_AT || (e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_2)){
+					pingfill = true;
+				}
+				if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_SPACE){
+					pingfill = false;
+					autofill.setVisible(false);
+				}
+				if(e.getKeyCode() == KeyEvent.VK_DOWN){
+					if(autofill != null && !autofill.hasFocus()){
+						Client.logger.debug("focus");
+						autofill.setVisible(false);
+						autofill.show(field, 0, 0);
+						e.consume();
+					}
+					return;
+				}
+				if(pingfill){
+					//TODO: this may be screwy
+					String s = (field.getText()+e.getKeyChar()).substring((field.getText()+e.getKeyChar()).lastIndexOf("@")+1);
+
+					autofill = new JPopupMenu();
+					
+					for(String user : Channel.this.unsync_userlist) if(user.toLowerCase().contains(s.toLowerCase())){
+						final JMenuItem item = new JMenuItem(user);
+						item.addActionListener(new ActionAdapter() {
+							public void actionPerformed(ActionEvent e) {
+								field.setText(field.getText().substring(0, field.getText().lastIndexOf("@"))+"@"+item.getText()+" ");
+								field.requestFocus();
+							}
+						});
+						
+						autofill.add(item);
+						Client.logger.debug("added "+user);
+					}
+					//autofill.setVisible(true);
+					autofill.show(field, 0, 0);
+					field.requestFocus();
 				}
 			}
 
