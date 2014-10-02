@@ -77,7 +77,7 @@ public class Channel {
 				if(e.getKeyCode() == KeyEvent.VK_AT || (e.isShiftDown() && e.getKeyCode() == KeyEvent.VK_2)){
 					pingfill = true;
 				}
-				if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_SPACE){
+				if(pingfill && (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_SPACE)){
 					pingfill = false;
 					autofill.setVisible(false);
 				}
