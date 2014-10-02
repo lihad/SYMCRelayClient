@@ -96,7 +96,7 @@ public class Channel {
 
 					autofill = new JPopupMenu();
 					
-					for(String user : Channel.this.unsync_userlist) if(user.toLowerCase().contains(s.toLowerCase())){
+					for(String user : Channel.this.unsync_userlist) if(user.toLowerCase().contains(s.toLowerCase()) && !user.equalsIgnoreCase(Client.username)){
 						final JMenuItem item = new JMenuItem(user);
 						item.addActionListener(new ActionAdapter() {
 							public void actionPerformed(ActionEvent e) {
