@@ -80,7 +80,6 @@ public class Channel {
 				}
 				if(e.getKeyCode() == KeyEvent.VK_DOWN){
 					if(autofill != null && !autofill.hasFocus()){
-						Client.logger.debug("focus");
 						autofill.setVisible(false);
 						autofill.show(field, 0, 0);
 						e.consume();

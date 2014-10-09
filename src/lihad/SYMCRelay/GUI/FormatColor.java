@@ -112,6 +112,11 @@ public class FormatColor {
 							}
 						}
 					}
+					
+					if(ischannel && (str_arr[i].contains("@"+Client.username))){
+						Client.gui.alert();
+					}
+					
 					if(ischannel && (str_arr[i].contains("http://") || str_arr[i].contains("https://"))){
 						boolean space = false;
 						for(String s  : str_arr[i].split(" ")){
@@ -128,12 +133,8 @@ public class FormatColor {
 							else doc.insertString(doc.getLength(), s.replaceAll(Client.RETURN, "\r\n"), key);
 							space = true;
 						}
-					}
-					if(ischannel && (str_arr[i].contains("@"+Client.username))){
-						Client.gui.alert();
-					}
-					
-					else doc.insertString(doc.getLength(), str_arr[i].replaceAll(Client.RETURN, "\r\n"), key);
+					}else doc.insertString(doc.getLength(), str_arr[i].replaceAll(Client.RETURN, "\r\n"), key);
+
 
 				} catch (BadLocationException | MalformedURLException e) {
 					Client.logger.severe(e.getMessage());

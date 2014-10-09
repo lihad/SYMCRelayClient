@@ -68,9 +68,9 @@ public class MenuPane extends WebMenuBar {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("connect")){
 					WebPanel mainPane = new WebPanel(new BorderLayout());
-					WebPanel optionsPane = new OptionsPane();
+					WebPanel connectionPane = new ConnectionPane();
 
-					mainPane.add(optionsPane, BorderLayout.CENTER);
+					mainPane.add(connectionPane, BorderLayout.CENTER);
 					connectPaneDialog.setContentPane(mainPane);
 					connectPaneDialog.setSize(connectPaneDialog.getPreferredSize());
 					connectPaneDialog.setLocationRelativeTo(Client.gui); 
@@ -183,7 +183,7 @@ public class MenuPane extends WebMenuBar {
 
 		relay.addSeparator();
 		
-		reconnectToggleItem = new WebCheckBoxMenuItem("Auto-Reconn");
+		reconnectToggleItem = new WebCheckBoxMenuItem("Auto-Reconnect");
 		reconnectToggleItem.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				Client.getRelayConfiguration().setAutoReconnect(reconnectToggleItem.isSelected());;
@@ -276,7 +276,7 @@ public class MenuPane extends WebMenuBar {
 		});
 		customize.add(bubbleToggleItem);	
 		
-		flashToggleItem = new WebCheckBoxMenuItem("Flash On");
+		flashToggleItem = new WebCheckBoxMenuItem("Flash/Focus On");
 		flashToggleItem.setSelected(Client.getRelayConfiguration().getFlashTogglable());
 		flashToggleItem.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {

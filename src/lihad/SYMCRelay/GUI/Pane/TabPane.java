@@ -69,7 +69,7 @@ public class TabPane extends WebTabbedPane{
 						insertTab(title, null, component, null, TabPane.this.getTabCount());
 						TabPane.this.setSelectedIndex(TabPane.this.getTabCount()-1);
 					}
-					Client.gui.userPane.expandChannel(title);
+					Client.gui.userPane.expandChannel(title.replaceFirst("#", ""));
 					TabPane.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				}
 

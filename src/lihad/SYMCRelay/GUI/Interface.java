@@ -173,7 +173,7 @@ public class Interface extends WebFrame implements Runnable {
 		case DISCONNECTED: updateFieldsHelpers(true, false, true, true, true, "", false, false, false, Color.red); break;
 		case DISCONNECTING: updateFieldsHelpers(false, false, false, false, false, null, false, false, false, Color.orange); break;
 		case CONNECTED: updateFieldsHelpers(false, true, false, false, false, null, true, false, true, Color.green); break;
-		case BEGIN_CONNECT: updateFieldsHelpers(false, false, false, false, false, null, false, false, false, Color.orange); break;
+		case BEGIN_CONNECT: updateFieldsHelpers(false, true, false, false, false, null, false, false, false, Color.orange); break;
 		case DESYNC: updateFieldsHelpers(false, true, false, false, false, null, false, false, true, Color.yellow); break;
 		case NULL: break;
 

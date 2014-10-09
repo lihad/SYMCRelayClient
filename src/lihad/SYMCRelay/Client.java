@@ -27,7 +27,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 138;
+	public final static double build = 139;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -231,6 +231,7 @@ public class Client{
 					}
 					
 					logger.debug("channels created");
+					d_on_d = false;
 				}
 				// if an error was thrown, then clean up any connection attempt made, and set to DISCONNECTING
 				catch (IOException | NumberFormatException e) {
@@ -351,7 +352,6 @@ public class Client{
 			case DISCONNECTED:
 				if (d_on_d && getRelayConfiguration().getAutoReconnect()){
 					changeStatusTS(ConnectionStatus.BEGIN_CONNECT, true, true);
-					d_on_d = false;
 				}
 				break;
 
@@ -367,9 +367,9 @@ public class Client{
 					logger.error(e.toString(),e.getStackTrace());
 				}
 				if(desync_count > 50){
+					d_on_d = true;
 					changeStatusTS(ConnectionStatus.DISCONNECTING, true, true);
 					logger.info("[CLIENT.DESYNC] can't find the server, disconnecting");
-					d_on_d = true;
 				}
 				desync_count++;
 

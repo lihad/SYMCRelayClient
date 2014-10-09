@@ -85,7 +85,7 @@ public class RelayConfiguration extends Properties{
 
 	public boolean getAutoReconnect(){ return auto_reconnect; }
 	public void setAutoReconnect(boolean auto_reconnect){ this.auto_reconnect = auto_reconnect; saveAutoReconnect(); Client.logger.info("[RELAYCONFIGURATION] Auto_Reconnect is now set to ["+this.auto_reconnect+"]");}
-	public boolean loadAutoReconnect(){ this.auto_reconnect = Boolean.parseBoolean(getProperty("auto_reconnect", "false")); return hasProperty("auto_reconnect");}
+	public boolean loadAutoReconnect(){ this.auto_reconnect = Boolean.parseBoolean(getProperty("auto_reconnect", "true")); return hasProperty("auto_reconnect");}
 	public void saveAutoReconnect(){ this.save("auto_reconnect", String.valueOf(this.auto_reconnect));}
 	
 	public List<String> getDefaultChannels(){ return Arrays.asList(default_channels.split(",")); }
@@ -133,7 +133,7 @@ public class RelayConfiguration extends Properties{
 	
 	public boolean getFlashTogglable(){ return flash_toggle; }
 	public void setFlashTogglable(boolean flash_toggle){ this.flash_toggle = flash_toggle; saveFlashTogglable(); Client.logger.info("[RELAYCONFIGURATION] FlashToggle is now set to ["+this.flash_toggle+"]");}
-	public boolean loadFlashTogglable(){ this.flash_toggle = Boolean.parseBoolean(getProperty("flash_toggle", "true")); return hasProperty("flash_toggle");}
+	public boolean loadFlashTogglable(){ this.flash_toggle = Boolean.parseBoolean(getProperty("flash_toggle", "false")); return hasProperty("flash_toggle");}
 	public void saveFlashTogglable(){ this.save("flash_toggle", String.valueOf(this.flash_toggle));}
 	
 	public boolean getUserListExpanded(){ return user_list_expanded; }

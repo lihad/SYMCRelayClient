@@ -17,7 +17,7 @@ import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.ConnectionStatus;
 import lihad.SYMCRelay.Adapters.ActionAdapter;
 
-public class OptionsPane extends WebPanel {
+public class ConnectionPane extends WebPanel {
 
 	private static final long serialVersionUID = 6357368373942848796L;
 
@@ -25,7 +25,7 @@ public class OptionsPane extends WebPanel {
 	private WebTextField ipField, portField, usernameField;
 	private WebCheckBox autoConnectBox;
 	
-	public OptionsPane(){
+	public ConnectionPane(){
 		super(new GridLayout(5, 1));
 		
 		

@@ -45,13 +45,10 @@ public class PreInterfaceWeblaf extends JFrame{
 					try {
 						worker.get();
 					} catch (InterruptedException | ExecutionException e) {
-						// handle any errors here
 						e.printStackTrace(); 
 					}
 				}
-				
 			}
-			
 		});
 		worker.execute();
 
