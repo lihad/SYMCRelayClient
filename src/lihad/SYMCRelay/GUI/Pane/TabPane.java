@@ -11,6 +11,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -31,6 +33,14 @@ public class TabPane extends WebTabbedPane{
 	private Point currentMouseLocation = null;
 	private int draggedTabIndex = 0;
 
+	public String[] getTabNames(){
+		List<String> l_t = new LinkedList<String>();
+		for(int i = 0; i < TabPane.this.getTabCount(); i++){
+			l_t.add(TabPane.this.getTitleAt(i).replace("#", ""));
+		}
+		return l_t.toArray(new String[0]);
+	}
+	
 	public TabPane(){
 		this.addChangeListener(new ChangeAdapter(){
 			public void stateChanged(ChangeEvent e) {
@@ -42,18 +52,18 @@ public class TabPane extends WebTabbedPane{
 		this.addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent event) {
 				if(SwingUtilities.isRightMouseButton(event)){
-					int index = Client.gui.tabbedPane.indexAtLocation(event.getX(), event.getY());
+					int index = TabPane.this.indexAtLocation(event.getX(), event.getY());
 
 					//TODO: similar code
-					Client.channelLeaveRequest(Client.gui.tabbedPane.getTitleAt(index).replace("#", ""));
-					Client.getRelayConfiguration().removeDefaultChannel(Client.gui.tabbedPane.getTitleAt(index).replace("#", ""));
-					Client.channels.remove(Client.getChannel(Client.gui.tabbedPane.getTitleAt(index).replace("#", "")));
-					Client.gui.tabbedPane.remove(index);
+					Client.channelLeaveRequest(TabPane.this.getTitleAt(index).replace("#", ""));
+					Client.getRelayConfiguration().removeDefaultChannel(TabPane.this.getTitleAt(index).replace("#", ""));
+					Client.channels.remove(Client.getChannel(TabPane.this.getTitleAt(index).replace("#", "")));
+					TabPane.this.remove(index);
 				}else if(SwingUtilities.isLeftMouseButton(event)){
-					int index = Client.gui.tabbedPane.indexAtLocation(event.getX(), event.getY());
+					int index = TabPane.this.indexAtLocation(event.getX(), event.getY());
 					if(index >= 0){
-						Client.getChannel(Client.gui.tabbedPane.getTitleAt(index).replace("#", "")).field.requestFocusInWindow();
-						Client.gui.userPane.expandChannel(Client.gui.tabbedPane.getTitleAt(index).replaceFirst("#", ""));
+						Client.getChannel(TabPane.this.getTitleAt(index).replace("#", "")).field.requestFocusInWindow();
+						Client.gui.userPane.expandChannel(TabPane.this.getTitleAt(index).replaceFirst("#", ""));
 					}
 				}
 			}
@@ -69,6 +79,8 @@ public class TabPane extends WebTabbedPane{
 						insertTab(title, null, component, null, TabPane.this.getTabCount());
 						TabPane.this.setSelectedIndex(TabPane.this.getTabCount()-1);
 					}
+
+					Client.gui.userPane.orderNodes(getTabNames());
 					Client.gui.userPane.expandChannel(title.replaceFirst("#", ""));
 					TabPane.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				}
@@ -115,7 +127,6 @@ public class TabPane extends WebTabbedPane{
 					currentMouseLocation = e.getPoint();
 					TabPane.this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 
-					// Need to repaint
 					repaint();
 				}
 				super.mouseDragged(e);
@@ -127,9 +138,7 @@ public class TabPane extends WebTabbedPane{
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		// Are we dragging?
 		if(dragging && currentMouseLocation != null && tabImage != null) {
-			// Draw the dragged tab
 			g.drawImage(tabImage, currentMouseLocation.x-30, currentMouseLocation.y-10, this);
 		}
 	}

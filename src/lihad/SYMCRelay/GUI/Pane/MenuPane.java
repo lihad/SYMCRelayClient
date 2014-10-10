@@ -81,8 +81,8 @@ public class MenuPane extends WebMenuBar {
 					for(;Client.gui.tabbedPane.getTabCount() > 0;){
 						Client.channelLeaveRequest(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", ""));
 						Client.channels.remove(Client.getChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", "")));
-						Client.gui.tabbedPane.remove((Client.gui.tabbedPane.getTabCount() - 1));
 					}
+					Client.d_on_d = false;
 					Client.changeStatusTS(ConnectionStatus.DISCONNECTING, true, false);
 				}
 			}

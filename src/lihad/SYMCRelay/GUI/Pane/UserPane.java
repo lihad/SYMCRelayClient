@@ -37,6 +37,18 @@ public class UserPane extends WebPanel {
 			}
 		}
 	}
+	public void orderNodes(String[] strings){
+		for(int i = 0; i < strings.length; i++){
+			for(int j = 0; j<top.getChildCount(); j++){
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode) top.getChildAt(j);
+				if(node.toString().replaceFirst("#", "").substring(0, node.toString().replaceFirst("#", "").lastIndexOf("_")).equalsIgnoreCase(strings[i])){
+					top.insert(node, i);
+					break;
+				}
+			}
+		}
+		((WebTreeModel<?>) (webTree.getModel())).reload(); 
+	}
 	
 	public void updateNodes(String string) {		
 		DefaultMutableTreeNode channel = null;
@@ -73,6 +85,7 @@ public class UserPane extends WebPanel {
 		WebTreeModel model = (WebTreeModel) (webTree.getModel()); 
 		model.reload(); 
 		webTree.expandNode(top);
+		orderNodes(Client.gui.tabbedPane.getTabNames());
 		if(Client.gui.tabbedPane.getSelectedIndex() >= 0) expandChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getSelectedIndex()).replaceFirst("#", ""));
 	}
 	

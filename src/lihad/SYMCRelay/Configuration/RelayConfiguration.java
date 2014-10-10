@@ -47,6 +47,26 @@ public class RelayConfiguration extends Properties{
 		}catch(Exception e){e.printStackTrace();}		
 		
 	}
+	
+	public String[] listConfiguration(){
+		List<String> l_a = new LinkedList<String>();
+		l_a.add("HostIP = "+getHostIP());
+		l_a.add("HostPort = "+getHostPort());
+		l_a.add("LNF = "+getLNF());
+		l_a.add("Format = "+getFormat());
+		l_a.add("AutoConnect = "+getAutoConnect());
+		l_a.add("AutoReconnect = "+getAutoReconnect());
+		l_a.add("DefaultChannels = "+getDefaultChannels());
+		l_a.add("LogTogglable = "+getLogTogglable());
+		l_a.add("SoundTogglable = "+getSoundTogglable());
+		l_a.add("TrayBubbleTogglable = "+getTrayBubbleTogglable());
+		l_a.add("UndecoratedTogglable = "+getUndecoratedTogglable());
+		l_a.add("WindowSize = "+getWindowSize());
+		l_a.add("FlashTogglable = "+getFlashTogglable());
+		l_a.add("UserListExpanded = "+getUserListExpanded());
+
+		return l_a.toArray(new String[0]);
+	}
 
 	public String getProperty(String string){
 		return super.getProperty(string);

@@ -18,12 +18,4 @@ public enum ConnectionStatus {
 	public String getStatus(){
 		return status;
 	}
-
-	public static String getHostIP(){
-		try{
-			return Client.getRelayConfiguration().getHostIP();
-		} catch (Exception e){
-			return "<something>";
-		}
-	}
 }

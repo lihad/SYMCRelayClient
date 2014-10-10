@@ -27,7 +27,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 139;
+	public final static double build = 140;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -81,7 +81,7 @@ public class Client{
 	public static BufferedReader in;
 	public static PrintWriter out;
 	private static int hearbeat_count = 0, desync_count = 0, internal_hearbeat_count = 0;
-	private static boolean d_on_d = false; //disconnecting_on_desync
+	public static boolean d_on_d = false; //disconnecting_on_desync
 
 	// user chat formatting
 	private static String last_user = "";
@@ -164,8 +164,8 @@ public class Client{
 		toAppend = new HashMap<Channel, StringBuffer>();
 		
 		//display configuration data
-		//TODO: logger.info("[RELAYCONFIGURATION] "+getRelayConfiguration().)
 		switch_logger(getRelayConfiguration().getLogTogglable());
+		for(String l_s : getRelayConfiguration().listConfiguration()) logger.info("[RELAYCONFIGURATION] --- "+l_s);
 
 		//install WebLaF - this needs to happen before the WebFrame component is built on the next line...
 		logger.info("loading style");
