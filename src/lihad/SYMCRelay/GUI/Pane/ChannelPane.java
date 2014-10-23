@@ -168,14 +168,14 @@ public class ChannelPane extends WebPanel{
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void addChannel(){
-		moveChannel((DefaultListModel)channelIncludedList.getModel(), (DefaultListModel)channelExistList.getModel());
+		moveChannel(channelIncludedList, (DefaultListModel)channelIncludedList.getModel(), (DefaultListModel)channelExistList.getModel());
 	}
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void removeChannel(){
-		moveChannel((DefaultListModel)channelExistList.getModel(), (DefaultListModel)channelIncludedList.getModel());
+		moveChannel(channelExistList, (DefaultListModel)channelExistList.getModel(), (DefaultListModel)channelIncludedList.getModel());
 	}
-	private void moveChannel(DefaultListModel<String> listFromModel, DefaultListModel<String> listToModel){
-		int[] removed_indexes = channelExistList.getSelectedIndices();
+	private void moveChannel(WebList raw, DefaultListModel<String> listFromModel, DefaultListModel<String> listToModel){
+		int[] removed_indexes = raw.getSelectedIndices();
 		for(int i : removed_indexes) listToModel.add(listToModel.size(), listFromModel.remove(i));
 	}
 }

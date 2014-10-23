@@ -27,7 +27,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 142;
+	public final static double build = 143;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
