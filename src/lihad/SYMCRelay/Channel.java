@@ -97,6 +97,7 @@ public class Channel {
 						item.addActionListener(new ActionAdapter() {
 							public void actionPerformed(ActionEvent e) {
 								field.setText(field.getText().substring(0, field.getText().lastIndexOf("@"))+"@"+item.getText()+" ");
+								Client.logger.debug("focus requested 1");
 								field.requestFocus();
 							}
 						});
@@ -106,6 +107,7 @@ public class Channel {
 					}
 					//autofill.setVisible(true);
 					autofill.show(field, 0, 0);
+					Client.logger.debug("focus requested 5");
 					field.requestFocus();
 				}
 			}

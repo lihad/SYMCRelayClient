@@ -102,6 +102,7 @@ public class FormatColor {
 										public void mouseClicked(MouseEvent arg0) {
 											Client.gui.setAlwaysOnTop(true);
 											Client.gui.toFront();
+											Client.logger.debug("focus requested 3");
 											Client.gui.requestFocus();
 											Client.gui.setAlwaysOnTop(false);
 											
