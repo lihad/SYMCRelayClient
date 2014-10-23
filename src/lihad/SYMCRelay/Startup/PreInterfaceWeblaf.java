@@ -25,7 +25,7 @@ public class PreInterfaceWeblaf extends JFrame{
 
 	private static final long serialVersionUID = -7710177664941204793L;
 
-	public static boolean finished = false;
+	public boolean finished = false;
 
 	public PreInterfaceWeblaf(){
 		super("SYMCRelay - Build "+Client.build+" | Welcome to SRC... ");
@@ -35,7 +35,41 @@ public class PreInterfaceWeblaf extends JFrame{
 		progressBar.setPreferredSize(new Dimension(100,20));
 		progressBar.setStringPainted(true);
 
-		final Worker worker = new Worker();
+		final SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+			@Override
+			public Void doInBackground() {
+				URL website;
+
+				try {
+					website = new URL(Client.lnfIP+"/weblaf-complete-1.28"+".jar");
+					HttpURLConnection connection = (HttpURLConnection) website.openConnection();
+					int filesize = connection.getContentLength();
+					int totalDataRead = 0;
+
+					BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+					FileOutputStream fos = new FileOutputStream(System.getenv("ProgramFiles")+"\\Relay\\LNF\\weblaf-complete-1.28.jar");
+					try(BufferedOutputStream bout = new BufferedOutputStream(fos, 1024)){
+						byte[] data = new byte[1024];
+						int i;
+						while ((i = in.read(data, 0, 1024)) >= 0) {
+							totalDataRead = totalDataRead + i;
+							bout.write(data, 0, i);
+							int percent = (totalDataRead * 100) / filesize;
+							setProgress(percent);
+						}
+					}
+
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return null;
+			}
+			@Override
+			public void done() {
+				PreInterfaceWeblaf.this.finished = true;
+			}
+		};
+
 		worker.addPropertyChangeListener(new PropertyChangeAdapter(){
 
 			public void propertyChange(PropertyChangeEvent event) {
@@ -63,43 +97,5 @@ public class PreInterfaceWeblaf extends JFrame{
 		this.setVisible(true);
 		this.setSize(500, 100);
 
-	}
-}
-
-class Worker extends SwingWorker<Void, Void> {
-	/*
-	 * Main task. Executed in background thread.
-	 */
-	@Override
-	public Void doInBackground() {
-		URL website;
-
-		try {
-			website = new URL(Client.lnfIP+"/weblaf-complete-1.28"+".jar");
-			HttpURLConnection connection = (HttpURLConnection) website.openConnection();
-			int filesize = connection.getContentLength();
-			int totalDataRead = 0;
-
-			BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
-			FileOutputStream fos = new FileOutputStream(System.getenv("ProgramFiles")+"\\Relay\\LNF\\weblaf-complete-1.28.jar");
-			try(BufferedOutputStream bout = new BufferedOutputStream(fos, 1024)){
-				byte[] data = new byte[1024];
-				int i;
-				while ((i = in.read(data, 0, 1024)) >= 0) {
-					totalDataRead = totalDataRead + i;
-					bout.write(data, 0, i);
-					int percent = (totalDataRead * 100) / filesize;
-					setProgress(percent);
-				}
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	@Override
-	public void done() {
-		PreInterfaceWeblaf.finished = true;
 	}
 }

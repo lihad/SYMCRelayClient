@@ -27,7 +27,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 140;
+	public final static double build = 140.1;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -288,10 +288,8 @@ public class Client{
 							}
 							// if the server wants to tell its version
 							else if(s.contains(VERSION)){
-
 								server_build=Double.parseDouble(s.replaceAll(VERSION, ""));
 							}
-
 
 							// if the server receive a COUNT request (used in channel viewer), then populate the channel/usercount map
 							else if (s.contains(COUNT)) {
@@ -312,7 +310,7 @@ public class Client{
 								appendToChatBox(getChannel(arr[0]), arr[1] + "\n");
 
 								//TODO: this may not belong here
-								getChannel(arr[0]).pane.setCaretPosition(getChannel(arr[0]).pane.getDocument().getLength());
+								if(!getChannel(arr[0]).handler.pressed)getChannel(arr[0]).pane.setCaretPosition(getChannel(arr[0]).pane.getDocument().getLength());
 								if(arr[1].split(FORMAT).length > 2)logger.info("["+arr[0]+"]"+arr[1].split(FORMAT)[0]+arr[1].split(FORMAT)[2]);
 								SYMCSound.playDing();
 								changeStatusTS(ConnectionStatus.NULL, true, true);
@@ -379,7 +377,6 @@ public class Client{
 			default: break; // do nothing
 			}
 		}
-
 		//relay has exited its main loop... which is not a good thing, and should be impossible
 	}
 	private static void send(PrintWriter pr, String s){

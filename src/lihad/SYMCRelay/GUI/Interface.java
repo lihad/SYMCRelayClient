@@ -150,6 +150,8 @@ public class Interface extends WebFrame implements Runnable {
 		this.requestFocus();
 		this.setAlwaysOnTop(false);
 		SYMCSound.playPing();
+		
+		Client.logger.debug("alert");
 	}
 
 	// connectButton, disconnectButton, ipField, portField, usernameField, chatLine_text, chatLine_boolean, statusColor
@@ -189,7 +191,7 @@ public class Interface extends WebFrame implements Runnable {
 				
 				FormatColor.decodeTextPaneFormat(e.getKey(),e.getKey().pane.getStyledDocument(), e.getValue().toString(), true);
 				for(int i = 0; i < tabbedPane.getTabCount(); i++){
-					if(Client.getRelayConfiguration().getFlashTogglable()) this.toFront();
+					if(Client.getRelayConfiguration().getFlashTogglable()) this.setFocusable(false); this.toFront();
 					if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(e.getKey().name)){
 						tabbedPane.setFlash(true,i);
 					}

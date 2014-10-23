@@ -166,30 +166,16 @@ public class ChannelPane extends WebPanel{
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void addChannel(){
-		try{
-			DefaultListModel<String> listFromModel = (DefaultListModel)(channelIncludedList.getModel());
-			DefaultListModel<String> listToModel = (DefaultListModel)(channelExistList.getModel());
-
-			int[] removed_indexes = channelIncludedList.getSelectedIndices();
-
-			for(int i : removed_indexes) listToModel.add(listToModel.size(), listFromModel.remove(i));
-
-		}catch(Exception e1){
-			Client.logger.error(e1.toString(), e1.getStackTrace());
-		}
+		moveChannel((DefaultListModel)channelIncludedList.getModel(), (DefaultListModel)channelExistList.getModel());
 	}
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void removeChannel(){
-		try{
-			DefaultListModel<String> listFromModel = (DefaultListModel)(channelExistList.getModel());
-			DefaultListModel<String> listToModel = (DefaultListModel)(channelIncludedList.getModel());
-
-			int[] removed_indexes = channelExistList.getSelectedIndices();
-
-			for(int i : removed_indexes) listToModel.add(listToModel.size(), listFromModel.remove(i));
-
-		}catch(Exception e1){
-			Client.logger.error(e1.toString(), e1.getStackTrace());
-		}
+		moveChannel((DefaultListModel)channelExistList.getModel(), (DefaultListModel)channelIncludedList.getModel());
+	}
+	private void moveChannel(DefaultListModel<String> listFromModel, DefaultListModel<String> listToModel){
+		int[] removed_indexes = channelExistList.getSelectedIndices();
+		for(int i : removed_indexes) listToModel.add(listToModel.size(), listFromModel.remove(i));
 	}
 }

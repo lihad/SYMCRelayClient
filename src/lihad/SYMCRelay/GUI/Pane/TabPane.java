@@ -137,7 +137,6 @@ public class TabPane extends WebTabbedPane{
 	}
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-
 		if(dragging && currentMouseLocation != null && tabImage != null) {
 			g.drawImage(tabImage, currentMouseLocation.x-30, currentMouseLocation.y-10, this);
 		}

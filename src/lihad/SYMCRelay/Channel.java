@@ -30,6 +30,7 @@ public class Channel {
 	public List<String> unsync_userlist = new LinkedList<String>(); //TODO: accuracy?... maybe 
 	public boolean pingfill = false;
 	private JPopupMenu autofill = null;
+	public Linker handler= new Linker();;
 
 	public Channel(final String n){
 		channel = this;
@@ -48,7 +49,6 @@ public class Channel {
 		field.setEnabled(false);
 		field.setFont(Client.font);
 		field.setLineWrap(true);
-		Linker handler = new Linker();
 		pane.addMouseListener(handler);
 		pane.addMouseMotionListener(handler);
 		field.addKeyListener(new KeyAdapter() {

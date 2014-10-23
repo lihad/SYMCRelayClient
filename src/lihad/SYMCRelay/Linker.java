@@ -14,6 +14,7 @@ import javax.swing.text.Document;
 import javax.swing.text.html.HTML;
 
 public class Linker extends MouseAdapter implements MouseMotionListener{
+	public boolean pressed = false;
 
 	public void mouseClicked(MouseEvent e){
 		JTextPane editor = (JTextPane) e.getSource();
@@ -49,5 +50,11 @@ public class Linker extends MouseAdapter implements MouseMotionListener{
 				}
 			}
 		}
+	}
+	public void mousePressed(MouseEvent e){
+		pressed = true;
+	}
+	public void mouseReleased(MouseEvent e){
+		pressed = false;
 	}
 }
