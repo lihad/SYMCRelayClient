@@ -27,7 +27,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 143;
+	public final static double build = 144;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -329,9 +329,6 @@ public class Client{
 			case DISCONNECTING:
 				try{
 					last_user = "";
-
-					//clear user field
-					//gui.userPane.getUserText().setText(null);
 
 					// tell the server the client is gracefully disconnecting
 					send(out, (END_CHAT_SESSION));

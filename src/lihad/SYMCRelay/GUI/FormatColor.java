@@ -36,7 +36,7 @@ public class FormatColor {
 	/**
 	 * All incoming text to be displayed utilizes this method, which handles the
 	 * following:
-	 * Posting of chat to both channel and user pane,
+	 * Posting of chat to channel,
 	 * text color,
 	 * text formatting (bold, italics, etc),
 	 * hyper-text conversion where necessary.
@@ -52,21 +52,21 @@ public class FormatColor {
 		SimpleAttributeSet key = new SimpleAttributeSet();
 		String[] str_arr = string.split(Client.FORMAT);
 		String name = "", color = "000000";
-		boolean ischannel = channel != null;
-
-		// channel only
-		if(ischannel){
-			try {
-				key = new SimpleAttributeSet();
-				StyleConstants.setItalic(key, true);
-				doc.insertString(doc.getLength(), "["+dateformat.format(Calendar.getInstance().getTime())+"] ", key);
-				StyleConstants.setItalic(key, false);
-			} catch (BadLocationException e1) {
-				e1.printStackTrace();
-			}
+		if(channel == null){
+			Client.logger.debug("a message was just processed through, that is not attached to a channel... "+ string);
+			return;
 		}
+
+		try {
+			key = new SimpleAttributeSet();
+			StyleConstants.setItalic(key, true);
+			doc.insertString(doc.getLength(), "["+dateformat.format(Calendar.getInstance().getTime())+"] ", key);
+			StyleConstants.setItalic(key, false);
+		} catch (BadLocationException e1) {
+			e1.printStackTrace();
+		}
+
 		for(int i = 0; i<str_arr.length; i++){
-			// if used in all circumstances
 			if(i != 0 && i % 2 != 0){
 				key = new SimpleAttributeSet();
 				String[] config = str_arr[i].split(" ");
@@ -87,38 +87,36 @@ public class FormatColor {
 				}
 			}else{
 				try {
-					if(ischannel){
-						if(i == 0)name = str_arr[i].replace(":", "");
 
-						if(pop && i > 0 && !Client.gui.isFocused()){
-							SystemTray tray = SystemTray.getSystemTray();
-							if(tray.getTrayIcons().length > 0){
-								String s_s = "";
-								if(ischannel) s_s = "[#"+channel.name+"] "+str_arr[i];
-								if(Client.getRelayConfiguration().getTrayBubbleTogglable()){
-									tray.getTrayIcons()[0].displayMessage(name, s_s, MessageType.NONE);
-									tray.getTrayIcons()[0].addMouseListener(new MouseAdapter(){
+					if(i == 0)name = str_arr[i].replace(":", "");
 
-										public void mouseClicked(MouseEvent arg0) {
-											Client.gui.setAlwaysOnTop(true);
-											Client.gui.toFront();
-											Client.logger.debug("focus requested 3");
-											Client.gui.requestFocus();
-											Client.gui.setAlwaysOnTop(false);
-											
-											Client.gui.tabbedPane.setSelectedIndex(Client.gui.tabbedPane.indexOfTab("#"+FormatColor.lastChannel.name));
-										}
-									});
-								}
+					if(pop && i > 0 && !Client.gui.isFocused()){
+						SystemTray tray = SystemTray.getSystemTray();
+						if(tray.getTrayIcons().length > 0){
+							String s_s = "[#"+channel.name+"] "+str_arr[i];
+							if(Client.getRelayConfiguration().getTrayBubbleTogglable()){
+								tray.getTrayIcons()[0].displayMessage(name, s_s, MessageType.NONE);
+								tray.getTrayIcons()[0].addMouseListener(new MouseAdapter(){
+
+									public void mouseClicked(MouseEvent arg0) {
+										Client.gui.setAlwaysOnTop(true);
+										Client.gui.toFront();
+										Client.gui.requestFocus();
+										Client.gui.setAlwaysOnTop(false);
+
+										Client.gui.tabbedPane.setSelectedIndex(Client.gui.tabbedPane.indexOfTab("#"+FormatColor.lastChannel.name));
+									}
+								});
 							}
 						}
 					}
-					
-					if(ischannel && (str_arr[i].contains("@"+Client.username))){
+
+
+					if(str_arr[i].contains("@"+Client.username)){
 						Client.gui.alert();
 					}
-					
-					if(ischannel && (str_arr[i].contains("http://") || str_arr[i].contains("https://"))){
+
+					if(str_arr[i].contains("http://") || str_arr[i].contains("https://")){
 						boolean space = false;
 						for(String s  : str_arr[i].split(" ")){
 							if(s.startsWith("http://") || s.startsWith("https://")){
@@ -129,7 +127,7 @@ public class FormatColor {
 								key = new SimpleAttributeSet();
 								StyleConstants.setForeground(key, Color.decode("#"+color));
 							}
-							
+
 							if(space)doc.insertString(doc.getLength(), " "+s.replaceAll(Client.RETURN, "\r\n"), key);
 							else doc.insertString(doc.getLength(), s.replaceAll(Client.RETURN, "\r\n"), key);
 							space = true;
@@ -143,7 +141,7 @@ public class FormatColor {
 			}
 		}
 	}
-	
+
 	/**
 	 * All text outgoing to the server is encoded before being sent in a packet.
 	 * Returns an encoded string, ready to be transmitted.
@@ -159,7 +157,7 @@ public class FormatColor {
 		else Client.logger.info("["+namechan.split(Client.CHANNEL)[0]+"]"+Client.username+": "+string);
 		return (Client.FORMAT+format+Client.FORMAT+namechan+string).replaceAll("\r", Client.RETURN).replaceAll("\n", Client.RETURN);
 	}
-	
+
 	/**
 	 * All commands outgoing to the server are encoded before being sent in a packet.
 	 * Returns an encoded string, ready to be transmitted.

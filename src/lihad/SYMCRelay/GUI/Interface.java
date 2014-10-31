@@ -134,7 +134,7 @@ public class Interface extends WebFrame implements Runnable {
 
 			@Override
 			public void mouseMoved(MouseEvent arg0) {
-				
+				 
 			}
 			
 		});
@@ -147,7 +147,6 @@ public class Interface extends WebFrame implements Runnable {
 	public void alert(){
 		this.setAlwaysOnTop(true);
 		this.toFront();
-		Client.logger.debug("focus requested 2");
 		this.requestFocus();
 		this.setAlwaysOnTop(false);
 		SYMCSound.playPing();
@@ -191,9 +190,8 @@ public class Interface extends WebFrame implements Runnable {
 				
 				FormatColor.decodeTextPaneFormat(e.getKey(),e.getKey().pane.getStyledDocument(), e.getValue().toString(), true);
 				for(int i = 0; i < tabbedPane.getTabCount(); i++){
-					//if(Client.getRelayConfiguration().getFlashTogglable()) this.toFront();
 					if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(e.getKey().name)){
-						tabbedPane.setFlash(true,i);
+						tabbedPane.setFlash(true,i,e.getValue().toString().contains(":"));
 					}
 				}
 			}

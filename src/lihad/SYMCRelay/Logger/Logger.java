@@ -34,11 +34,11 @@ public class Logger {
 		System.out.println(s);} catch (IOException e){error(e.toString(),e.getStackTrace());}
 	}
 	public void warning(String string){
-		if(enabled) try { String s = (dateformat.format(Calendar.getInstance().getTime())+" [warning] "+string); writer.write(s); writer.newLine();  writer.flush();
+		try { String s = (dateformat.format(Calendar.getInstance().getTime())+" [warning] "+string); writer.write(s); writer.newLine();  writer.flush();
 		System.out.println(s);} catch (IOException e){error(e.toString(),e.getStackTrace());}
 	}
 	public void severe(String string){
-		if(enabled) try { String s = (dateformat.format(Calendar.getInstance().getTime())+" [severe] "+string); writer.write(s); writer.newLine();  writer.flush();
+		try { String s = (dateformat.format(Calendar.getInstance().getTime())+" [severe] "+string); writer.write(s); writer.newLine();  writer.flush();
 		System.out.println(s);} catch (IOException e){error(e.toString(),e.getStackTrace());}
 	}
 	public void error(String s, StackTraceElement[] t){
@@ -47,7 +47,7 @@ public class Logger {
 			try {writer.write(t_a.toString()); writer.newLine();  writer.flush(); System.out.println(t_a.toString());} catch (IOException e){e.printStackTrace();}
 	}
 	public void debug(String string){
-		if(enabled) try { String s = (dateformat.format(Calendar.getInstance().getTime())+" [debug] "+string); writer.write(s); writer.newLine();  writer.flush();
+		try { String s = (dateformat.format(Calendar.getInstance().getTime())+" [debug] "+string); writer.write(s); writer.newLine();  writer.flush();
 		System.out.println(s);} catch (IOException e){e.printStackTrace();}
 	}
 }

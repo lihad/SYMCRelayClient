@@ -45,7 +45,7 @@ public class TabPane extends WebTabbedPane{
 		this.addChangeListener(new ChangeAdapter(){
 			public void stateChanged(ChangeEvent e) {
 				if(TabPane.this.getSelectedIndex() != -1){
-					setFlash(false, TabPane.this.getSelectedIndex());
+					setFlash(false, TabPane.this.getSelectedIndex(), false);
 				}
 			}
 		});
@@ -143,9 +143,11 @@ public class TabPane extends WebTabbedPane{
 		}
 	}
 
-	public void setFlash(boolean on, int index){
-		if(on) this.setForegroundAt(index, Color.red);
-		else this.setForegroundAt(index, Color.black);
+	public void setFlash(boolean on, int index, boolean ismessage){
+		if(on){
+			if(!ismessage && !this.getForegroundAt(index).equals(Color.red))this.setForegroundAt(index, Color.blue);
+			else this.setForegroundAt(index, Color.red);
+		}else this.setForegroundAt(index, Color.black);
 	}
 
 }
