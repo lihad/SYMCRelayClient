@@ -20,7 +20,7 @@ public class Linker extends MouseAdapter implements MouseMotionListener{
 		JTextPane editor = (JTextPane) e.getSource();
 		Document doc =  editor.getDocument();
 		
-		editor.setCaretPosition(editor.getDocument().getLength());
+		if(editor.getCursor().getType() != Cursor.HAND_CURSOR)editor.setCaretPosition(editor.getDocument().getLength());
 		
 		int pos = editor.viewToModel(new Point(e.getX(), e.getY()));
 		if (pos >= 0){

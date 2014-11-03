@@ -15,10 +15,10 @@ import lihad.SYMCRelay.Client;
 public class RelayConfiguration extends Properties{
 
 	private static final long serialVersionUID = -4752504796844276291L;
-	
+
 	private String hostIP, hostPort, format, window, default_channels, lnf;
 	private boolean auto_connect, auto_reconnect, sound_toggle, log_toggle, bubble_toggle, flash_toggle, undecorated, user_list_expanded;
-	
+
 	private File file;
 
 
@@ -27,7 +27,7 @@ public class RelayConfiguration extends Properties{
 			this.file = file;
 			if(!this.file.exists())this.file.createNewFile();
 			this.load(new BufferedReader(new FileReader(this.file)));
-			
+
 			this.loadHostIP();
 			this.loadHostPort();
 			this.loadLNF();
@@ -43,11 +43,11 @@ public class RelayConfiguration extends Properties{
 			this.loadFlashTogglable();
 			this.loadUserListExpanded();
 
-			
+
 		}catch(Exception e){e.printStackTrace();}		
-		
+
 	}
-	
+
 	public String[] listConfiguration(){
 		List<String> l_a = new LinkedList<String>();
 		l_a.add("HostIP = "+getHostIP());
@@ -77,12 +77,12 @@ public class RelayConfiguration extends Properties{
 	private boolean hasProperty(String string){
 		return (getProperty(string) != null);
 	}
-	
+
 	public String getHostIP(){ return hostIP; }
 	public void setHostIP(String hostIP){ this.hostIP = hostIP; saveHostIP(); Client.logger.info("[RELAYCONFIGURATION] HostIP is now set to ["+this.hostIP+"]");}
 	public boolean loadHostIP(){ this.hostIP = getProperty("ip", "10.167.3.11"); return hasProperty("ip");}
 	public void saveHostIP(){ this.save("ip", this.hostIP);}
-	
+
 	public String getHostPort(){ return hostPort; }
 	public void setHostPort(String hostPort){ this.hostPort = hostPort; savehostPort(); Client.logger.info("[RELAYCONFIGURATION] HostPort is now set to ["+this.hostPort+"]");}
 	public boolean loadHostPort(){ this.hostPort = getProperty("port", "443"); return hasProperty("port");}
@@ -107,12 +107,16 @@ public class RelayConfiguration extends Properties{
 	public void setAutoReconnect(boolean auto_reconnect){ this.auto_reconnect = auto_reconnect; saveAutoReconnect(); Client.logger.info("[RELAYCONFIGURATION] Auto_Reconnect is now set to ["+this.auto_reconnect+"]");}
 	public boolean loadAutoReconnect(){ this.auto_reconnect = Boolean.parseBoolean(getProperty("auto_reconnect", "true")); return hasProperty("auto_reconnect");}
 	public void saveAutoReconnect(){ this.save("auto_reconnect", String.valueOf(this.auto_reconnect));}
-	
-	public List<String> getDefaultChannels(){ return Arrays.asList(default_channels.split(",")); }
+
+	public List<String> getDefaultChannels(){
+		List<String> l_s = new LinkedList<String>(Arrays.asList(default_channels.split(",")));
+		l_s.remove("");
+		return l_s;
+	}
 	public void addDefaultChannel(String channel){ List<String> t_s = new LinkedList<String>();
-		t_s.addAll(getDefaultChannels()); 
-		t_s.add(channel); 
-		setDefaultChannels(t_s);}
+	t_s.addAll(getDefaultChannels()); 
+	t_s.add(channel); 
+	setDefaultChannels(t_s);}
 	public void removeDefaultChannel(String channel){
 		List<String> t_s = new LinkedList<String>();
 		t_s.addAll(getDefaultChannels()); 
@@ -135,32 +139,32 @@ public class RelayConfiguration extends Properties{
 	public void setLogTogglable(boolean log_toggle){ this.log_toggle = log_toggle; saveLogTogglable(); Client.logger.info("[RELAYCONFIGURATION] LogToggle is now set to ["+this.log_toggle+"]");}
 	public boolean loadLogTogglable(){ this.log_toggle = Boolean.parseBoolean(getProperty("log_toggle", "true")); return hasProperty("log_toggle");}
 	public void saveLogTogglable(){ this.save("log_toggle", String.valueOf(this.log_toggle));}
-	
+
 	public boolean getTrayBubbleTogglable(){ return bubble_toggle; }
 	public void setTrayBubbleTogglable(boolean bubble_toggle){ this.bubble_toggle = bubble_toggle; saveTrayBubbleTogglable(); Client.logger.info("[RELAYCONFIGURATION] BubbleToggle is now set to ["+this.bubble_toggle+"]");}
 	public boolean loadTrayBubbleTogglable(){ this.bubble_toggle = Boolean.parseBoolean(getProperty("bubble_toggle", "true")); return hasProperty("bubble_toggle");}
 	public void saveTrayBubbleTogglable(){ this.save("bubble_toggle", String.valueOf(this.bubble_toggle));}
-	
+
 	public boolean getUndecoratedTogglable(){ return undecorated; }
 	public void setUndecoratedTogglable(boolean undecorated){ this.undecorated = undecorated; saveUndecoratedTogglable(); Client.logger.info("[RELAYCONFIGURATION] Undecorated is now set to ["+this.undecorated+"]");}
 	public boolean loadUndecoratedTogglable(){ this.undecorated = Boolean.parseBoolean(getProperty("undecorated", "false")); return hasProperty("undecorated");}
 	public void saveUndecoratedTogglable(){ this.save("undecorated", String.valueOf(this.undecorated));}
-	
+
 	public String getLNF(){ return lnf; }
 	public void setLNF(String lnf){ this.lnf = lnf; saveLNF(); Client.logger.info("[RELAYCONFIGURATION] LNF is now set to ["+this.lnf+"]");}
 	public boolean loadLNF(){ this.lnf = getProperty("lnf", "weblaf-complete-1.28.jar"); return hasProperty("lnf");}
 	public void saveLNF(){ this.save("lnf", this.lnf);}
-	
+
 	public boolean getFlashTogglable(){ return flash_toggle; }
 	public void setFlashTogglable(boolean flash_toggle){ this.flash_toggle = flash_toggle; saveFlashTogglable(); Client.logger.info("[RELAYCONFIGURATION] FlashToggle is now set to ["+this.flash_toggle+"]");}
 	public boolean loadFlashTogglable(){ this.flash_toggle = Boolean.parseBoolean(getProperty("flash_toggle", "false")); return hasProperty("flash_toggle");}
 	public void saveFlashTogglable(){ this.save("flash_toggle", String.valueOf(this.flash_toggle));}
-	
+
 	public boolean getUserListExpanded(){ return user_list_expanded; }
 	public void setUserListExpanded(boolean user_list_expanded){ this.user_list_expanded = user_list_expanded; saveUserListExpanded(); Client.logger.info("[RELAYCONFIGURATION] User List Expansion is now set to ["+this.user_list_expanded+"]");}
 	public boolean loadUserListExpanded(){ this.user_list_expanded = Boolean.parseBoolean(getProperty("user_list_expanded", "false")); return hasProperty("user_list_expanded");}
 	public void saveUserListExpanded(){ this.save("user_list_expanded", String.valueOf(this.user_list_expanded));}
-	
+
 	public void save(String key, String value){
 		try {
 			this.setProperty(key, value);

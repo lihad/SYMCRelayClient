@@ -27,7 +27,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 144;
+	public final static double build = 145;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -44,12 +44,12 @@ public class Client{
 
 	// log file
 	public static String log_file = System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay.log";
-	
+
 	// save config
 	private static RelayConfiguration config;
 
 	public static RelayConfiguration getRelayConfiguration(){ return config; }
-	
+
 	public static CommandHandler handler;
 
 	public static Logger logger;
@@ -147,7 +147,7 @@ public class Client{
 
 	// main procedure
 	public static void main(String args[]) {
-		
+
 		//create logger object and a new log (renaming the previous)
 		if(new File(log_file).exists() && args.length == 0) new File(log_file).renameTo(new File(System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay_"+System.currentTimeMillis()+".log"));
 		logger = new Logger(new File(log_file));
@@ -158,11 +158,11 @@ public class Client{
 
 		//launch the program, or re-launch with other parameters
 		try { launcher(args); } catch (IOException | URISyntaxException e2) { logger.error(e2.toString(), e2.getStackTrace()); }    
-		
+
 		handler = new CommandHandler();
 		channels = new HashMap<Channel,List<String>>();
 		toAppend = new HashMap<Channel, StringBuffer>();
-		
+
 		//display configuration data
 		switch_logger(getRelayConfiguration().getLogTogglable());
 		for(String l_s : getRelayConfiguration().listConfiguration()) logger.info("[RELAYCONFIGURATION] --- "+l_s);
@@ -210,7 +210,7 @@ public class Client{
 					socket = new Socket(getRelayConfiguration().getHostIP(), Integer.parseInt(getRelayConfiguration().getHostPort()));
 					in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out = new PrintWriter(socket.getOutputStream(), true);
-					
+
 					logger.debug("created socket");
 
 					// if no error is thrown, then we must be connected
@@ -229,7 +229,7 @@ public class Client{
 					for(Channel channelname : channels.keySet()){
 						Client.channelJoinRequest(channelname.name);
 					}
-					
+
 					logger.debug("channels created");
 					d_on_d = false;
 				}
@@ -256,6 +256,7 @@ public class Client{
 
 					// if there is data to receive, then receive data
 					if (in.ready()) {
+
 						//data is going to be encoded, so decode it
 						String s = decode(in.readLine());
 
@@ -265,11 +266,12 @@ public class Client{
 						 * 
 						 */
 						if ((s != null) &&  (s.length() != 0)) {
-
+							
 							// if server wants the client to disconnect, then we shall disconnect
 							if (s.equals(END_CHAT_SESSION.replace("\n", ""))) {
 								logger.info("force disconnection received. ["+s+"]");
 								changeStatusTS(ConnectionStatus.DISCONNECTING, true, true);
+								
 							}
 							// if server wants to notify the client of users connected. the server sends this request at a given interval,
 							//  so this is also used to drive the internal heartbeat
@@ -286,6 +288,7 @@ public class Client{
 								}
 
 							}
+
 							// if the server wants to tell its version
 							else if(s.contains(VERSION)){
 								server_build=Double.parseDouble(s.replaceAll(VERSION, ""));
@@ -293,7 +296,6 @@ public class Client{
 
 							// if the server receive a COUNT request (used in channel viewer), then populate the channel/usercount map
 							else if (s.contains(COUNT)) {
-
 								channelcount.clear();
 								s = s.replaceAll(COUNT, "").replaceAll("\\{", "");
 								String[] arr = s.split("}");
@@ -327,7 +329,9 @@ public class Client{
 				break;
 
 			case DISCONNECTING:
-				try{
+				try{					
+					logger.warning("disconnecting");
+
 					last_user = "";
 
 					// tell the server the client is gracefully disconnecting
@@ -407,7 +411,7 @@ public class Client{
 		if(safe)SwingUtilities.invokeLater(gui);
 		else gui.run();
 	}
-	
+
 	public static void createGUIChannel(String name){
 		for(Channel c : Client.channels.keySet())if(c.name.equalsIgnoreCase(name))return;
 		if(!getRelayConfiguration().containsDefaultChannel(name))getRelayConfiguration().addDefaultChannel(name);
@@ -442,10 +446,10 @@ public class Client{
 				while(!preinterface_web.finished){
 					try { Thread.sleep(10); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
 				}
-				
+
 				try { Thread.sleep(3000); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
 			}
-			
+
 			//program will check for sound files and reexecute'
 
 			if(!new File(System.getenv("ProgramFiles")+"\\Relay\\Sounds\\ping.wav").exists() || !new File(System.getenv("ProgramFiles")+"\\Relay\\Sounds\\ding.wav").exists() ||
@@ -457,7 +461,7 @@ public class Client{
 				while(!preinterface_sound.finished){
 					try { Thread.sleep(10); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
 				}
-				
+
 				try { Thread.sleep(3000); }catch (InterruptedException e) {logger.error(e.toString(),e.getStackTrace());}
 			}
 
