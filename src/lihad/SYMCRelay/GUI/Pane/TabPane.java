@@ -63,7 +63,6 @@ public class TabPane extends WebTabbedPane{
 					int index = TabPane.this.indexAtLocation(event.getX(), event.getY());
 					if(index >= 0){
 						Client.getChannel(TabPane.this.getTitleAt(index).replace("#", "")).field.requestFocusInWindow();
-						Client.logger.debug("focus requested 4");
 						Client.gui.userPane.expandChannel(TabPane.this.getTitleAt(index).replaceFirst("#", ""));
 					}
 				}

@@ -1,7 +1,9 @@
 package lihad.SYMCRelay;
 
+import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.LinkedList;
@@ -82,6 +84,11 @@ public class Channel {
 					if(autofill != null && !autofill.hasFocus()){
 						autofill.setVisible(false);
 						autofill.show(field, 0, 0);
+						Robot robot;
+						try {
+							robot = new Robot();
+							robot.keyPress(KeyEvent.VK_DOWN);
+						} catch (AWTException e1) {e1.printStackTrace();} 
 						e.consume();
 					}
 					return;
@@ -97,7 +104,6 @@ public class Channel {
 						item.addActionListener(new ActionAdapter() {
 							public void actionPerformed(ActionEvent e) {
 								field.setText(field.getText().substring(0, field.getText().lastIndexOf("@"))+"@"+item.getText()+" ");
-								Client.logger.debug("focus requested 1");
 								field.requestFocus();
 							}
 						});
