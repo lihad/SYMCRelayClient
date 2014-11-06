@@ -3,12 +3,14 @@ package lihad.SYMCRelay;
 import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.JEditorPane;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -21,6 +23,7 @@ import lihad.SYMCRelay.Adapters.ActionAdapter;
 import lihad.SYMCRelay.Adapters.KeyAdapter;
 import lihad.SYMCRelay.Command.Command;
 import lihad.SYMCRelay.GUI.FormatColor;
+import lihad.SYMCRelay.GUI.WrapEditorKit;
 
 public class Channel {
 
@@ -32,13 +35,17 @@ public class Channel {
 	public List<String> unsync_userlist = new LinkedList<String>(); //TODO: accuracy?... maybe 
 	public boolean pingfill = false;
 	private JPopupMenu autofill = null;
-	public Linker handler= new Linker();;
+	public Linker handler= new Linker();
 
 	public Channel(final String n){
 		channel = this;
 		name = n;
 		pane = new JTextPane();
+		
+		pane.setEditorKit(new WrapEditorKit());
+		
 		pane.setEditable(false);
+		pane.setMinimumSize(new Dimension(0,0));
 		pane.setForeground(Color.black);
 		pane.setFont(Client.font);
 		WebScrollPane chatTextPane = new WebScrollPane(pane);
@@ -84,10 +91,8 @@ public class Channel {
 					if(autofill != null && !autofill.hasFocus()){
 						autofill.setVisible(false);
 						autofill.show(field, 0, 0);
-						Robot robot;
 						try {
-							robot = new Robot();
-							robot.keyPress(KeyEvent.VK_DOWN);
+							new Robot().keyPress(KeyEvent.VK_DOWN);
 						} catch (AWTException e1) {e1.printStackTrace();} 
 						e.consume();
 					}
@@ -98,7 +103,7 @@ public class Channel {
 					String s = (field.getText()+e.getKeyChar()).substring((field.getText()+e.getKeyChar()).lastIndexOf("@")+1);
 
 					autofill = new JPopupMenu();
-					
+
 					for(String user : Channel.this.unsync_userlist) if(user.toLowerCase().contains(s.toLowerCase()) && !user.equalsIgnoreCase(Client.username)){
 						final JMenuItem item = new JMenuItem(user);
 						item.addActionListener(new ActionAdapter() {
@@ -107,7 +112,7 @@ public class Channel {
 								field.requestFocus();
 							}
 						});
-						
+
 						autofill.add(item);
 						Client.logger.debug("added "+user);
 					}
@@ -124,3 +129,5 @@ public class Channel {
 		panel.add(chatTextPane, BorderLayout.CENTER);
 	}
 }
+
+
