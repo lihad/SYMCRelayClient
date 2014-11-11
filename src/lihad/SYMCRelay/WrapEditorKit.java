@@ -1,4 +1,4 @@
-package lihad.SYMCRelay.GUI;
+package lihad.SYMCRelay;
 
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BoxView;

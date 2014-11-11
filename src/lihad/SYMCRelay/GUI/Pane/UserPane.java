@@ -17,6 +17,7 @@ import com.alee.laf.tree.WebTree;
 import com.alee.laf.tree.WebTreeCellRenderer;
 import com.alee.laf.tree.WebTreeModel;
 
+import lihad.SYMCRelay.Channel;
 import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.Adapters.ActionAdapter;
 import lihad.SYMCRelay.GUI.RotatedButton;
@@ -66,10 +67,11 @@ public class UserPane extends WebPanel {
 				top.add(channel);
 			}else{
 				if(channel != null){
+					Channel chan = Client.getChannel(channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_")));
 					user = new DefaultMutableTreeNode(elements[i]);
 					channel.add(user);
-					if(Client.getChannel(channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_"))) != null){
-						Client.getChannel(channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_"))).unsync_userlist.add(elements[i]);
+					if(chan != null){
+						chan.unsync_userlist.add(elements[i]);
 					}else{
 						Client.logger.debug("UserPane just tried to update a channel user list and got it wrong: "+channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_")));
 					}
@@ -90,6 +92,7 @@ public class UserPane extends WebPanel {
 	}
 	
 	public void sortchildrenA(DefaultMutableTreeNode node){
+
 		@SuppressWarnings("unchecked")
 		ArrayList<DefaultMutableTreeNode> children = Collections.list(node.children());
         // for getting original location

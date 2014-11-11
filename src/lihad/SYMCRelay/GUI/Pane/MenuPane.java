@@ -2,6 +2,7 @@ package lihad.SYMCRelay.GUI.Pane;
 
 import java.awt.BorderLayout;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -34,15 +35,17 @@ public class MenuPane extends WebMenuBar {
 	private WebCheckBoxMenuItem soundToggleItem, logToggleItem, bubbleToggleItem, undecoratedToggleItem, reconnectToggleItem, flashToggleItem;
 	private WebMenu relay, channel, customize, help;
 	private JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), updatePaneDialog = new JDialog(), lnfPaneDialog = new JDialog(), channelPaneDialog = new JDialog();
+	private ChannelPane chan_pane;
+
 
 	public WebMenu getRelayMenu(){ return relay; }
-	
+
 	public WebMenu getChannelMenu(){ return channel; }
-	
+
 	public WebMenu getCustomizeMenu(){ return customize; }
-	
+
 	public WebMenu getHelpMenu(){ return help; }
-	
+
 	public JDialog getConnectDialog(){ return connectPaneDialog; }
 
 	public JDialog getColorDialog(){ return colorPaneDialog; }
@@ -61,6 +64,13 @@ public class MenuPane extends WebMenuBar {
 
 	public WebMenuItem getDisconnectItem(){  return disconnectItem; }
 
+	public void closeChanPane(){
+		Client.gui.mainPane.remove(chan_pane);
+		Client.gui.pack();
+		Client.unconnected_channels.clear();
+		chan_pane = null;
+	}
+	
 	public MenuPane(){
 
 		//build 'connect...' option listener
@@ -144,21 +154,17 @@ public class MenuPane extends WebMenuBar {
 		//build 'channel' option listener
 		ActionAdapter channelListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				//get an updated channel list
-				Client.updatechannelcount();
-				//TODO: literally will hang errything.  need safety
-				while(!Client.isupdated){try { Thread.sleep(10); }catch (InterruptedException e1) {Client.logger.error(e1.toString(),e1.getStackTrace());}}
-
-				WebPanel mainPane = new WebPanel(new BorderLayout());
-				WebPanel channelPane = new ChannelPane();
-
-				mainPane.add(channelPane, BorderLayout.CENTER);
-
-				channelPaneDialog.setContentPane(mainPane);
-				channelPaneDialog.setLocationRelativeTo(Client.gui); 
-				channelPaneDialog.setTitle("Channel");
-				channelPaneDialog.pack();
-				channelPaneDialog.setVisible(true);
+				if(chan_pane == null){
+					//get an updated channel list
+					Client.updatechannelcount(null);
+					chan_pane = new ChannelPane();
+					chan_pane.setSize(new Dimension(175, 200));
+					chan_pane.setVisible(true);
+					Client.gui.mainPane.add(chan_pane, BorderLayout.WEST);
+					Client.gui.pack();
+				}else{
+					closeChanPane();
+				}
 			}
 		};
 
@@ -183,7 +189,7 @@ public class MenuPane extends WebMenuBar {
 		relay.add(disconnectItem);
 
 		relay.addSeparator();
-		
+
 		reconnectToggleItem = new WebCheckBoxMenuItem("Auto-Reconnect");
 		reconnectToggleItem.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
@@ -191,7 +197,7 @@ public class MenuPane extends WebMenuBar {
 			}
 		});
 		reconnectToggleItem.setSelected(Client.getRelayConfiguration().getAutoReconnect());
-		
+
 		relay.add(reconnectToggleItem);		
 		relay.addSeparator();
 
@@ -201,7 +207,7 @@ public class MenuPane extends WebMenuBar {
 		relay.add(updateItem);
 
 		relay.addSeparator();
-		
+
 		openlogItem = new WebMenuItem("Open Log", KeyEvent.VK_O);
 		openlogItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.ALT_MASK));
 		openlogItem.addActionListener(new ActionAdapter() {
@@ -214,7 +220,7 @@ public class MenuPane extends WebMenuBar {
 			}
 		});
 		relay.add(openlogItem);
-		
+
 		relay.addSeparator();
 
 		exitItem = new WebMenuItem("Exit", KeyEvent.VK_E);
@@ -235,7 +241,7 @@ public class MenuPane extends WebMenuBar {
 		//channel.setFont(Client.font);
 		this.add(channel);
 
-		channelJoinItem = new WebMenuItem("Join/Leave", KeyEvent.VK_J);
+		channelJoinItem = new WebMenuItem("Join/Manage", KeyEvent.VK_J);
 		channelJoinItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J, ActionEvent.ALT_MASK));
 		channelJoinItem.addActionListener(channelListener);
 		channelJoinItem.setEnabled(false);
@@ -276,7 +282,7 @@ public class MenuPane extends WebMenuBar {
 			}
 		});
 		customize.add(bubbleToggleItem);	
-		
+
 		flashToggleItem = new WebCheckBoxMenuItem("Flash/Focus On");
 		flashToggleItem.setSelected(Client.getRelayConfiguration().getFlashTogglable());
 		flashToggleItem.addActionListener(new ActionAdapter() {
@@ -285,13 +291,13 @@ public class MenuPane extends WebMenuBar {
 			}
 		});
 		customize.add(flashToggleItem);	
-		
+
 		customize.addSeparator();
 
 		colorChangeItem = new WebMenuItem("Color..."); 
 		colorChangeItem.addActionListener(colorListener);
 		customize.add(colorChangeItem);	
-		
+
 		customize.addSeparator();
 
 		undecoratedToggleItem = new WebCheckBoxMenuItem("Undecorated");
@@ -303,24 +309,24 @@ public class MenuPane extends WebMenuBar {
 			}
 		});
 		customize.add(undecoratedToggleItem);	
-		
+
 		lnfItem = new WebMenuItem("Look & Feel...");
 		lnfItem.setEnabled(false); //TODO: locked down until themes
 		lnfItem.addActionListener(lnfListener);
 		customize.add(lnfItem);
-		
+
 		// about menu drop
 		/////////////////////////////////////////////////////////////
 
 		help = new WebMenu("Help");
 		//about.setFont(Client.font);
 		this.add(help);
-		
+
 		WebMenuItem version = new WebMenuItem("Build: "+Client.build);
 		help.add(version);
-		
+
 		help.addSeparator();
-		
+
 		WebMenuItem legal = new WebMenuItem("Legal");
 		legal.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
@@ -329,6 +335,7 @@ public class MenuPane extends WebMenuBar {
 
 				mainPane.add(legalPane, BorderLayout.CENTER);
 
+				//TODO: LegalPane
 				channelPaneDialog.setContentPane(mainPane);
 				channelPaneDialog.setLocationRelativeTo(Client.gui); 
 				channelPaneDialog.setTitle("Legal");
@@ -337,9 +344,9 @@ public class MenuPane extends WebMenuBar {
 			}
 		});
 		help.add(legal);
-		
+
 		help.addSeparator();
-		
+
 		WebMenuItem new_user = new WebMenuItem("New User Guide");
 		new_user.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
@@ -351,9 +358,9 @@ public class MenuPane extends WebMenuBar {
 			}
 		});
 		help.add(new_user);
-		
+
 		help.addSeparator();
-		
+
 		WebMenuItem enhancement = new WebMenuItem("Enhancement Request");
 		enhancement.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
@@ -364,15 +371,15 @@ public class MenuPane extends WebMenuBar {
 			}
 		});
 		help.add(enhancement);
-		
+
 		WebMenuItem bug = new WebMenuItem("Bug Report");
 		bug.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				Desktop desktop = Desktop.getDesktop(); 
 				try {
 					desktop.mail(new URI("mailto:kyle_armstrong@symantec.com?subject=SYMCRelay%20Bug%20Report&body=-"+Client.build+"-"+Client.getRelayConfiguration().getFormat()+
-				"-"+Client.getRelayConfiguration().getUndecoratedTogglable()+"-"+Client.getRelayConfiguration().getLogTogglable()+"-"+Client.getRelayConfiguration().getTrayBubbleTogglable()+
-				"-"+Client.getRelayConfiguration().getLNF()+"-"+Client.getRelayConfiguration().getAutoConnect()+"-"+Client.getRelayConfiguration().getAutoReconnect()+"-"));
+							"-"+Client.getRelayConfiguration().getUndecoratedTogglable()+"-"+Client.getRelayConfiguration().getLogTogglable()+"-"+Client.getRelayConfiguration().getTrayBubbleTogglable()+
+							"-"+Client.getRelayConfiguration().getLNF()+"-"+Client.getRelayConfiguration().getAutoConnect()+"-"+Client.getRelayConfiguration().getAutoReconnect()+"-"));
 				} catch (IOException | URISyntaxException e1) {Client.logger.error(e1.toString(), e1.getStackTrace());}
 			}
 		});

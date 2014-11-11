@@ -93,7 +93,7 @@ public class FormatColor {
 					if(pop && i > 0 && !Client.gui.isFocused()){
 						SystemTray tray = SystemTray.getSystemTray();
 						if(tray.getTrayIcons().length > 0){
-							String s_s = "[#"+channel.name+"] "+str_arr[i];
+							String s_s = "[#"+channel.getName()+"] "+str_arr[i];
 							if(Client.getRelayConfiguration().getTrayBubbleTogglable()){
 								tray.getTrayIcons()[0].displayMessage(name, s_s, MessageType.NONE);
 								tray.getTrayIcons()[0].addMouseListener(new MouseAdapter(){
@@ -104,7 +104,7 @@ public class FormatColor {
 										Client.gui.requestFocus();
 										Client.gui.setAlwaysOnTop(false);
 
-										Client.gui.tabbedPane.setSelectedIndex(Client.gui.tabbedPane.indexOfTab("#"+FormatColor.lastChannel.name));
+										Client.gui.tabbedPane.setSelectedIndex(Client.gui.tabbedPane.indexOfTab("#"+FormatColor.lastChannel.getName()));
 									}
 								});
 							}

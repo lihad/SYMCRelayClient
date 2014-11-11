@@ -25,8 +25,8 @@ public class CommandHandler {
 					String s_b = command.getRequest().replace("/me", Client.username);
 					
 					FormatColor.decodeTextPaneFormat(command.channel, command.pane.getStyledDocument(), FormatColor.encodeTextPaneFormat(null, s_b, Client.getRelayConfiguration().getFormat()) + "\n",false);
-					Client.logger.debug(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.name+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat())+":"+(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.name+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()).contains(Client.COMMAND)));
-					Client.sendString(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.name+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()));
+					Client.logger.debug(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat())+":"+(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()).contains(Client.COMMAND)));
+					Client.sendString(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()));
 				}
 				return true;
 			case "/i":
@@ -34,9 +34,17 @@ public class CommandHandler {
 					String s_b = command.getRequest().replace("/i", "");
 					
 					FormatColor.decodeTextPaneFormat(command.channel, command.pane.getStyledDocument(), Client.username+": "+FormatColor.encodeTextPaneFormat(null, s_b, Client.getRelayConfiguration().getFormat()+" b") + "\n",false);
-					Client.logger.debug(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.name+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat())+":"+(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.name+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()+" b").contains(Client.COMMAND)));
-					Client.sendString(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.name+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()+" b"));
+					Client.logger.debug(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat())+":"+(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()+" b").contains(Client.COMMAND)));
+					Client.sendString(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()+" b"));
 				}
+				return true;
+			case "/create":
+				Client.sendString(command.getCommand()+Client.COMMAND+command.getRequest());
+				return true;
+			case "/manage":
+				Client.logger.info("[COMMAND] processing" +command.getCommand()+Client.COMMAND+command.getRequest());
+
+				Client.sendString(command.getCommand()+Client.COMMAND+command.getRequest());
 				return true;
 			default: 
 				command.getTextPane().getDocument().insertString(command.getTextPane().getDocument().getLength(), "Invalid Command", null);

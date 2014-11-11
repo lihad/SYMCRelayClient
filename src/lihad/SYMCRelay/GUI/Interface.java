@@ -37,6 +37,8 @@ public class Interface extends WebFrame implements Runnable {
 	public TabPane tabbedPane;
 	public UserPane userPane;	
 	public MenuPane menuPane;
+	
+	public WebPanel mainPane;
 
 	/////////////////////////////////////////////////////////////////
 
@@ -89,7 +91,7 @@ public class Interface extends WebFrame implements Runnable {
 		
 		
 		// create main pane
-		WebPanel mainPane = new WebPanel(new BorderLayout());
+		mainPane = new WebPanel(new BorderLayout());
 		mainPane.add(statusPane, BorderLayout.SOUTH);
 		mainPane.add(menuPane, BorderLayout.NORTH);
 		mainPane.add(tabbedPane, BorderLayout.CENTER);
@@ -190,7 +192,7 @@ public class Interface extends WebFrame implements Runnable {
 				
 				FormatColor.decodeTextPaneFormat(e.getKey(),e.getKey().pane.getStyledDocument(), e.getValue().toString(), true);
 				for(int i = 0; i < tabbedPane.getTabCount(); i++){
-					if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(e.getKey().name)){
+					if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(e.getKey().getName())){
 						tabbedPane.setFlash(true,i,e.getValue().toString().contains(":"));
 					}
 				}

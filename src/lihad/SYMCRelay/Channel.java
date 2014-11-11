@@ -10,7 +10,6 @@ import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.JEditorPane;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -23,11 +22,9 @@ import lihad.SYMCRelay.Adapters.ActionAdapter;
 import lihad.SYMCRelay.Adapters.KeyAdapter;
 import lihad.SYMCRelay.Command.Command;
 import lihad.SYMCRelay.GUI.FormatColor;
-import lihad.SYMCRelay.GUI.WrapEditorKit;
 
 public class Channel {
 
-	public String name;
 	public JPanel panel;
 	public JTextPane pane;
 	public WebTextArea field;
@@ -37,13 +34,19 @@ public class Channel {
 	private JPopupMenu autofill = null;
 	public Linker handler= new Linker();
 
-	public Channel(final String n){
+	String name;
+
+	public String getName(){
+		return name;
+	}
+
+	public Channel(final String name){
 		channel = this;
-		name = n;
+		this.name = name;
 		pane = new JTextPane();
-		
+
 		pane.setEditorKit(new WrapEditorKit());
-		
+
 		pane.setEditable(false);
 		pane.setMinimumSize(new Dimension(0,0));
 		pane.setForeground(Color.black);
@@ -58,6 +61,7 @@ public class Channel {
 		field.setEnabled(false);
 		field.setFont(Client.font);
 		field.setLineWrap(true);
+		field.setDocument(new JTextFieldLimit(10000, true));
 		pane.addMouseListener(handler);
 		pane.addMouseMotionListener(handler);
 		field.addKeyListener(new KeyAdapter() {
@@ -114,11 +118,9 @@ public class Channel {
 						});
 
 						autofill.add(item);
-						Client.logger.debug("added "+user);
 					}
 					//autofill.setVisible(true);
 					autofill.show(field, 0, 0);
-					Client.logger.debug("focus requested 5");
 					field.requestFocus();
 				}
 			}

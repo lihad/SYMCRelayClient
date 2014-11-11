@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.swing.SwingUtilities;
 
 import com.alee.laf.WebLookAndFeel;
+import com.alee.utils.encryption.Base64;
 
 import lihad.SYMCRelay.Command.CommandHandler;
 import lihad.SYMCRelay.Configuration.RelayConfiguration;
@@ -27,7 +28,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 147;
+	public final static double build = 148;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -68,13 +69,15 @@ public class Client{
 	FORMAT = new Character((char)8).toString(), // this is always followed by a format code, followed by the format request
 	COUNT = new Character((char)9).toString(),
 	COMMAND = new Character((char)11).toString(),
-	IMPORTANT = new Character((char)12).toString();
+	IMPORTANT = new Character((char)12).toString(),
+	STATUS = new Character((char)13).toString();
 
 	// variables and stuff
 	public static ConnectionStatus connectionStatus = ConnectionStatus.DISCONNECTED;
 	public static ConnectionStatus previousStatus = connectionStatus;
 	public static Map<Channel, StringBuffer> toAppend;
-	public static StringBuffer toAppendUser = new StringBuffer(""), toSend = new StringBuffer("");
+	public static StringBuffer toAppendUser = new StringBuffer("");
+	public static List<StringBuffer> toSend = new LinkedList<StringBuffer>();
 
 	// TCP components
 	public static Socket socket;
@@ -91,7 +94,7 @@ public class Client{
 	public static Interface gui;
 
 	// all active channels + count; related to ChannelPane
-	public static Map<String, Integer> channelcount = new HashMap<String, Integer>();
+	public static List<UnconnectedChannel> unconnected_channels = new LinkedList<UnconnectedChannel>();
 	public static boolean isupdated = true;
 
 	/////////////////////////////////////////////////////////////////
@@ -109,7 +112,7 @@ public class Client{
 	// append to the user box
 	protected static void appendToUserBox(String s) {synchronized (toAppendUser) {toAppendUser.append(s);}}
 	// add text to the buffer
-	public static void sendString(String s) {synchronized (toSend) {toSend.append(s);}}
+	public static void sendString(String s) {synchronized (toSend) {toSend.add(new StringBuffer(s));}}
 
 	/////////////////////////////////////////////////////////////////
 
@@ -122,9 +125,9 @@ public class Client{
 			hearbeat_count = 0;
 			internal_hearbeat_count = 0;
 			last_user = "";
-			channelcount.clear();
+			unconnected_channels.clear();
 			toAppendUser = new StringBuffer("");
-			toSend = new StringBuffer("");
+			toSend.clear();
 		}catch (IOException e) {logger.error(e.toString(),e.getStackTrace());in = null;}
 	}
 
@@ -134,9 +137,33 @@ public class Client{
 
 	// get channel
 	public static Channel getChannel(String name){for(Channel c : channels.keySet())if(c.name.equalsIgnoreCase(name)) return c; return null;}
+	
+	public static boolean hasChannel(String name){for(Channel c : channels.keySet())if(c.name.equalsIgnoreCase(name)) return true; return false;}
+	
+	public static UnconnectedChannel getUnconnectedChannel(String name){for(UnconnectedChannel uc : unconnected_channels) if(uc.name.equalsIgnoreCase(name)) return uc; return null;}
+	
+	public static boolean hasUnconnectedChannel(String name){for(UnconnectedChannel uc : unconnected_channels) if(uc.name.equalsIgnoreCase(name)) return true; return false;}
 
 	//get an updated channel/user map
-	public static void updatechannelcount(){send(out, COUNT);isupdated = false;}
+	public static void updatechannelcount(String select, int timeout){
+		send(out, COUNT+select);
+		isupdated = false;
+
+		int count = 0;
+		while(!Client.isupdated){try {
+			Thread.sleep(10); 
+			if(count >= timeout) break; 
+			count++;
+		}catch (InterruptedException e1) {
+			Client.logger.error(e1.toString(),e1.getStackTrace());}
+		}
+
+	}
+	public static void updatechannelcount(String select){
+		updatechannelcount(select, 500);
+	}
+
+		
 
 	// notification to the server of join/leave
 	public static void channelJoinRequest(String chan){send(out, chan+CHANNEL_JOIN);}
@@ -219,18 +246,19 @@ public class Client{
 					// let the server know we've connected - format { <version> <username> <ip> <port> }
 					send(out,(build +" "+username+" "+InetAddress.getLocalHost().getHostAddress()+" "+InetAddress.getLocalHost().getHostName())); 
 
-					logger.debug("sent request");
+					logger.debug("grabbing pre-defined channel information");
+					
+					//load up public channels
+					updatechannelcount(null, 100);
 
-					// creates predefined channels (if not already open)
-					for(String dc : getRelayConfiguration().getDefaultChannels()){
-						if(!channels.keySet().contains(dc)) createGUIChannel(dc);
-					}	
+					logger.debug("sending requested channels ...");
+
 					// let the server know the channels we've opened
-					for(Channel channelname : channels.keySet()){
-						Client.channelJoinRequest(channelname.name);
+					for(String dc : getRelayConfiguration().getDefaultChannels()){
+						channelJoinRequest(dc);
 					}
-
-					logger.debug("channels created");
+					
+					logger.debug("channel requests sent");
 					d_on_d = false;
 				}
 				// if an error was thrown, then clean up any connection attempt made, and set to DISCONNECTING
@@ -246,10 +274,10 @@ public class Client{
 
 				try {
 					// if there is data to send, then send data
-					if (toSend.length() != 0) {
-						send(out, toSend+"");
-						toSend.setLength(0);
-
+					if (toSend.size() != 0) {
+						while(!toSend.isEmpty()){
+							send(out, toSend.remove(0)+"");
+						}
 						//TODO: why am i NULLing? because we want to update fields, tho connection status stays CONNECTED.  may need a better naming convention
 						changeStatusTS(ConnectionStatus.NULL, true, true);
 					}
@@ -266,12 +294,12 @@ public class Client{
 						 * 
 						 */
 						if ((s != null) &&  (s.length() != 0)) {
-							
+
 							// if server wants the client to disconnect, then we shall disconnect
 							if (s.equals(END_CHAT_SESSION.replace("\n", ""))) {
 								logger.info("force disconnection received. ["+s+"]");
 								changeStatusTS(ConnectionStatus.DISCONNECTING, true, true);
-								
+
 							}
 							// if server wants to notify the client of users connected. the server sends this request at a given interval,
 							//  so this is also used to drive the internal heartbeat
@@ -288,20 +316,40 @@ public class Client{
 								}
 
 							}
+							
+							else if(s.contains(CHANNEL_JOIN)){
+								String c = s.split(CHANNEL_JOIN)[1];
+								if(c.length()>0){
+									Channel chan = new Channel(c);
+									toAppend.put(chan, new StringBuffer());
+									channels.put(chan, new LinkedList<String>());
+									if(!getRelayConfiguration().containsDefaultChannel(chan.name))getRelayConfiguration().addDefaultChannel(chan.name);
+									
+									gui.tabbedPane.addTab("#"+chan.name, chan.panel);
+									changeStatusTS(ConnectionStatus.NULL, true, true);
+								}
+							}
 
 							// if the server wants to tell its version
+							else if(s.contains(STATUS)){
+								gui.statusPane.setInformation(s.replace(STATUS, ""));
+							}
+
 							else if(s.contains(VERSION)){
 								server_build=Double.parseDouble(s.replaceAll(VERSION, ""));
 							}
 
 							// if the server receive a COUNT request (used in channel viewer), then populate the channel/usercount map
 							else if (s.contains(COUNT)) {
-								channelcount.clear();
 								s = s.replaceAll(COUNT, "").replaceAll("\\{", "");
 								String[] arr = s.split("}");
 								for(int i = 0; i<arr.length; i++){
-									if(getChannel(arr[i].split("\\|")[0]) == null){
-										channelcount.put(arr[i].split("\\|")[0], Integer.parseInt(arr[i].split("\\|")[1]));
+									//name, size, owner, admins, des, marq, whitelist_enabled, whitelist, blacklist, password_enabled, private 
+									// 0     1      2       3      4    5           6             7             8              9         10
+									String[] u_p = arr[i].split("\\|");		
+									if(!hasUnconnectedChannel(u_p[0]) && u_p.length > 1){
+
+										unconnected_channels.add(new UnconnectedChannel(u_p[0], Integer.parseInt(u_p[1]), u_p[2], u_p[3], u_p[4], u_p[5], Boolean.parseBoolean(u_p[6]), u_p[7], u_p[8], Boolean.parseBoolean(u_p[9]), Boolean.parseBoolean(u_p[10])));	
 									}
 								}
 								isupdated = true;
@@ -309,18 +357,22 @@ public class Client{
 							// all else is received as text
 							else {
 								String[] arr = s.split(CHANNEL);
-								appendToChatBox(getChannel(arr[0]), arr[1] + "\n");
+								if(arr.length > 1){
+									appendToChatBox(getChannel(arr[0]), arr[1] + "\n");
 
-								//TODO: this may not belong here
-								if(!getChannel(arr[0]).handler.pressed)getChannel(arr[0]).pane.setCaretPosition(getChannel(arr[0]).pane.getDocument().getLength());
-								if(arr[1].split(FORMAT).length > 2)logger.info("["+arr[0]+"]"+arr[1].split(FORMAT)[0]+arr[1].split(FORMAT)[2]);
-								SYMCSound.playDing();
-								changeStatusTS(ConnectionStatus.NULL, true, true);
+									//TODO: this may not belong here
+									if(!getChannel(arr[0]).handler.pressed)getChannel(arr[0]).pane.setCaretPosition(getChannel(arr[0]).pane.getDocument().getLength());
+									if(arr[1].split(FORMAT).length > 2)logger.info("["+arr[0]+"]"+arr[1].split(FORMAT)[0]+arr[1].split(FORMAT)[2]);
+									SYMCSound.playDing();
+									changeStatusTS(ConnectionStatus.NULL, true, true);
+								}else{
+									logger.severe("received a message that was tied to nothing: "+s);
+								}
 							}
 						}
 					}
 				}
-				catch (IOException e) {
+				catch (IOException | ArrayIndexOutOfBoundsException e) {
 					logger.error(e.toString(),e.getStackTrace());
 					logger.severe("an error occurred in the main thread.  the main thread is still active, but I'm disconnecting from the server as a precaution.");
 					cleanup();
@@ -381,25 +433,15 @@ public class Client{
 		//relay has exited its main loop... which is not a good thing, and should be impossible
 	}
 	private static void send(PrintWriter pr, String s){
+		//logger.debug("sending "+s);
 		if(pr != null){pr.print(encode(s)+"\n"); pr.flush();}
 	}
+	
 	private static String encode(String string){
-		byte[] b_a = string.getBytes();
-		String s = "";
-		for(byte b : b_a)s = s.concat(b+".");
-		s = s.substring(0, s.length()-1);
-		return s;
+		return Base64.encode(string.getBytes()).replaceAll("\n", RETURN).replaceAll("\r",RETURN);
 	}
 	private static String decode(String s){
-		try {
-			String[] s_a = s.split("\\.");
-			byte[] b = new byte [s_a.length];
-			for(int k = 0; k<s_a.length;k++)b[k] = Byte.parseByte(s_a[k]);
-			return new String(b, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return "error";
-		}
+		return new String(Base64.decode(s.replace(RETURN, "\n")));
 	}
 	// changing any state (safe = true if thread-protected)
 	public static void changeStatusTS(ConnectionStatus newConnectStatus, boolean noerror, boolean safe) {
@@ -412,15 +454,18 @@ public class Client{
 		else gui.run();
 	}
 
+	/**
 	public static void createGUIChannel(String name){
 		for(Channel c : Client.channels.keySet())if(c.name.equalsIgnoreCase(name))return;
-		if(!getRelayConfiguration().containsDefaultChannel(name))getRelayConfiguration().addDefaultChannel(name);
-		Channel chan = new Channel(name);
+		//if(!getRelayConfiguration().containsDefaultChannel(name))getRelayConfiguration().addDefaultChannel(name);
+		//Channel chan = new Channel(name);
 		gui.tabbedPane.addTab("#"+chan.name, chan.panel);
-		toAppend.put(chan, new StringBuffer());
-		channels.put(chan, new LinkedList<String>());
+		//toAppend.put(chan, new StringBuffer());
+		//channels.put(chan, new LinkedList<String>());
 		changeStatusTS(ConnectionStatus.NULL, true, true);
 	}
+	*/
+	
 	private static void launcher(String[] args) throws URISyntaxException, IOException{
 
 		runtime = "java -Xms20m -Xmx45m -cp \""+Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().toASCIIString().replace("file:/", "").replace("%20", " ")+ "\""+((getRelayConfiguration().getLNF() != null && getRelayConfiguration().getLNF().length()>0) ? ";"+"\""+System.getenv("ProgramFiles")+"\\Relay\\LNF\\"+getRelayConfiguration().getLNF()+"\"" : "")+" lihad.SYMCRelay.Client launch";
