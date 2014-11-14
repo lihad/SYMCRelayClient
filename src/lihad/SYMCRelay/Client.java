@@ -28,7 +28,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 149;
+	public final static double build = 150;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -319,13 +319,19 @@ public class Client{
 							
 							else if(s.contains(CHANNEL_JOIN)){
 								String c = s.split(CHANNEL_JOIN)[1];
-								if(c.length()>0 && !channels.containsKey(c)){
+								if(c.length()>0  && !channels.containsKey(c)){
+									Client.logger.debug("creating channel: "+c);
 									Channel chan = new Channel(c);
 									toAppend.put(chan, new StringBuffer());
 									channels.put(chan, new LinkedList<String>());
 									if(!getRelayConfiguration().containsDefaultChannel(chan.name))getRelayConfiguration().addDefaultChannel(chan.name);
-									
-									gui.tabbedPane.addTab("#"+chan.name, chan.panel);
+									boolean create = true;
+									for(int i = 0; i < gui.tabbedPane.getTabCount(); i++){
+										if(gui.tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(chan.name)) create = false;
+										
+									}
+									if(create)gui.tabbedPane.addTab("#"+chan.name, chan.panel);
+
 									changeStatusTS(ConnectionStatus.NULL, true, true);
 								}
 							}
