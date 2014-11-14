@@ -61,7 +61,7 @@ public class UserPane extends WebPanel {
 		for(int i = 0; i<elements.length; i++){
 			if(elements[i].contains("#")){
 				channel = new DefaultMutableTreeNode(elements[i]);
-				try{Client.getChannel(channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_"))).unsync_userlist.clear();}catch(NullPointerException e){
+				try{Client.getChannel(channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_"))).getUnsynchronizedUsers().clear();}catch(NullPointerException e){
 					Client.logger.debug("UserPane just tried to update a channel user list and got it wrong: "+channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_")));
 				};
 				top.add(channel);
@@ -71,7 +71,7 @@ public class UserPane extends WebPanel {
 					user = new DefaultMutableTreeNode(elements[i]);
 					channel.add(user);
 					if(chan != null){
-						chan.unsync_userlist.add(elements[i]);
+						chan.getUnsynchronizedUsers().add(elements[i]);
 					}else{
 						Client.logger.debug("UserPane just tried to update a channel user list and got it wrong: "+channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_")));
 					}

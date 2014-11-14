@@ -36,6 +36,7 @@ public class MenuPane extends WebMenuBar {
 	private WebMenu relay, channel, customize, help;
 	private JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), updatePaneDialog = new JDialog(), lnfPaneDialog = new JDialog(), channelPaneDialog = new JDialog();
 	private ChannelPane chan_pane;
+	private ConnectionPane connect_pane;
 
 
 	public WebMenu getRelayMenu(){ return relay; }
@@ -63,12 +64,23 @@ public class MenuPane extends WebMenuBar {
 	public WebMenuItem getConnectItem(){  return connectItem; }
 
 	public WebMenuItem getDisconnectItem(){  return disconnectItem; }
+	
+	protected ChannelPane getChannelPane(){
+		return chan_pane;
+	}
 
 	public void closeChanPane(){
 		Client.gui.mainPane.remove(chan_pane);
 		Client.gui.pack();
 		Client.unconnected_channels.clear();
+		connectItem.setEnabled(true);
 		chan_pane = null;
+	}
+	
+	public void closeConnectPane(){
+		Client.gui.mainPane.remove(connect_pane);
+		Client.gui.pack();
+		connect_pane = null;
 	}
 	
 	public MenuPane(){
@@ -76,22 +88,18 @@ public class MenuPane extends WebMenuBar {
 		//build 'connect...' option listener
 		ActionAdapter connectListener = new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				if (e.getActionCommand().equals("connect")){
-					WebPanel mainPane = new WebPanel(new BorderLayout());
-					WebPanel connectionPane = new ConnectionPane();
+				if (e.getActionCommand().equals("connect")) {
+					
+					connect_pane = new ConnectionPane();
+					connect_pane.setSize(new Dimension(175, 200));
+					connect_pane.setVisible(true);					
+					Client.gui.mainPane.add(connect_pane, BorderLayout.WEST);
+					connectItem.setEnabled(false);
+					Client.gui.pack();
 
-					mainPane.add(connectionPane, BorderLayout.CENTER);
-					connectPaneDialog.setContentPane(mainPane);
-					connectPaneDialog.setSize(connectPaneDialog.getPreferredSize());
-					connectPaneDialog.setLocationRelativeTo(Client.gui); 
-					connectPaneDialog.pack();
-					connectPaneDialog.setVisible(true);
-				}
-				else{
+				}else{
 					for(;Client.gui.tabbedPane.getTabCount() > 0;){
-						Client.channelLeaveRequest(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", ""));
-						Client.channels.remove(Client.getChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", "")));
-						Client.gui.tabbedPane.remove((Client.gui.tabbedPane.getTabCount() - 1));
+						Client.getChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", "")).leave(false, Client.gui.tabbedPane.getTabCount() - 1);
 					}
 					Client.d_on_d = false;
 					Client.changeStatusTS(ConnectionStatus.DISCONNECTING, true, false);

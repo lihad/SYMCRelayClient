@@ -28,7 +28,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 151;
+	public final static double build = 152;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -136,9 +136,9 @@ public class Client{
 	/////////////////////////////////////////////////////////////////
 
 	// get channel
-	public static Channel getChannel(String name){for(Channel c : channels.keySet())if(c.name.equalsIgnoreCase(name)) return c; return null;}
+	public static Channel getChannel(String name){for(Channel c : channels.keySet())if(c.getName().equalsIgnoreCase(name)) return c; return null;}
 	
-	public static boolean hasChannel(String name){for(Channel c : channels.keySet())if(c.name.equalsIgnoreCase(name)) return true; return false;}
+	public static boolean hasChannel(String name){for(Channel c : channels.keySet())if(c.getName().equalsIgnoreCase(name)) return true; return false;}
 	
 	public static UnconnectedChannel getUnconnectedChannel(String name){for(UnconnectedChannel uc : unconnected_channels) if(uc.name.equalsIgnoreCase(name)) return uc; return null;}
 	
@@ -324,12 +324,12 @@ public class Client{
 									Channel chan = new Channel(c);
 									toAppend.put(chan, new StringBuffer());
 									channels.put(chan, new LinkedList<String>());
-									if(!getRelayConfiguration().containsDefaultChannel(chan.name))getRelayConfiguration().addDefaultChannel(chan.name);
+									if(!getRelayConfiguration().containsDefaultChannel(chan.getName()))getRelayConfiguration().addDefaultChannel(chan.getName());
 									boolean create = true;
 									for(int i = 0; i < gui.tabbedPane.getTabCount(); i++){
-										if(gui.tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(chan.name)) create = false;	
+										if(gui.tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(chan.getName())) create = false;	
 									}
-									if(create)gui.tabbedPane.addTab("#"+chan.name, chan.panel);
+									if(create)gui.tabbedPane.addTab("#"+chan.getName(), chan.getPanel());
 
 									changeStatusTS(ConnectionStatus.NULL, true, true);
 								}
@@ -365,7 +365,7 @@ public class Client{
 									appendToChatBox(getChannel(arr[0]), arr[1] + "\n");
 
 									//TODO: this may not belong here
-									if(!getChannel(arr[0]).handler.pressed)getChannel(arr[0]).pane.setCaretPosition(getChannel(arr[0]).pane.getDocument().getLength());
+									if(!getChannel(arr[0]).isInteracted())getChannel(arr[0]).getTextPane().setCaretPosition(getChannel(arr[0]).getTextPane().getDocument().getLength());
 									if(arr[1].split(FORMAT).length > 2)logger.info("["+arr[0]+"]"+arr[1].split(FORMAT)[0]+arr[1].split(FORMAT)[2]);
 									SYMCSound.playDing();
 									changeStatusTS(ConnectionStatus.NULL, true, true);

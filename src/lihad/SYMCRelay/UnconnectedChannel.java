@@ -2,9 +2,6 @@ package lihad.SYMCRelay;
 
 public class UnconnectedChannel {
 
-	//name, size, owner, admins, des, whitelist_enabled, password_enabled, private 
-
-
 	String name;
 	int size;
 	String owner;
@@ -13,52 +10,66 @@ public class UnconnectedChannel {
 	String marquee;
 	String whitelist;
 	String blacklist;
-	boolean whitelist_enabled, password, privat;
+	boolean whitelist_enabled, password_enabled, privat;
 
 	public String getName(){
-		return name;
+		return this.name;
 	}
-	
+
 	public int getUserCount(){
-		return size;
+		return this.size;
 	}
-	
+
 	public String getOwner(){
-		return owner;
+		return this.owner;
 	}
-	
+
 	public String getAdmins(){
-		return admins;
+		return this.admins;
 	}
-	
+
 	public String getDescription(){
-		return des;
+		return this.des;
 	}
-	
+
 	public String getMarquee(){
-		return marquee;
+		return this.marquee;
 	}
-	
+
 	public boolean hasWhitelist(){
-		return whitelist_enabled;
+		return this.whitelist_enabled;
 	}
-	
+
 	public String getWhitelist(){
-		return whitelist;
+		return this.whitelist;
 	}
-	
+
 	public String getBlacklist(){
-		return blacklist;
+		return this.blacklist;
 	}
-	
+
 	public boolean hasPassword(){
-		return password;
+		return this.password_enabled;
 	}
-	
+
 	public boolean isPrivate(){
-		return privat;
+		return this.privat;
 	}
-	
-	//name, size, owner, admins, des, marq, whitelist_enabled, whitelist, blacklist, password_enabled, private 
-	UnconnectedChannel(String n, int s, String o, String a, String d, String m, boolean w, String wh, String b, boolean p, boolean pri){name=n; size=s; owner=o; admins=a; des=d; marquee=m; whitelist_enabled=w; whitelist=wh; blacklist=b; password=p; privat=pri;}
+
+	/**
+	 * 
+	 * @param name defines the name of the Channel
+	 * @param size defines the current count of users connected
+	 * @param owner defines the owner
+	 * @param admins defines the admins associated with the channel (delimited)
+	 * @param description defines the channel description
+	 * @param marquee defines the channel marquee
+	 * @param whitelist_enabled defines whether the whitelist is being utilized
+	 * @param whitelist defines the whitelist (delimited)
+	 * @param blacklist defines the blacklist (delimited)
+	 * @param password_enabled defines whether or not a password is used.
+	 * @param privat defines whether or not the channel is private
+	 */
+	UnconnectedChannel(String name, int size, String owner, String admins, String description, String marquee, boolean whitelist_enabled, String whitelist, String blacklist, boolean password_enabled, boolean privat){
+		this.name=name; this.size=size; this.owner=owner; this.admins=admins; this.des=description; this.marquee=marquee; this.whitelist_enabled=whitelist_enabled; this.whitelist=whitelist; this.blacklist=blacklist; this.password_enabled=password_enabled; this.privat=privat;}
 }

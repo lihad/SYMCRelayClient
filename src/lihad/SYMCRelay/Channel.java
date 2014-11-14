@@ -25,32 +25,90 @@ import lihad.SYMCRelay.GUI.FormatColor;
 
 public class Channel {
 
-	public JPanel panel;
-	public JTextPane pane;
-	public WebTextArea field;
-	public Channel channel;
-	public List<String> unsync_userlist = new LinkedList<String>(); //TODO: accuracy?... maybe 
-	public boolean pingfill = false;
+	private JPanel panel;
+	private JTextPane pane;
+	private WebTextArea field;
+	private Channel channel;
+	private List<String> unsync_userlist = new LinkedList<String>();
+	private boolean pingfill = false;
 	private JPopupMenu autofill = null;
-	public Linker handler= new Linker();
+	private Linker linker = new Linker();
+	private String name;
 
-	String name;
-
+	/**
+	 * 
+	 * @return Returns the name of this channel
+	 */
 	public String getName(){
-		return name;
+		return this.name;
+	}
+	
+	/**
+	 * 
+	 * @return Returns 'true' if the user is actively holding a mouse button down with a the text pane
+	 */
+	public boolean isInteracted(){
+		return this.linker.pressed;
+	}
+	
+	/**
+	 * 
+	 * @return Returns the physical panel for all channel components.
+	 */
+	public JPanel getPanel(){
+		return this.panel;
+	}
+	
+	/**
+	 * 
+	 * @return Returns the text pane that all text for the channel is displayed into.
+	 */
+	public JTextPane getTextPane(){
+		return this.pane;
+	}
+	
+	/**
+	 * 
+	 * @return Returns the physical text field users type into.
+	 */
+	public WebTextArea getTextField(){
+		return this.field;
+	}
+	
+	/**
+	 * 
+	 * @return Returns a list of usernames that may be associated with this channel.
+	 */
+	public List<String> getUnsynchronizedUsers(){
+		return this.unsync_userlist;
+	}
+	
+	/**
+	 * Removes this channel from the view pane, and orphans it.
+	 * 
+	 * @param remove_default Defines whether this channel should be removed from the list of default startup channels.
+	 * @param tab_index Defines the tab to close by leaving this channel.
+	 */
+	public void leave(boolean remove_default, int tab_index){
+		Client.channelLeaveRequest(this.name);
+		if(remove_default)Client.getRelayConfiguration().removeDefaultChannel(this.name);
+		Client.channels.remove(this);
+		Client.gui.tabbedPane.remove(tab_index);
 	}
 
-	public Channel(final String name){
+	protected Channel(final String name){		
 		channel = this;
 		this.name = name;
 		pane = new JTextPane();
 
 		pane.setEditorKit(new WrapEditorKit());
-
 		pane.setEditable(false);
 		pane.setMinimumSize(new Dimension(0,0));
 		pane.setForeground(Color.black);
 		pane.setFont(Client.font);
+		pane.addMouseListener(linker);
+		pane.addMouseMotionListener(linker);
+		
 		WebScrollPane chatTextPane = new WebScrollPane(pane);
 		chatTextPane.setVerticalScrollBarPolicy(WebScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		chatTextPane.setHorizontalScrollBarPolicy(WebScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -62,8 +120,6 @@ public class Channel {
 		field.setFont(Client.font);
 		field.setLineWrap(true);
 		field.setDocument(new JTextFieldLimit(10000, true));
-		pane.addMouseListener(handler);
-		pane.addMouseMotionListener(handler);
 		field.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {				
 				if(e.getKeyCode() == KeyEvent.VK_ENTER){
@@ -103,9 +159,7 @@ public class Channel {
 					return;
 				}
 				if(pingfill){
-					//TODO: this may be screwy
 					String s = (field.getText()+e.getKeyChar()).substring((field.getText()+e.getKeyChar()).lastIndexOf("@")+1);
-
 					autofill = new JPopupMenu();
 
 					for(String user : Channel.this.unsync_userlist) if(user.toLowerCase().contains(s.toLowerCase()) && !user.equalsIgnoreCase(Client.username)){
@@ -119,7 +173,6 @@ public class Channel {
 
 						autofill.add(item);
 					}
-					//autofill.setVisible(true);
 					autofill.show(field, 0, 0);
 					field.requestFocus();
 				}

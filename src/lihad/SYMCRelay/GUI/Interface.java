@@ -110,9 +110,7 @@ public class Interface extends WebFrame implements Runnable {
 			public void windowClosing(WindowEvent we) {
 				try{
 					for(;Client.gui.tabbedPane.getTabCount() > 0;){
-						Client.channelLeaveRequest(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", ""));
-						Client.channels.remove(Client.getChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", "")));
-						Client.gui.tabbedPane.remove((Client.gui.tabbedPane.getTabCount() - 1));
+						Client.getChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", "")).leave(false, Client.gui.tabbedPane.getTabCount() - 1);
 					}
 					Client.changeStatusTS(ConnectionStatus.DISCONNECTING, true, false);
 				}catch(Exception e){}
@@ -164,8 +162,8 @@ public class Interface extends WebFrame implements Runnable {
 		menuPane.getDisconnectItem().setEnabled(db);
 		menuPane.getChannelJoinItem().setEnabled(cha);
 
-		if(clt != null)for(Channel ch : Client.channels.keySet()) ch.field.setText(clt); 
-		for(Channel ch : Client.channels.keySet()) ch.field.setEnabled(clb);
+		if(clt != null)for(Channel ch : Client.channels.keySet()) ch.getTextField().setText(clt); 
+		for(Channel ch : Client.channels.keySet()) ch.getTextField().setEnabled(clb);
 		statusPane.getStatusColor().setBackground(c);		
 	}
 	
@@ -190,7 +188,7 @@ public class Interface extends WebFrame implements Runnable {
 					s_b = s_b.replace(Client.IMPORTANT, "");
 				}
 				
-				FormatColor.decodeTextPaneFormat(e.getKey(),e.getKey().pane.getStyledDocument(), e.getValue().toString(), true);
+				FormatColor.decodeTextPaneFormat(e.getKey(),e.getKey().getTextPane().getStyledDocument(), e.getValue().toString(), true);
 				for(int i = 0; i < tabbedPane.getTabCount(); i++){
 					if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(e.getKey().getName())){
 						tabbedPane.setFlash(true,i,e.getValue().toString().contains(":"));

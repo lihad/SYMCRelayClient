@@ -54,27 +54,19 @@ public class TabPane extends WebTabbedPane{
 			public void mouseClicked(MouseEvent event) {
 				if(SwingUtilities.isRightMouseButton(event)){
 					int index = TabPane.this.indexAtLocation(event.getX(), event.getY());
-
-					//TODO: similar code
-					Client.channelLeaveRequest(TabPane.this.getTitleAt(index).replace("#", ""));
-					Client.getRelayConfiguration().removeDefaultChannel(TabPane.this.getTitleAt(index).replace("#", ""));
-					Client.channels.remove(Client.getChannel(TabPane.this.getTitleAt(index).replace("#", "")));
-					
+					Client.getChannel(TabPane.this.getTitleAt(index).replace("#", "")).leave(true, index);					
 					
 					// debug
 					String t = "";
 					for(Channel c : Client.channels.keySet()) t = t.concat(c.getName()+" ");
-					
 					Client.logger.debug("channels now contain: "+t);
 					
 					////////
 					
-					
-					TabPane.this.remove(index);
 				}else if(SwingUtilities.isLeftMouseButton(event)){
 					int index = TabPane.this.indexAtLocation(event.getX(), event.getY());
 					if(index >= 0){
-						Client.getChannel(TabPane.this.getTitleAt(index).replace("#", "")).field.requestFocusInWindow();
+						Client.getChannel(TabPane.this.getTitleAt(index).replace("#", "")).getTextField().requestFocusInWindow();
 						Client.gui.userPane.expandChannel(TabPane.this.getTitleAt(index).replaceFirst("#", ""));
 					}
 				}
