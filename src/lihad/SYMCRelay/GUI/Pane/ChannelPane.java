@@ -52,20 +52,24 @@ public class ChannelPane extends WebPanel{
 
 
 	private void searchChannel(){
-		Client.updatechannelcount(search_field.getText());
+		searchChannel(search_field.getText());
+	}
+	
+	private void searchChannel(String string){
+		Client.updatechannelcount(string);
 		searchButton.setVisible(false);
 
-		if(Client.hasChannel(search_field.getText())){
-			displayAlreadyJoined(search_field.getText());
-			Client.logger.debug("does the channel '"+search_field.getText()+"' exist? "+Client.hasUnconnectedChannel(search_field.getText()));
-			if(Client.hasUnconnectedChannel(search_field.getText()) && Client.getUnconnectedChannel(search_field.getText()).getOwner().equalsIgnoreCase(Client.username))manageButton.setVisible(true);
-		}else if(Client.hasUnconnectedChannel(search_field.getText())){
+		if(Client.hasChannel(string)){
+			displayAlreadyJoined(string);
+			Client.logger.debug("does the channel '"+string+"' exist? "+Client.hasUnconnectedChannel(string));
+			if(Client.hasUnconnectedChannel(string) && Client.getUnconnectedChannel(string).getOwner().equalsIgnoreCase(Client.username))manageButton.setVisible(true);
+		}else if(Client.hasUnconnectedChannel(string)){
 			joinButton.setVisible(true);
-			if(Client.getUnconnectedChannel(search_field.getText()).getOwner().equalsIgnoreCase(Client.username))manageButton.setVisible(true);
-			displaySearchedInfo(search_field.getText());
+			if(Client.getUnconnectedChannel(string).getOwner().equalsIgnoreCase(Client.username))manageButton.setVisible(true);
+			displaySearchedInfo(string);
 		}else{
 			createButton.setVisible(true);
-			displayNotFound(search_field.getText());
+			displayNotFound(string);
 		}
 	}
 
@@ -197,6 +201,9 @@ public class ChannelPane extends WebPanel{
 		});
 		channelIncludedList.addKeyListener(new KeyAdapter(){
 			public void keyReleased(KeyEvent e){
+				searchButton.setVisible(false);
+				createButton.setVisible(false);
+				manageButton.setVisible(false);
 				displaySelectedInfo();
 			}
 		});
@@ -814,7 +821,9 @@ public class ChannelPane extends WebPanel{
 	private void displaySelectedInfo(){
 		int[] indexes = channelIncludedList.getSelectedIndices();
 		int index = indexes[0];
-
+		search_field.setText(channelIncludedList.getModel().getElementAt(index).toString().split(" ")[0]);
+		searchChannel(channelIncludedList.getModel().getElementAt(index).toString().split(" ")[0]);
+		/**
 		for(UnconnectedChannel uc : Client.unconnected_channels){
 			if(uc.getName().equalsIgnoreCase(channelIncludedList.getModel().getElementAt(index).toString().split(" ")[0])){
 				details_area.setText("[#"+uc.getName()+"] {"+(uc.isPrivate() ? "+p" : "-p")+(uc.hasPassword() ? "~p" : "")+(uc.hasWhitelist() ? "+w" : "")+"} : "+uc.getOwner().toLowerCase()+
@@ -824,6 +833,7 @@ public class ChannelPane extends WebPanel{
 				password_entered_field.setText(null);
 			}
 		}
+		*/
 	}
 
 	private void displaySearchedInfo(String search){

@@ -28,7 +28,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 public class Client{
 
-	public final static double build = 150;
+	public final static double build = 151;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -160,7 +160,7 @@ public class Client{
 
 	}
 	public static void updatechannelcount(String select){
-		updatechannelcount(select, 500);
+		updatechannelcount(select, 200);
 	}
 
 		
@@ -319,7 +319,7 @@ public class Client{
 							
 							else if(s.contains(CHANNEL_JOIN)){
 								String c = s.split(CHANNEL_JOIN)[1];
-								if(c.length()>0  && !channels.containsKey(c)){
+								if(c.length()>0  && !hasChannel(c)){
 									Client.logger.debug("creating channel: "+c);
 									Channel chan = new Channel(c);
 									toAppend.put(chan, new StringBuffer());
@@ -327,8 +327,7 @@ public class Client{
 									if(!getRelayConfiguration().containsDefaultChannel(chan.name))getRelayConfiguration().addDefaultChannel(chan.name);
 									boolean create = true;
 									for(int i = 0; i < gui.tabbedPane.getTabCount(); i++){
-										if(gui.tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(chan.name)) create = false;
-										
+										if(gui.tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(chan.name)) create = false;	
 									}
 									if(create)gui.tabbedPane.addTab("#"+chan.name, chan.panel);
 
@@ -354,7 +353,6 @@ public class Client{
 									// 0     1      2       3      4    5           6             7             8              9         10
 									String[] u_p = arr[i].split("\\|");		
 									if(!hasUnconnectedChannel(u_p[0]) && u_p.length > 1){
-
 										unconnected_channels.add(new UnconnectedChannel(u_p[0], Integer.parseInt(u_p[1]), u_p[2], u_p[3], u_p[4], u_p[5], Boolean.parseBoolean(u_p[6]), u_p[7], u_p[8], Boolean.parseBoolean(u_p[9]), Boolean.parseBoolean(u_p[10])));	
 									}
 								}
