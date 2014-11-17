@@ -33,6 +33,7 @@ public class ChannelManagePane extends WebPanel {
 	private WebPanel manage_center_admins, manage_center_desc_marq, manage_center_whitelist, manage_center_blacklist, manage_center_password;
 	private WebList admins_list, whitelist_list, blacklist_list;
 	private WebTextField add_field, add_whitelist_field, add_blacklist_field, password_modify_field;
+	private ChannelPane channelpane;
 
 	WebPanel manage_south_button_options = new WebPanel(new GridLayout(3,2));
 	WebButton blacklist = new WebButton("blacklist");
@@ -40,29 +41,45 @@ public class ChannelManagePane extends WebPanel {
 	WebButton admins = new WebButton("admins");
 	WebButton password = new WebButton("password");
 	WebButton descriptions = new WebButton("descriptions");
+	
+	private void resetManagePane(WebPanel active){
+		manage_south_button_options.removeAll();
+		manage_south_button_options.add(blacklist);
+		manage_south_button_options.add(whitelist);
+		manage_south_button_options.add(admins);
+		manage_south_button_options.add(password);
+		manage_south_button_options.add(channelpane.private_box);
+		manage_south_button_options.add(channelpane.whitelist_box);
+		
+		manage_center_admins.setVisible(false);
+		manage_center_whitelist.setVisible(false);
+		manage_center_blacklist.setVisible(false);
+		manage_center_desc_marq.setVisible(false);
+		manage_center_password.setVisible(false);
+		
+		active.setVisible(true);
+		
+		channelpane.validate();
+	}
+	
+	private WebList buildWeblist(String delimited_string){
+		DefaultListModel<String> m_b = new DefaultListModel<String>();
+		List<String> l_b = new LinkedList<String>((Arrays.asList(delimited_string.split(","))));
+		l_b.remove("");
+		String[] a_w = l_b.toArray(new String[0]);
+
+		Arrays.sort(a_w);
+
+		for(String s : a_w)m_b.addElement(s);
+
+		return new WebList(m_b);
+	}
 
 	public ChannelManagePane(final ChannelPane channelpane){
+		this.channelpane = channelpane;
 
 		UnconnectedChannel uc = Client.getUnconnectedChannel(channelpane.search_field.getText());
-		/**
-		 * 									}else if(s.split(COMMAND)[0].equalsIgnoreCase("/manage")){
-										//manageCOMMANDchannel`thing`variable
-										s = s.split(COMMAND)[1];
-										String[] a_s = s.split("`");
-										switch(a_s[1]){
-										case "dsrp": getChannel(a_s[0]).dsrp = a_s[2];
-										case "marquee": getChannel(a_s[0]).marquee = Arrays.asList(a_s[2].split("\\\\n"));
-										case "admins": getChannel(a_s[0]).admins = Arrays.asList(a_s[2].split("\\\\n"));
-										case "white_list": getChannel(a_s[0]).white_list = Arrays.asList(a_s[2].split("\\\\n"));
-										case "white_list_enabled": getChannel(a_s[0]).white_list_enabled = Boolean.parseBoolean(a_s[2]);
-										case "black_list": getChannel(a_s[0]).black_list = Arrays.asList(a_s[2].split("\\\\n"));
-										case "password": getChannel(a_s[0]).password = a_s[2];
-										case "privat": getChannel(a_s[0]).privat = Boolean.parseBoolean(a_s[2]);
-										}
-									}
-		 * 
-		 * 
-		 */
+
 		WebPanel north_panel = new WebPanel();
 		WebPanel center_panel = new WebPanel();
 		WebPanel center_panel_flow = new WebPanel(new FlowLayout(0,0,0));
@@ -85,8 +102,7 @@ public class ChannelManagePane extends WebPanel {
 		manage_center_password = new WebPanel();
 
 		///////// desc and marq
-		WebPanel description_panel = new WebPanel();
-		WebPanel marquee_panel = new WebPanel();
+		WebPanel description_panel = new WebPanel(), marquee_panel = new WebPanel();
 
 		channelpane.description_area = new JTextArea(5, 20);
 		channelpane.marquee_area = new JTextArea(5, 20);
@@ -110,16 +126,7 @@ public class ChannelManagePane extends WebPanel {
 		WebPanel north_admins_list_panel = new WebPanel();
 		WebPanel center_admins_buttons_panel = new WebPanel();
 
-		DefaultListModel<String> m_a = new DefaultListModel<String>();
-		List<String> l = new LinkedList<String>((Arrays.asList(uc.getAdmins().split(","))));
-		l.remove("");
-		String[] a = l.toArray(new String[0]);
-
-		Arrays.sort(a);
-
-		for(String s : a)m_a.addElement(s);
-
-		admins_list = new WebList(m_a);
+		admins_list = buildWeblist(uc.getAdmins());
 
 		WebScrollPane admins_scroll_pane = new WebScrollPane(admins_list);
 		admins_scroll_pane.getVerticalScrollBar().setUnitIncrement(32);
@@ -145,6 +152,7 @@ public class ChannelManagePane extends WebPanel {
 				((DefaultListModel)admins_list.getModel()).remove(admins_list.getSelectedIndex());
 			}
 		});
+		
 		WebPanel add_panel = new WebPanel();
 		add_panel.add(add_field, BorderLayout.WEST);
 		add_panel.add(add, BorderLayout.EAST);
@@ -158,22 +166,12 @@ public class ChannelManagePane extends WebPanel {
 
 		center_panel_flow.add(manage_center_admins);
 
-
 		///////// whitelist
 
 		WebPanel north_whitelist_list_panel = new WebPanel();
 		WebPanel center_whitelist_buttons_panel = new WebPanel();
 
-		DefaultListModel<String> m_b = new DefaultListModel<String>();
-		List<String> l_b = new LinkedList<String>((Arrays.asList(uc.getWhitelist().split(","))));
-		l_b.remove("");
-		String[] a_w = l_b.toArray(new String[0]);
-
-		Arrays.sort(a_w);
-
-		for(String s : a_w)m_b.addElement(s);
-
-		whitelist_list = new WebList(m_b);
+		whitelist_list = buildWeblist(uc.getWhitelist());
 
 		WebScrollPane whitelist_scroll_pane = new WebScrollPane(whitelist_list);
 		whitelist_scroll_pane.getVerticalScrollBar().setUnitIncrement(32);
@@ -217,16 +215,7 @@ public class ChannelManagePane extends WebPanel {
 		WebPanel north_blacklist_list_panel = new WebPanel();
 		WebPanel center_blacklist_buttons_panel = new WebPanel();
 
-		DefaultListModel<String> m_c = new DefaultListModel<String>();
-		List<String> l_c = new LinkedList<String>((Arrays.asList(uc.getBlacklist().split(","))));
-		l_c.remove("");
-		String[] a_b = l_c.toArray(new String[0]);
-
-		Arrays.sort(a_b);
-
-		for(String s : a_b)m_c.addElement(s);
-
-		blacklist_list = new WebList(m_c);
+		blacklist_list = buildWeblist(uc.getBlacklist());
 
 		WebScrollPane blacklist_scroll_pane = new WebScrollPane(blacklist_list);
 		blacklist_scroll_pane.getVerticalScrollBar().setUnitIncrement(32);
@@ -252,6 +241,7 @@ public class ChannelManagePane extends WebPanel {
 				((DefaultListModel)blacklist_list.getModel()).remove(blacklist_list.getSelectedIndex());
 			}
 		});
+		
 		WebPanel add_blacklist_panel = new WebPanel();
 		add_blacklist_panel.add(add_blacklist_field, BorderLayout.WEST);
 		add_blacklist_panel.add(add_blacklist, BorderLayout.EAST);
@@ -289,107 +279,33 @@ public class ChannelManagePane extends WebPanel {
 
 		descriptions.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				manage_south_button_options.removeAll();
-				manage_south_button_options.add(blacklist);
-				manage_south_button_options.add(whitelist);
-				manage_south_button_options.add(admins);
-				manage_south_button_options.add(password);
-				manage_south_button_options.add(channelpane.private_box);
-				manage_south_button_options.add(channelpane.whitelist_box);
-
-				manage_center_admins.setVisible(false);
-				manage_center_whitelist.setVisible(false);
-				manage_center_blacklist.setVisible(false);
-				manage_center_desc_marq.setVisible(true);
-				manage_center_password.setVisible(false);
-
-				channelpane.validate();
+				resetManagePane(manage_center_desc_marq);
 			}
 		});
 
 		blacklist.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				manage_south_button_options.removeAll();
-				manage_south_button_options.add(descriptions);
-				manage_south_button_options.add(whitelist);
-				manage_south_button_options.add(admins);
-				manage_south_button_options.add(password);
-				manage_south_button_options.add(channelpane.private_box);
-				manage_south_button_options.add(channelpane.whitelist_box);
-
-				manage_center_admins.setVisible(false);
-				manage_center_whitelist.setVisible(false);
-				manage_center_blacklist.setVisible(true);
-				manage_center_desc_marq.setVisible(false);
-				manage_center_password.setVisible(false);
-
-				channelpane.validate();
+				resetManagePane(manage_center_blacklist);
 			}
 		});
 
 		whitelist.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				manage_south_button_options.removeAll();
-				manage_south_button_options.add(descriptions);
-				manage_south_button_options.add(blacklist);
-				manage_south_button_options.add(admins);
-				manage_south_button_options.add(password);
-				manage_south_button_options.add(channelpane.private_box);
-				manage_south_button_options.add(channelpane.whitelist_box);
-
-				manage_center_admins.setVisible(false);
-				manage_center_whitelist.setVisible(true);
-				manage_center_blacklist.setVisible(false);
-				manage_center_desc_marq.setVisible(false);
-				manage_center_password.setVisible(false);
-
-
-				channelpane.validate();
+				resetManagePane(manage_center_whitelist);
 			}
 		});
 
 		admins.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				manage_south_button_options.removeAll();
-				manage_south_button_options.add(descriptions);
-				manage_south_button_options.add(blacklist);
-				manage_south_button_options.add(whitelist);
-				manage_south_button_options.add(password);
-				manage_south_button_options.add(channelpane.private_box);
-				manage_south_button_options.add(channelpane.whitelist_box);
-
-				manage_center_admins.setVisible(true);
-				manage_center_whitelist.setVisible(false);
-				manage_center_blacklist.setVisible(false);
-				manage_center_desc_marq.setVisible(false);
-				manage_center_password.setVisible(false);
-
-
-				channelpane.validate();
+				resetManagePane(manage_center_admins);
 			}
 		});
 
 		password.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				manage_south_button_options.removeAll();
-				manage_south_button_options.add(descriptions);
-				manage_south_button_options.add(blacklist);
-				manage_south_button_options.add(whitelist);
-				manage_south_button_options.add(admins);
-				manage_south_button_options.add(channelpane.private_box);
-				manage_south_button_options.add(channelpane.whitelist_box);
-
-				manage_center_admins.setVisible(false);
-				manage_center_whitelist.setVisible(false);
-				manage_center_blacklist.setVisible(false);
-				manage_center_desc_marq.setVisible(false);
-				manage_center_password.setVisible(true);
-
-
-				channelpane.validate();
+				resetManagePane(manage_center_password);
 			}
 		});		
-
 
 		manage_south_button_options.add(blacklist);
 		manage_south_button_options.add(whitelist);
@@ -397,7 +313,6 @@ public class ChannelManagePane extends WebPanel {
 		manage_south_button_options.add(password);
 		manage_south_button_options.add(channelpane.private_box);
 		manage_south_button_options.add(channelpane.whitelist_box);
-
 
 		center_panel_flow.add(manage_center_desc_marq);
 		center_panel.add(center_panel_flow, BorderLayout.CENTER);
@@ -424,6 +339,16 @@ public class ChannelManagePane extends WebPanel {
 		});
 
 		accept.addActionListener(new ActionAdapter() {
+			@SuppressWarnings("rawtypes")
+			private String listStringBuilder(WebList list){
+				String returned = "";
+				for(int i = 0; i < ((DefaultListModel)list.getModel()).size(); i++){
+					returned = returned.concat(((DefaultListModel)list.getModel()).getElementAt(i).toString());
+					if(((DefaultListModel)list.getModel()).size()-1 > i)returned = returned.concat(";");
+				}
+				return returned;
+			}
+			
 			public void actionPerformed(ActionEvent e) {
 
 				//create name, dsrp, marq, admins, black, white, password, private, owner
@@ -431,25 +356,12 @@ public class ChannelManagePane extends WebPanel {
 
 				//manageCOMMANDchannel`thing`variable
 
-				String admins = "";
-				for(int i = 0; i < ((DefaultListModel)admins_list.getModel()).size(); i++){
-					admins = admins.concat(((DefaultListModel)admins_list.getModel()).getElementAt(i).toString());
-					if(((DefaultListModel)admins_list.getModel()).size()-1 > i)admins = admins.concat(";");
-				}
+				String admins = listStringBuilder(admins_list);
+				String whitelist = listStringBuilder(whitelist_list);
+				String blacklist = listStringBuilder(blacklist_list);
 
-				String whitelist = "";
-				for(int i = 0; i < ((DefaultListModel)whitelist_list.getModel()).size(); i++){
-					whitelist = whitelist.concat(((DefaultListModel)whitelist_list.getModel()).getElementAt(i).toString());
-					if(((DefaultListModel)whitelist_list.getModel()).size()-1 > i)whitelist = whitelist.concat(";");
-				}
-
-				String blacklist = "";
-				for(int i = 0; i < ((DefaultListModel)blacklist_list.getModel()).size(); i++){
-					blacklist = blacklist.concat(((DefaultListModel)blacklist_list.getModel()).getElementAt(i).toString());
-					if(((DefaultListModel)blacklist_list.getModel()).size()-1 > i)blacklist = blacklist.concat(";");
-				}
-
-				String[] commands = new String[]{"/manage "+channelpane.search_field.getText()+"`"+"dsrp"+"`"+channelpane.description_area.getText(),
+				String[] commands = new String[]{
+						"/manage "+channelpane.search_field.getText()+"`"+"dsrp"+"`"+channelpane.description_area.getText(),
 						"/manage "+channelpane.search_field.getText()+"`"+"marquee"+"`"+channelpane.marquee_area.getText(),
 						"/manage "+channelpane.search_field.getText()+"`"+"admins"+"`"+admins,
 						"/manage "+channelpane.search_field.getText()+"`"+"white_list"+"`"+whitelist,
@@ -459,7 +371,6 @@ public class ChannelManagePane extends WebPanel {
 						"/manage "+channelpane.search_field.getText()+"`"+"privat"+"`"+channelpane.private_box.isSelected()};
 
 				for(String com : commands){Client.handler.process(new Command(com, "/manage", com.split("`"), null, null));}
-
 				Client.gui.menuPane.closeChanPane();
 			}
 		});

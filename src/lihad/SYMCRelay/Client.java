@@ -21,14 +21,12 @@ import lihad.SYMCRelay.Startup.PreInterfaceSounds;
 import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 
 /**
- *  
  * @author Kyle_Armstrong
- *
  */
 
 public class Client{
 
-	public final static double build = 152;
+	public final static double build = 153;
 	protected final static double config_build = 104;
 	public static double server_build = 0;
 
@@ -161,9 +159,7 @@ public class Client{
 	}
 	public static void updatechannelcount(String select){
 		updatechannelcount(select, 200);
-	}
-
-		
+	}	
 
 	// notification to the server of join/leave
 	public static void channelJoinRequest(String chan){send(out, chan+CHANNEL_JOIN);}
@@ -450,25 +446,10 @@ public class Client{
 	// changing any state (safe = true if thread-protected)
 	public static void changeStatusTS(ConnectionStatus newConnectStatus, boolean noerror, boolean safe) {
 		if (newConnectStatus != ConnectionStatus.NULL) {connectionStatus = newConnectStatus;}
-		//if (!noerror) {statusString = statusMessages[connectionStatus];}
-		//else {statusString = statusMessages[NULL];}
-
 		// error-handling and GUI-update thread
 		if(safe)SwingUtilities.invokeLater(gui);
 		else gui.run();
 	}
-
-	/**
-	public static void createGUIChannel(String name){
-		for(Channel c : Client.channels.keySet())if(c.name.equalsIgnoreCase(name))return;
-		//if(!getRelayConfiguration().containsDefaultChannel(name))getRelayConfiguration().addDefaultChannel(name);
-		//Channel chan = new Channel(name);
-		gui.tabbedPane.addTab("#"+chan.name, chan.panel);
-		//toAppend.put(chan, new StringBuffer());
-		//channels.put(chan, new LinkedList<String>());
-		changeStatusTS(ConnectionStatus.NULL, true, true);
-	}
-	*/
 	
 	private static void launcher(String[] args) throws URISyntaxException, IOException{
 

@@ -1,6 +1,8 @@
 package lihad.SYMCRelay.GUI.Pane;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -8,7 +10,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.JList;
 import javax.swing.JTextArea;
 
 import lihad.SYMCRelay.Client;
@@ -60,12 +64,14 @@ public class ChannelSearchPane extends WebPanel{
 	}
 
 	private void addChannelFromSearch(){
-		Client.channelJoinRequest(channelpane.search_field.getText()+(password_entered_field.getText() != null && password_entered_field.getText().length() > 0 ? (";"+password_entered_field.getText()) : ""));
-		channelpane.search_field.setText("");
-		joinButton.setVisible(false);
-		createButton.setVisible(false);
-		manageButton.setVisible(false);
-		searchButton.setVisible(true);
+		if(!Client.hasChannel(channelpane.search_field.getText())){
+			Client.channelJoinRequest(channelpane.search_field.getText()+(password_entered_field.getText() != null && password_entered_field.getText().length() > 0 ? (";"+password_entered_field.getText()) : ""));
+			channelpane.search_field.setText("");
+			joinButton.setVisible(false);
+			createButton.setVisible(false);
+			manageButton.setVisible(false);
+			searchButton.setVisible(true);
+		}
 	}
 
 	//TODO: save the unconnectedchannel object into the selection.  less load
@@ -105,14 +111,14 @@ public class ChannelSearchPane extends WebPanel{
 	private void addChannelFromSelection(){
 		int[] indexes = channelIncludedList.getSelectedIndices();
 		for(int i : indexes){
-			Client.channelJoinRequest(channelIncludedList.getModel().getElementAt(i).toString().split(" ")[0]+(password_entered_field.getText() != null && password_entered_field.getText().length() > 0 ? (";"+password_entered_field.getText()) : ""));
-			((DefaultListModel)channelIncludedList.getModel()).remove(i);
+			if(!Client.hasChannel((channelIncludedList.getModel().getElementAt(i).toString().split(" ")[0])))Client.channelJoinRequest(channelIncludedList.getModel().getElementAt(i).toString().split(" ")[0]+(password_entered_field.getText() != null && password_entered_field.getText().length() > 0 ? (";"+password_entered_field.getText()) : ""));
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "serial" })
 	public ChannelSearchPane(final ChannelPane channelpane){
 		this.channelpane = channelpane;
-		
+
 		WebPanel north_panel = new WebPanel();
 		WebPanel center_panel = new WebPanel();
 		WebPanel south_panel = new WebPanel();
@@ -223,7 +229,13 @@ public class ChannelSearchPane extends WebPanel{
 		}
 		Arrays.sort(a);
 
-		for(String s : a)if(!Client.hasChannel(s.split(" ")[0]))m_a.addElement(s);
+		for(String s : a){
+			if(Client.hasChannel(s.split(" ")[0])){
+
+			}
+			m_a.addElement(s);
+
+		}
 
 		channelIncludedList = new WebList(m_a);
 		channelIncludedList.addMouseListener(new MouseAdapter(){
@@ -245,6 +257,19 @@ public class ChannelSearchPane extends WebPanel{
 				manageButton.setVisible(false);
 				displaySelectedInfo();
 			}
+		});
+
+		channelIncludedList.setCellRenderer(new DefaultListCellRenderer(){
+			public Component getListCellRendererComponent( @SuppressWarnings("rawtypes") JList list, Object value, int index, boolean isSelected, boolean cellHasFocus ){  
+				super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );  
+
+				if( Client.hasChannel(value.toString().split(" ")[0]) ){  
+					setForeground( Color.blue );  
+				}else{  
+					setForeground( Color.black );  
+				}  
+				return( this );  
+			}  
 		});
 
 		WebScrollPane available_channel_pane = new WebScrollPane(channelIncludedList);

@@ -31,13 +31,12 @@ public class MenuPane extends WebMenuBar {
 
 	private static final long serialVersionUID = 4452654864959142763L;
 
-	private WebMenuItem colorChangeItem,  lnfItem, exitItem, updateItem, channelJoinItem, connectItem, disconnectItem, openlogItem;
+	private WebMenuItem colorChangeItem, exitItem, updateItem, channelJoinItem, connectItem, disconnectItem, openlogItem;
 	private WebCheckBoxMenuItem soundToggleItem, logToggleItem, bubbleToggleItem, undecoratedToggleItem, reconnectToggleItem, flashToggleItem;
 	private WebMenu relay, channel, customize, help;
-	private JDialog connectPaneDialog = new JDialog(), colorPaneDialog = new JDialog(), updatePaneDialog = new JDialog(), lnfPaneDialog = new JDialog(), channelPaneDialog = new JDialog();
+	private JDialog colorPaneDialog, updatePaneDialog, legalPaneDialog;
 	private ChannelPane chan_pane;
 	private ConnectionPane connect_pane;
-
 
 	public WebMenu getRelayMenu(){ return relay; }
 
@@ -46,16 +45,6 @@ public class MenuPane extends WebMenuBar {
 	public WebMenu getCustomizeMenu(){ return customize; }
 
 	public WebMenu getHelpMenu(){ return help; }
-
-	public JDialog getConnectDialog(){ return connectPaneDialog; }
-
-	public JDialog getColorDialog(){ return colorPaneDialog; }
-
-	public JDialog getUpdateDialog(){ return updatePaneDialog; }
-
-	public JDialog getLNFDialog(){ return lnfPaneDialog; }
-
-	public JDialog getChannelDialog(){ return channelPaneDialog; }
 
 	public WebCheckBoxMenuItem getSoundItem(){ return soundToggleItem; }
 
@@ -73,7 +62,6 @@ public class MenuPane extends WebMenuBar {
 		Client.gui.mainPane.remove(chan_pane);
 		Client.gui.pack();
 		Client.unconnected_channels.clear();
-		connectItem.setEnabled(true);
 		chan_pane = null;
 	}
 	
@@ -115,6 +103,7 @@ public class MenuPane extends WebMenuBar {
 
 				mainPane.add(updatePane, BorderLayout.CENTER);
 
+				updatePaneDialog = new JDialog();
 				updatePaneDialog.setContentPane(mainPane);
 				updatePaneDialog.setSize(updatePaneDialog.getPreferredSize());
 				updatePaneDialog.setResizable(false);
@@ -133,29 +122,13 @@ public class MenuPane extends WebMenuBar {
 
 				mainPane.add(colorPane, BorderLayout.CENTER);
 
+				colorPaneDialog = new JDialog();
 				colorPaneDialog.setContentPane(mainPane);
 				colorPaneDialog.setSize(colorPaneDialog.getPreferredSize());
 				colorPaneDialog.setLocationRelativeTo(Client.gui); 
 				colorPaneDialog.setTitle("Color");
 				colorPaneDialog.pack();
 				colorPaneDialog.setVisible(true);
-			}
-		};
-
-		//build 'look and feel' option listener
-		ActionAdapter lnfListener = new ActionAdapter() {
-			public void actionPerformed(ActionEvent e) {
-				WebPanel mainPane = new WebPanel(new BorderLayout());
-				WebPanel lnfPane = new LNFPane();
-
-				mainPane.add(lnfPane, BorderLayout.CENTER);
-
-				lnfPaneDialog.setContentPane(mainPane);
-				lnfPaneDialog.setSize(lnfPaneDialog.getPreferredSize());
-				lnfPaneDialog.setLocationRelativeTo(Client.gui); 
-				lnfPaneDialog.setTitle("Look and Feel");
-				lnfPaneDialog.pack();
-				lnfPaneDialog.setVisible(true);
 			}
 		};
 
@@ -166,9 +139,9 @@ public class MenuPane extends WebMenuBar {
 					//get an updated channel list
 					Client.updatechannelcount(null);
 					chan_pane = new ChannelPane();
-					chan_pane.setSize(new Dimension(175, 200));
 					chan_pane.setVisible(true);
 					Client.gui.mainPane.add(chan_pane, BorderLayout.WEST);
+					Client.gui.setPreferredSize(Client.gui.getSize());
 					Client.gui.pack();
 				}else{
 					closeChanPane();
@@ -316,12 +289,7 @@ public class MenuPane extends WebMenuBar {
 				Client.getRelayConfiguration().setUndecoratedTogglable(undecoratedToggleItem.isSelected());;
 			}
 		});
-		customize.add(undecoratedToggleItem);	
-
-		lnfItem = new WebMenuItem("Look & Feel...");
-		lnfItem.setEnabled(false); //TODO: locked down until themes
-		lnfItem.addActionListener(lnfListener);
-		customize.add(lnfItem);
+		customize.add(undecoratedToggleItem);
 
 		// about menu drop
 		/////////////////////////////////////////////////////////////
@@ -343,12 +311,12 @@ public class MenuPane extends WebMenuBar {
 
 				mainPane.add(legalPane, BorderLayout.CENTER);
 
-				//TODO: LegalPane
-				channelPaneDialog.setContentPane(mainPane);
-				channelPaneDialog.setLocationRelativeTo(Client.gui); 
-				channelPaneDialog.setTitle("Legal");
-				channelPaneDialog.pack();
-				channelPaneDialog.setVisible(true);
+				legalPaneDialog = new JDialog();
+				legalPaneDialog.setContentPane(mainPane);
+				legalPaneDialog.setLocationRelativeTo(Client.gui); 
+				legalPaneDialog.setTitle("Legal");
+				legalPaneDialog.pack();
+				legalPaneDialog.setVisible(true);
 			}
 		});
 		help.add(legal);

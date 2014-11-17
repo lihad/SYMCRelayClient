@@ -28,12 +28,9 @@ public class ConnectionPane extends WebPanel {
 
 	public ConnectionPane(){
 		super(new BorderLayout());
-
-
 		
 		WebPanel northpane = new WebPanel(new GridLayout(5, 1));
 
-		
 		// ip address input
 		WebPanel pane = new WebPanel(new FlowLayout(FlowLayout.RIGHT));
 		pane.add(new WebLabel("Host IP:"));
@@ -109,26 +106,25 @@ public class ConnectionPane extends WebPanel {
 
 		// connect/disconnect buttons
 		WebPanel buttonPane = new WebPanel(new GridLayout(1, 2));
-		ActionAdapter buttonListener = new ActionAdapter() {
+		connectButton = new WebButton("Connect");
+		connectButton.setMnemonic(KeyEvent.VK_C);
+		connectButton.setActionCommand("connect");
+		connectButton.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("connect")){
 					Client.getRelayConfiguration().setAutoConnect(autoConnectBox.isSelected());
-					Client.gui.menuPane.getConnectDialog().setVisible(false);
 					Client.gui.menuPane.closeConnectPane();
 					Client.changeStatusTS(ConnectionStatus.BEGIN_CONNECT, true, false);
 				}
 				else Client.changeStatusTS(ConnectionStatus.DISCONNECTING, true, false);
 			}
-		};
-		connectButton = new WebButton("Connect");
-		connectButton.setMnemonic(KeyEvent.VK_C);
-		connectButton.setActionCommand("connect");
-		connectButton.addActionListener(buttonListener);
+		});
+		
 		connectButton.setEnabled(true);
 
 		buttonPane.add(connectButton);
 		northpane.add(buttonPane);
-		
+
 		this.add(northpane, BorderLayout.NORTH);
 	}
 }
