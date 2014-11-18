@@ -2,7 +2,7 @@ package lihad.SYMCRelay;
 
 public enum ConnectionStatus {
 
-	NULL(" Error! Could not connect!"), 
+	REFRESH("Refreshing the GUI.  Or something terrible happened."),
 	DISCONNECTED(" Disconnected"), 
 	DISCONNECTING(" Disconnecting..."), 
 	BEGIN_CONNECT(" Connecting..."), 

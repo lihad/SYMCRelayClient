@@ -370,8 +370,9 @@ public class ChannelManagePane extends WebPanel {
 						"/manage "+channelpane.search_field.getText()+"`"+"password"+"`"+password_modify_field.getText(),
 						"/manage "+channelpane.search_field.getText()+"`"+"privat"+"`"+channelpane.private_box.isSelected()};
 
-				for(String com : commands){Client.handler.process(new Command(com, "/manage", com.split("`"), null, null));}
-				Client.gui.menuPane.closeChanPane();
+				for(String com : commands){Client.getCommandHandler().process(new Command(com, "/manage", com.split("`"), null, null));}
+				Client.getGUI().setPreferredSize(Client.getGUI().getSize());
+				Client.getGUI().getMenuPane().closeChanPane();
 			}
 		});
 

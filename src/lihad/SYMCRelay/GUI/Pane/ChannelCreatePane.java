@@ -96,10 +96,10 @@ public class ChannelCreatePane extends WebPanel{
 				channelpane.create_panel.setVisible(false);
 				//create name, dsrp, marq, admins, black, white, password, private, owner
 				//create kyle_channel`this is my channel`marquee message;another message`jeff;dave`maxx;phil`troy`hey1`kyle`false
-				String full_command = "/create "+channelpane.name_field.getText()+"`"+channelpane.description_area.getText()+"`"+channelpane.marquee_area.getText()+"```"+channelpane.whitelist_box.isSelected()+"`"+password_field.getText()+"`"+channelpane.private_box.isSelected()+"`"+Client.username;
+				String full_command = "/create "+channelpane.name_field.getText()+"`"+channelpane.description_area.getText()+"`"+channelpane.marquee_area.getText()+"```"+channelpane.whitelist_box.isSelected()+"`"+password_field.getText()+"`"+channelpane.private_box.isSelected()+"`"+Client.getUsername();
 				String[] s_a = full_command.split("`");
-				Client.handler.process(new Command(full_command, "/create", s_a, null, null));
-				Client.gui.menuPane.closeChanPane();
+				Client.getCommandHandler().process(new Command(full_command, "/create", s_a, null, null));
+				Client.getGUI().getMenuPane().closeChanPane();
 
 			}
 		});

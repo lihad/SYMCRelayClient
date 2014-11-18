@@ -39,12 +39,6 @@ public class ChannelPane extends WebPanel{
 		create_panel.setVisible(false);
 		manage_panel.setVisible(false);
 
-		// aux north
-
-		// aux center
-
-		// aux south
-
 		this.add(search_panel);
 		this.add(create_panel);
 		this.add(manage_panel);

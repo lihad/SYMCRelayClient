@@ -29,7 +29,7 @@ public class PreInterfaceSounds extends JFrame{
 	public boolean finished = false;
 
 	public PreInterfaceSounds(){
-		super("SYMCRelay - Build "+Client.build+" | Welcome to SRC... ");
+		super("SYMCRelay - Build "+Client.getBuild()+" | Welcome to SRC... ");
 
 		final JProgressBar progressBar = new JProgressBar(0,100);
 		progressBar.setValue(0);
@@ -44,8 +44,8 @@ public class PreInterfaceSounds extends JFrame{
 				for(int j = 0; j<arr.length; j++){
 					try {
 						if(!new File(System.getenv("ProgramFiles")+"\\Relay\\Sounds\\"+arr[j]+".wav").exists()){
-							Client.logger.info("[SOUND] installing "+arr[j]+".wav");
-							website = new URL(Client.soundsIP+"/"+arr[j]+".wav");
+							Client.getLogger().info("[SOUND] installing "+arr[j]+".wav");
+							website = new URL(Client.IP_SOUNDS+"/"+arr[j]+".wav");
 							HttpURLConnection connection = (HttpURLConnection) website.openConnection();
 							int filesize = connection.getContentLength();
 							int totalDataRead = 0;

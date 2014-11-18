@@ -28,7 +28,7 @@ public class PreInterfaceWeblaf extends JFrame{
 	public boolean finished = false;
 
 	public PreInterfaceWeblaf(){
-		super("SYMCRelay - Build "+Client.build+" | Welcome to SRC... ");
+		super("SYMCRelay - Build "+Client.getBuild()+" | Welcome to SRC... ");
 
 		final JProgressBar progressBar = new JProgressBar(0,100);
 		progressBar.setValue(0);
@@ -41,7 +41,7 @@ public class PreInterfaceWeblaf extends JFrame{
 				URL website;
 
 				try {
-					website = new URL(Client.lnfIP+"/weblaf-complete-1.28"+".jar");
+					website = new URL(Client.IP_LNF+"/weblaf-complete-1.28"+".jar");
 					HttpURLConnection connection = (HttpURLConnection) website.openConnection();
 					int filesize = connection.getContentLength();
 					int totalDataRead = 0;

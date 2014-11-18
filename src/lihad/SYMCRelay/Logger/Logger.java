@@ -17,7 +17,7 @@ public class Logger {
 		try {
 			writer = new BufferedWriter(new FileWriter(file, true));
 		} catch (IOException e) {
-			System.out.println("failed to start logger.  invalid file: "+file.getPath());
+			System.out.println("failed to start.getLogger().  invalid file: "+file.getPath());
 			error(e.toString(),e.getStackTrace());
 		}
 	}

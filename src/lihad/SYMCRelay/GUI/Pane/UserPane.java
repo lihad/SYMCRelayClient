@@ -28,6 +28,20 @@ public class UserPane extends WebPanel {
 	private WebPanel userPane;
 	private WebTree<DefaultMutableTreeNode> webTree;
 	private DefaultMutableTreeNode top = new DefaultMutableTreeNode("SYMCRelay User List");
+	private static StringBuffer toAppendUser;
+
+	// append to the user box
+	public synchronized void appendToUserBox(String s) {
+		toAppendUser.append(s);
+	}
+	
+	public synchronized StringBuffer getUserBoxBuffer() {
+		return toAppendUser;
+	}
+	
+	public synchronized void resetBuffer() {
+		toAppendUser.setLength(0);
+	}
 
 	public void expandChannel(String string){
 		for(int i = 0; i < top.getChildCount(); i++){
@@ -50,11 +64,11 @@ public class UserPane extends WebPanel {
 		}
 		((WebTreeModel<?>) (webTree.getModel())).reload(); 
 	}
-	
+
 	public void updateNodes(String string) {		
 		DefaultMutableTreeNode channel = null;
 		DefaultMutableTreeNode user = null;
-		
+
 		top.removeAllChildren();
 
 		String[] elements = string.split("\n");
@@ -62,7 +76,7 @@ public class UserPane extends WebPanel {
 			if(elements[i].contains("#")){
 				channel = new DefaultMutableTreeNode(elements[i]);
 				try{Client.getChannel(channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_"))).getUnsynchronizedUsers().clear();}catch(NullPointerException e){
-					Client.logger.debug("UserPane just tried to update a channel user list and got it wrong: "+channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_")));
+					Client.getLogger().debug("UserPane just tried to update a channel user list and got it wrong: "+channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_")));
 				};
 				top.add(channel);
 			}else{
@@ -73,7 +87,7 @@ public class UserPane extends WebPanel {
 					if(chan != null){
 						chan.getUnsynchronizedUsers().add(elements[i]);
 					}else{
-						Client.logger.debug("UserPane just tried to update a channel user list and got it wrong: "+channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_")));
+						Client.getLogger().debug("UserPane just tried to update a channel user list and got it wrong: "+channel.getUserObject().toString().replaceFirst("#", "").substring(0, channel.getUserObject().toString().replaceFirst("#", "").lastIndexOf("_")));
 					}
 				}
 			}
@@ -87,38 +101,39 @@ public class UserPane extends WebPanel {
 		WebTreeModel model = (WebTreeModel) (webTree.getModel()); 
 		model.reload(); 
 		webTree.expandNode(top);
-		orderNodes(Client.gui.tabbedPane.getTabNames());
-		if(Client.gui.tabbedPane.getSelectedIndex() >= 0) expandChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getSelectedIndex()).replaceFirst("#", ""));
+		orderNodes(Client.getGUI().getTabPane().getTabNames());
+		if(Client.getGUI().getTabPane().getSelectedIndex() >= 0) expandChannel(Client.getGUI().getTabPane().getTitleAt(Client.getGUI().getTabPane().getSelectedIndex()).replaceFirst("#", ""));
 	}
-	
+
 	public void sortchildrenA(DefaultMutableTreeNode node){
 
 		@SuppressWarnings("unchecked")
 		ArrayList<DefaultMutableTreeNode> children = Collections.list(node.children());
-        // for getting original location
-        ArrayList<String> orgCnames = new ArrayList<String>();
-        // new location
-        ArrayList<String> cNames = new ArrayList<String>();
-        //move the child to here so we can move them back
-        DefaultMutableTreeNode temParent = new DefaultMutableTreeNode();
-        for(Object child:children) {
-            DefaultMutableTreeNode ch = (DefaultMutableTreeNode)child;
-            temParent.insert(ch,0);
-            cNames.add(ch.toString().toUpperCase());
-            orgCnames.add(ch.toString().toUpperCase());
-        }
-        Collections.sort(cNames);
-        for(String name:cNames) {
-            // find the original location to get from children arrayList
-            int indx = orgCnames.indexOf(name);
-            node.insert(children.get(indx),node.getChildCount());
-        }
+		// for getting original location
+		ArrayList<String> orgCnames = new ArrayList<String>();
+		// new location
+		ArrayList<String> cNames = new ArrayList<String>();
+		//move the child to here so we can move them back
+		DefaultMutableTreeNode temParent = new DefaultMutableTreeNode();
+		for(Object child:children) {
+			DefaultMutableTreeNode ch = (DefaultMutableTreeNode)child;
+			temParent.insert(ch,0);
+			cNames.add(ch.toString().toUpperCase());
+			orgCnames.add(ch.toString().toUpperCase());
+		}
+		Collections.sort(cNames);
+		for(String name:cNames) {
+			// find the original location to get from children arrayList
+			int indx = orgCnames.indexOf(name);
+			node.insert(children.get(indx),node.getChildCount());
+		}
 	}
 
 
 	public UserPane(){
 		super(new BorderLayout());
 		userPane = new WebPanel(new BorderLayout());
+		toAppendUser = new StringBuffer("");
 
 		webTree = new WebTree<DefaultMutableTreeNode>(top);
 		((WebTreeCellRenderer) webTree.getCellRenderer()).setOpenIcon(null);

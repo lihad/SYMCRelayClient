@@ -22,37 +22,48 @@ public class CommandHandler {
 
 			case "/me":
 				if (command.parts.length > 1) {
-					String s_b = command.getRequest().replace("/me", Client.username);
+					String s_b = command.getRequest().replace("/me", Client.getUsername());
 					
 					FormatColor.decodeTextPaneFormat(command.channel, command.pane.getStyledDocument(), FormatColor.encodeTextPaneFormat(null, s_b, Client.getRelayConfiguration().getFormat()) + "\n",false);
-					Client.logger.debug(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat())+":"+(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()).contains(Client.COMMAND)));
-					Client.sendString(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()));
+					Client.getLogger().debug(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat())+":"+(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()).contains(Client.COMMAND)));
+					Client.addSendString(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()));
 				}
 				return true;
 			case "/i":
 				if (command.parts.length > 1) {	
 					String s_b = command.getRequest().replace("/i", "");
 					
-					FormatColor.decodeTextPaneFormat(command.channel, command.pane.getStyledDocument(), Client.username+": "+FormatColor.encodeTextPaneFormat(null, s_b, Client.getRelayConfiguration().getFormat()+" b") + "\n",false);
-					Client.logger.debug(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat())+":"+(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()+" b").contains(Client.COMMAND)));
-					Client.sendString(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()+" b"));
+					FormatColor.decodeTextPaneFormat(command.channel, command.pane.getStyledDocument(), Client.getUsername()+": "+FormatColor.encodeTextPaneFormat(null, s_b, Client.getRelayConfiguration().getFormat()+" b") + "\n",false);
+					Client.getLogger().debug(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat())+":"+(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()+" b").contains(Client.COMMAND)));
+					Client.addSendString(FormatColor.encodeCommandPaneFormat(command.getCommand(), command.channel.getName()+Client.CHANNEL, s_b, Client.getRelayConfiguration().getFormat()+" b"));
 				}
 				return true;
 			case "/create":
-				Client.sendString(command.getCommand()+Client.COMMAND+command.getRequest());
+				Client.addSendString(command.getCommand()+Client.COMMAND+command.getRequest());
 				return true;
 			case "/manage":
-				Client.logger.info("[COMMAND] processing" +command.getCommand()+Client.COMMAND+command.getRequest());
+				Client.getLogger().info("[COMMAND] processing" +command.getCommand()+Client.COMMAND+command.getRequest());
 
-				Client.sendString(command.getCommand()+Client.COMMAND+command.getRequest());
+				Client.addSendString(command.getCommand()+Client.COMMAND+command.getRequest());
+				return true;
+			case "/kick":
+				Client.getLogger().info("[COMMAND] processing" +command.getCommand()+Client.COMMAND+command.getRequest());
+				Client.addSendString(command.getCommand()+Client.COMMAND+command.getRequest());
+				return true;
+			case "/tell":
+				/**
+				Client.getLogger().info("[COMMAND] processing" +command.getCommand()+Client.COMMAND+command.getRequest());
+				Client.addSendString(command.getCommand()+Client.COMMAND+command.getRequest());
+				TODO: make this a thing
+				*/
 				return true;
 			default: 
 				command.getTextPane().getDocument().insertString(command.getTextPane().getDocument().getLength(), "Invalid Command", null);
-				Client.logger.info("[COMMAND] invalid command"); return false;
+				Client.getLogger().info("[COMMAND] invalid command"); return false;
 			}
 		}catch(Exception e){
-			Client.logger.severe("[COMMAND] an error occurred whilst attempting to run a command");
-			Client.logger.error(e.toString(),e.getStackTrace());
+			Client.getLogger().severe("[COMMAND] an error occurred whilst attempting to run a command");
+			Client.getLogger().error(e.toString(),e.getStackTrace());
 			return false;
 		}
 	}

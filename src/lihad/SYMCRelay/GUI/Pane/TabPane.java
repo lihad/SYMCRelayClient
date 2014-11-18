@@ -17,11 +17,11 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 
+import com.alee.laf.tabbedpane.WebTabbedPane;
+
 import lihad.SYMCRelay.Channel;
 import lihad.SYMCRelay.Client;
 import lihad.SYMCRelay.Adapters.ChangeAdapter;
-
-import com.alee.laf.tabbedpane.WebTabbedPane;
 
 public class TabPane extends WebTabbedPane{
 
@@ -58,8 +58,8 @@ public class TabPane extends WebTabbedPane{
 					
 					// debug
 					String t = "";
-					for(Channel c : Client.channels.keySet()) t = t.concat(c.getName()+" ");
-					Client.logger.debug("channels now contain: "+t);
+					for(Channel c : Client.getChannels()) t = t.concat(c.getName()+" ");
+					Client.getLogger().debug("channels now contain: "+t);
 					
 					////////
 					
@@ -67,7 +67,7 @@ public class TabPane extends WebTabbedPane{
 					int index = TabPane.this.indexAtLocation(event.getX(), event.getY());
 					if(index >= 0){
 						Client.getChannel(TabPane.this.getTitleAt(index).replace("#", "")).getTextField().requestFocusInWindow();
-						Client.gui.userPane.expandChannel(TabPane.this.getTitleAt(index).replaceFirst("#", ""));
+						Client.getGUI().getUserPane().expandChannel(TabPane.this.getTitleAt(index).replaceFirst("#", ""));
 					}
 				}
 			}
@@ -84,8 +84,8 @@ public class TabPane extends WebTabbedPane{
 						TabPane.this.setSelectedIndex(TabPane.this.getTabCount()-1);
 					}
 
-					Client.gui.userPane.orderNodes(getTabNames());
-					Client.gui.userPane.expandChannel(title.replaceFirst("#", ""));
+					Client.getGUI().getUserPane().orderNodes(getTabNames());
+					Client.getGUI().getUserPane().expandChannel(title.replaceFirst("#", ""));
 					TabPane.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				}
 

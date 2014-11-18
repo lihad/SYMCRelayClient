@@ -36,7 +36,7 @@ public class UpdatePane extends WebPanel {
 	public UpdatePane(){
 		super(new BorderLayout());
 
-		ipFieldUpdate = new WebTextField(); ipFieldUpdate.setText(Client.updateIP);
+		ipFieldUpdate = new WebTextField(); ipFieldUpdate.setText(Client.IP_UPDATE);
 		ipFieldUpdate.setEnabled(true);
 
 		able_update = checkValidBuild();
@@ -45,7 +45,7 @@ public class UpdatePane extends WebPanel {
 
 
 		current_version_label = new WebLabel("The current available version is: "+able_build);
-		server_supported_label = new WebLabel("This server supports (at least) version: "+Client.server_build);
+		server_supported_label = new WebLabel("This server supports (at least) version: "+Client.getServerBuild());
 
 		this.add(current_version_label, BorderLayout.NORTH);
 		this.add(server_supported_label, BorderLayout.CENTER);
@@ -55,7 +55,7 @@ public class UpdatePane extends WebPanel {
 			public void actionPerformed(ActionEvent e) {
 				// what happens when button is pressed
 				try {
-					Client.changeStatusTS(ConnectionStatus.DISCONNECTING, true, true);
+					Client.changeConnectionStatus(ConnectionStatus.DISCONNECTING);
 
 					URL website = new URL(ipFieldUpdate.getText()+"SYMCRelayClient_alpha_"+(int)able_build+".jar");
 					ReadableByteChannel rbc = Channels.newChannel(website.openStream());
@@ -68,17 +68,17 @@ public class UpdatePane extends WebPanel {
 					fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 					fos.close();
 
-					Client.logger.info("restarting with new version: "+able_build);
+					Client.getLogger().info("restarting with new version: "+able_build);
 
 					//TODO: dup code
-					try { Thread.sleep(500); }catch (InterruptedException e2) {Client.logger.error(e2.toString(),e2.getStackTrace());}
+					try { Thread.sleep(500); }catch (InterruptedException e2) {Client.getLogger().error(e2.toString(),e2.getStackTrace());}
 
-					Runtime.getRuntime().exec(Client.runtime);
-					Client.logger.info("spawning child. killing parent.");
+					Runtime.getRuntime().exec(Client.getRuntime());
+					Client.getLogger().info("spawning child. killing parent.");
 					System.exit(0);					
 
 				} catch (IOException | URISyntaxException e1) {
-					Client.logger.error(e1.toString(),e1.getStackTrace());
+					Client.getLogger().error(e1.toString(),e1.getStackTrace());
 				}
 			}
 		};
@@ -103,13 +103,13 @@ public class UpdatePane extends WebPanel {
 	
 	private boolean checkValidBuild(){
 		URL website = null;
-		for(double i = Client.build-1; i < Client.build+10; i++){
+		for(double i = Client.getBuild()-1; i < Client.getBuild()+10; i++){
 			try {
 				website = new URL(ipFieldUpdate.getText()+"SYMCRelayClient_alpha_"+(int)i+".jar");
 				HttpURLConnection huc =  (HttpURLConnection) website.openConnection();
 				huc.setRequestMethod("GET"); 
 				huc.setConnectTimeout(1000);
-				Client.logger.debug("[UPDATE] looking for version ["+i+"]. "+ipFieldUpdate.getText()+"SYMCRelayClient_alpha_"+(int)i+".jar");
+				Client.getLogger().debug("[UPDATE] looking for version ["+i+"]. "+ipFieldUpdate.getText()+"SYMCRelayClient_alpha_"+(int)i+".jar");
 
 				huc.connect(); 
 				if(huc.getResponseCode() == 200){
@@ -117,7 +117,7 @@ public class UpdatePane extends WebPanel {
 					return true;
 				}
 			} catch (Exception e2) {
-				Client.logger.error(e2.toString(),e2.getStackTrace());
+				Client.getLogger().error(e2.toString(),e2.getStackTrace());
 			}
 
 		}

@@ -59,15 +59,15 @@ public class MenuPane extends WebMenuBar {
 	}
 
 	public void closeChanPane(){
-		Client.gui.mainPane.remove(chan_pane);
-		Client.gui.pack();
-		Client.unconnected_channels.clear();
+		Client.getGUI().getMainPane().remove(chan_pane);
+		Client.getGUI().pack();
+		Client.removeAllUnconnectedChannels();
 		chan_pane = null;
 	}
 	
 	public void closeConnectPane(){
-		Client.gui.mainPane.remove(connect_pane);
-		Client.gui.pack();
+		Client.getGUI().getMainPane().remove(connect_pane);
+		Client.getGUI().pack();
 		connect_pane = null;
 	}
 	
@@ -81,16 +81,16 @@ public class MenuPane extends WebMenuBar {
 					connect_pane = new ConnectionPane();
 					connect_pane.setSize(new Dimension(175, 200));
 					connect_pane.setVisible(true);					
-					Client.gui.mainPane.add(connect_pane, BorderLayout.WEST);
+					Client.getGUI().getMainPane().add(connect_pane, BorderLayout.WEST);
 					connectItem.setEnabled(false);
-					Client.gui.pack();
+					Client.getGUI().pack();
 
 				}else{
-					for(;Client.gui.tabbedPane.getTabCount() > 0;){
-						Client.getChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", "")).leave(false, Client.gui.tabbedPane.getTabCount() - 1);
+					for(;Client.getGUI().getTabPane().getTabCount() > 0;){
+						Client.getChannel(Client.getGUI().getTabPane().getTitleAt(Client.getGUI().getTabPane().getTabCount()-1).replace("#", "")).leave(false, Client.getGUI().getTabPane().getTabCount() - 1);
 					}
-					Client.d_on_d = false;
-					Client.changeStatusTS(ConnectionStatus.DISCONNECTING, true, false);
+					Client.setDisconnectOnDesync(false);
+					Client.changeConnectionStatus(ConnectionStatus.DISCONNECTING);
 				}
 			}
 		};
@@ -108,7 +108,7 @@ public class MenuPane extends WebMenuBar {
 				updatePaneDialog.setSize(updatePaneDialog.getPreferredSize());
 				updatePaneDialog.setResizable(false);
 				updatePaneDialog.setTitle("Update");
-				updatePaneDialog.setLocationRelativeTo(Client.gui); 
+				updatePaneDialog.setLocationRelativeTo(Client.getGUI()); 
 				updatePaneDialog.pack();
 				updatePaneDialog.setVisible(true);
 			}
@@ -125,7 +125,7 @@ public class MenuPane extends WebMenuBar {
 				colorPaneDialog = new JDialog();
 				colorPaneDialog.setContentPane(mainPane);
 				colorPaneDialog.setSize(colorPaneDialog.getPreferredSize());
-				colorPaneDialog.setLocationRelativeTo(Client.gui); 
+				colorPaneDialog.setLocationRelativeTo(Client.getGUI()); 
 				colorPaneDialog.setTitle("Color");
 				colorPaneDialog.pack();
 				colorPaneDialog.setVisible(true);
@@ -140,10 +140,11 @@ public class MenuPane extends WebMenuBar {
 					Client.updatechannelcount(null);
 					chan_pane = new ChannelPane();
 					chan_pane.setVisible(true);
-					Client.gui.mainPane.add(chan_pane, BorderLayout.WEST);
-					Client.gui.setPreferredSize(Client.gui.getSize());
-					Client.gui.pack();
+					Client.getGUI().getMainPane().add(chan_pane, BorderLayout.WEST);
+					Client.getGUI().setPreferredSize(Client.getGUI().getSize());
+					Client.getGUI().pack();
 				}else{
+					Client.getGUI().setPreferredSize(Client.getGUI().getSize());
 					closeChanPane();
 				}
 			}
@@ -194,9 +195,9 @@ public class MenuPane extends WebMenuBar {
 		openlogItem.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					java.awt.Desktop.getDesktop().open(new File(Client.log_file));
+					java.awt.Desktop.getDesktop().open(new File(Client.getLogFileLocation()));
 				} catch (IOException e1) {
-					Client.logger.error(e1.toString(), e1.getStackTrace());
+					Client.getLogger().error(e1.toString(), e1.getStackTrace());
 				}
 			}
 		});
@@ -209,7 +210,7 @@ public class MenuPane extends WebMenuBar {
 		exitItem.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
 				//save window size
-				Client.getRelayConfiguration().setWindowSize(Client.gui.getSize().width+","+Client.gui.getSize().height);
+				Client.getRelayConfiguration().setWindowSize(Client.getGUI().getSize().width+","+Client.getGUI().getSize().height);
 				System.exit(0);
 			}
 		});
@@ -249,7 +250,7 @@ public class MenuPane extends WebMenuBar {
 		logToggleItem.setSelected(Client.getRelayConfiguration().getLogTogglable());
 		logToggleItem.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				Client.switch_logger(logToggleItem.isSelected());
+				Client.setLoggerEnabled(logToggleItem.isSelected());
 				Client.getRelayConfiguration().setLogTogglable(logToggleItem.isSelected());
 			}
 		});
@@ -298,7 +299,7 @@ public class MenuPane extends WebMenuBar {
 		//about.setFont(Client.font);
 		this.add(help);
 
-		WebMenuItem version = new WebMenuItem("Build: "+Client.build);
+		WebMenuItem version = new WebMenuItem("Build: "+Client.getBuild());
 		help.add(version);
 
 		help.addSeparator();
@@ -313,7 +314,7 @@ public class MenuPane extends WebMenuBar {
 
 				legalPaneDialog = new JDialog();
 				legalPaneDialog.setContentPane(mainPane);
-				legalPaneDialog.setLocationRelativeTo(Client.gui); 
+				legalPaneDialog.setLocationRelativeTo(Client.getGUI()); 
 				legalPaneDialog.setTitle("Legal");
 				legalPaneDialog.pack();
 				legalPaneDialog.setVisible(true);
@@ -329,7 +330,7 @@ public class MenuPane extends WebMenuBar {
 				try {
 					Desktop.getDesktop().browse(new URI("http://10.167.3.82/RelayClient/Guides/New_User_Guide.pdf"));
 				} catch (IOException | URISyntaxException e1) {
-					Client.logger.error(e1.toString(), e1.getStackTrace());
+					Client.getLogger().error(e1.toString(), e1.getStackTrace());
 				}
 			}
 		});
@@ -343,7 +344,7 @@ public class MenuPane extends WebMenuBar {
 				Desktop desktop = Desktop.getDesktop(); 
 				try {
 					desktop.mail(new URI("mailto:kyle_armstrong@symantec.com?subject=SYMCRelay%20Enhancement%20Request"));
-				} catch (IOException | URISyntaxException e1) {Client.logger.error(e1.toString(), e1.getStackTrace());}
+				} catch (IOException | URISyntaxException e1) {Client.getLogger().error(e1.toString(), e1.getStackTrace());}
 			}
 		});
 		help.add(enhancement);
@@ -353,10 +354,10 @@ public class MenuPane extends WebMenuBar {
 			public void actionPerformed(ActionEvent e) {
 				Desktop desktop = Desktop.getDesktop(); 
 				try {
-					desktop.mail(new URI("mailto:kyle_armstrong@symantec.com?subject=SYMCRelay%20Bug%20Report&body=-"+Client.build+"-"+Client.getRelayConfiguration().getFormat()+
+					desktop.mail(new URI("mailto:kyle_armstrong@symantec.com?subject=SYMCRelay%20Bug%20Report&body=-"+Client.getBuild()+"-"+Client.getRelayConfiguration().getFormat()+
 							"-"+Client.getRelayConfiguration().getUndecoratedTogglable()+"-"+Client.getRelayConfiguration().getLogTogglable()+"-"+Client.getRelayConfiguration().getTrayBubbleTogglable()+
 							"-"+Client.getRelayConfiguration().getLNF()+"-"+Client.getRelayConfiguration().getAutoConnect()+"-"+Client.getRelayConfiguration().getAutoReconnect()+"-"));
-				} catch (IOException | URISyntaxException e1) {Client.logger.error(e1.toString(), e1.getStackTrace());}
+				} catch (IOException | URISyntaxException e1) {Client.getLogger().error(e1.toString(), e1.getStackTrace());}
 			}
 		});
 		help.add(bug);

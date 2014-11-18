@@ -53,7 +53,7 @@ public class FormatColor {
 		String[] str_arr = string.split(Client.FORMAT);
 		String name = "", color = "000000";
 		if(channel == null){
-			Client.logger.debug("a message was just processed through, that is not attached to a channel... "+ string);
+			Client.getLogger().debug("a message was just processed through, that is not attached to a channel... "+ string);
 			return;
 		}
 
@@ -90,7 +90,7 @@ public class FormatColor {
 
 					if(i == 0)name = str_arr[i].replace(":", "");
 
-					if(pop && i > 0 && !Client.gui.isFocused()){
+					if(pop && i > 0 && !Client.getGUI().isFocused()){
 						SystemTray tray = SystemTray.getSystemTray();
 						if(tray.getTrayIcons().length > 0){
 							String s_s = "[#"+channel.getName()+"] "+str_arr[i];
@@ -99,12 +99,12 @@ public class FormatColor {
 								tray.getTrayIcons()[0].addMouseListener(new MouseAdapter(){
 
 									public void mouseClicked(MouseEvent arg0) {
-										Client.gui.setAlwaysOnTop(true);
-										Client.gui.toFront();
-										Client.gui.requestFocus();
-										Client.gui.setAlwaysOnTop(false);
+										Client.getGUI().setAlwaysOnTop(true);
+										Client.getGUI().toFront();
+										Client.getGUI().requestFocus();
+										Client.getGUI().setAlwaysOnTop(false);
 
-										Client.gui.tabbedPane.setSelectedIndex(Client.gui.tabbedPane.indexOfTab("#"+FormatColor.lastChannel.getName()));
+										Client.getGUI().getTabPane().setSelectedIndex(Client.getGUI().getTabPane().indexOfTab("#"+FormatColor.lastChannel.getName()));
 									}
 								});
 							}
@@ -112,8 +112,8 @@ public class FormatColor {
 					}
 
 
-					if(str_arr[i].contains("@"+Client.username)){
-						Client.gui.alert();
+					if(str_arr[i].contains("@"+Client.getUsername())){
+						Client.getGUI().alert();
 					}
 
 					if(str_arr[i].contains("http://") || str_arr[i].contains("https://")){
@@ -136,7 +136,7 @@ public class FormatColor {
 
 
 				} catch (BadLocationException | MalformedURLException e) {
-					Client.logger.severe(e.getMessage());
+					Client.getLogger().severe(e.getMessage());
 				}
 			}
 		}
@@ -154,7 +154,7 @@ public class FormatColor {
 	 */
 	public static String encodeTextPaneFormat(String namechan, String string, String format){
 		if(namechan == null)namechan = "";
-		else Client.logger.info("["+namechan.split(Client.CHANNEL)[0]+"]"+Client.username+": "+string);
+		else Client.getLogger().info("["+namechan.split(Client.CHANNEL)[0]+"]"+Client.getUsername()+": "+string);
 		return (Client.FORMAT+format+Client.FORMAT+namechan+string).replaceAll("\r", Client.RETURN).replaceAll("\n", Client.RETURN);
 	}
 
@@ -170,7 +170,7 @@ public class FormatColor {
 	 */
 	public static String encodeCommandPaneFormat(String command, String namechan, String string, String format){
 		if(namechan == null)namechan = "";
-		else Client.logger.info("["+namechan.split(Client.CHANNEL)[0]+"][COMMAND]"+command+": "+string);
+		else Client.getLogger().info("["+namechan.split(Client.CHANNEL)[0]+"][COMMAND]"+command+": "+string);
 		return (command+Client.COMMAND+Client.FORMAT+format+Client.FORMAT+namechan+string).replaceAll("\r", Client.RETURN).replaceAll("\n", Client.RETURN);
 	}
 }

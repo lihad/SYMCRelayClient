@@ -25,6 +25,7 @@ import lihad.SYMCRelay.GUI.RotatedButton;
 import com.alee.laf.button.WebButton;
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.list.WebList;
+import com.alee.laf.list.WebListCellRenderer;
 import com.alee.laf.panel.WebPanel;
 import com.alee.laf.scroll.WebScrollPane;
 import com.alee.laf.text.WebTextField;
@@ -51,11 +52,11 @@ public class ChannelSearchPane extends WebPanel{
 
 		if(Client.hasChannel(string)){
 			displayAlreadyJoined(string);
-			Client.logger.debug("does the channel '"+string+"' exist? "+Client.hasUnconnectedChannel(string));
-			if(Client.hasUnconnectedChannel(string) && Client.getUnconnectedChannel(string).getOwner().equalsIgnoreCase(Client.username))manageButton.setVisible(true);
+			Client.getLogger().debug("does the channel '"+string+"' exist? "+Client.hasUnconnectedChannel(string));
+			if(Client.hasUnconnectedChannel(string) && Client.getUnconnectedChannel(string).getOwner().equalsIgnoreCase(Client.getUsername()))manageButton.setVisible(true);
 		}else if(Client.hasUnconnectedChannel(string)){
 			joinButton.setVisible(true);
-			if(Client.getUnconnectedChannel(string).getOwner().equalsIgnoreCase(Client.username))manageButton.setVisible(true);
+			if(Client.getUnconnectedChannel(string).getOwner().equalsIgnoreCase(Client.getUsername()))manageButton.setVisible(true);
 			displaySearchedInfo(string);
 		}else{
 			createButton.setVisible(true);
@@ -65,7 +66,7 @@ public class ChannelSearchPane extends WebPanel{
 
 	private void addChannelFromSearch(){
 		if(!Client.hasChannel(channelpane.search_field.getText())){
-			Client.channelJoinRequest(channelpane.search_field.getText()+(password_entered_field.getText() != null && password_entered_field.getText().length() > 0 ? (";"+password_entered_field.getText()) : ""));
+			Client.sendChannelJoinRequest(channelpane.search_field.getText()+(password_entered_field.getText() != null && password_entered_field.getText().length() > 0 ? (";"+password_entered_field.getText()) : ""));
 			channelpane.search_field.setText("");
 			joinButton.setVisible(false);
 			createButton.setVisible(false);
@@ -83,7 +84,7 @@ public class ChannelSearchPane extends WebPanel{
 	}
 
 	private void displaySearchedInfo(String search){
-		for(UnconnectedChannel uc : Client.unconnected_channels){
+		for(UnconnectedChannel uc : Client.getUnconnectedChannels()){
 			if(uc.getName().equalsIgnoreCase(search)){
 				details_area.setText("[#"+uc.getName()+"] {"+(uc.isPrivate() ? "+p" : "-p")+(uc.hasPassword() ? "~p" : "")+(uc.hasWhitelist() ? "+w" : "")+"} : "+uc.getOwner().toLowerCase()+
 						"\n"+uc.getDescription().split("\\\\n")[0]);
@@ -111,7 +112,7 @@ public class ChannelSearchPane extends WebPanel{
 	private void addChannelFromSelection(){
 		int[] indexes = channelIncludedList.getSelectedIndices();
 		for(int i : indexes){
-			if(!Client.hasChannel((channelIncludedList.getModel().getElementAt(i).toString().split(" ")[0])))Client.channelJoinRequest(channelIncludedList.getModel().getElementAt(i).toString().split(" ")[0]+(password_entered_field.getText() != null && password_entered_field.getText().length() > 0 ? (";"+password_entered_field.getText()) : ""));
+			if(!Client.hasChannel((channelIncludedList.getModel().getElementAt(i).toString().split(" ")[0])))Client.sendChannelJoinRequest(channelIncludedList.getModel().getElementAt(i).toString().split(" ")[0]+(password_entered_field.getText() != null && password_entered_field.getText().length() > 0 ? (";"+password_entered_field.getText()) : ""));
 		}
 	}
 
@@ -163,9 +164,9 @@ public class ChannelSearchPane extends WebPanel{
 			public void actionPerformed(ActionEvent e) {
 				//TODO: so many references for deep items... need be this complicated?
 				channelpane.search_panel.setVisible(false);
-				channelpane.remove(Client.gui.menuPane.getChannelPane().manage_panel);
-				channelpane.manage_panel = Client.gui.menuPane.getChannelPane().initializeManageGUI();
-				channelpane.add(Client.gui.menuPane.getChannelPane().manage_panel, BorderLayout.WEST);
+				channelpane.remove(Client.getGUI().getMenuPane().getChannelPane().manage_panel);
+				channelpane.manage_panel = Client.getGUI().getMenuPane().getChannelPane().initializeManageGUI();
+				channelpane.add(Client.getGUI().getMenuPane().getChannelPane().manage_panel, BorderLayout.WEST);
 				channelpane.manage_panel.setVisible(true);
 			}
 		});
@@ -220,10 +221,10 @@ public class ChannelSearchPane extends WebPanel{
 		// south panel		
 
 		DefaultListModel<String> m_a = new DefaultListModel<String>();
-		String[] a = new String[Client.unconnected_channels.size()];
+		String[] a = new String[Client.getUnconnectedChannels().size()];
 		int c_a = 0;
 
-		for(UnconnectedChannel uc : Client.unconnected_channels){
+		for(UnconnectedChannel uc : Client.getUnconnectedChannels()){
 			a[c_a] = (uc.getName()+" {"+uc.getUserCount()+"}"+" ["+(uc.hasPassword() ? "~p" : "")+(uc.hasWhitelist() ? "+w" : "")+"]");
 			c_a++;
 		}
@@ -259,7 +260,7 @@ public class ChannelSearchPane extends WebPanel{
 			}
 		});
 
-		channelIncludedList.setCellRenderer(new DefaultListCellRenderer(){
+		channelIncludedList.setCellRenderer(new WebListCellRenderer(){
 			public Component getListCellRendererComponent( @SuppressWarnings("rawtypes") JList list, Object value, int index, boolean isSelected, boolean cellHasFocus ){  
 				super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );  
 
@@ -280,7 +281,7 @@ public class ChannelSearchPane extends WebPanel{
 		// set button
 		WebPanel centerbuttonPane = new WebPanel(new BorderLayout()), southbuttonPane = new WebPanel(new BorderLayout());
 
-		south_panel.add(available_channel_pane, BorderLayout.WEST);
+		south_panel.add(available_channel_pane, BorderLayout.CENTER);
 
 		channelAddButton = new RotatedButton("add", false);
 		channelAddButton.addActionListener(new ActionAdapter() {
@@ -301,14 +302,14 @@ public class ChannelSearchPane extends WebPanel{
 		WebButton close_button = new WebButton("close");
 		close_button.addActionListener(new ActionAdapter() {
 			public void actionPerformed(ActionEvent e) {
-				Client.gui.menuPane.closeChanPane();
+				Client.getGUI().getMenuPane().closeChanPane();
 			}
 		});
 
 		southbuttonPane.add(close_button, BorderLayout.EAST);
 
 		south_panel.add(labelPane, BorderLayout.NORTH);
-		south_panel.add(centerbuttonPane, BorderLayout.CENTER);
+		south_panel.add(centerbuttonPane, BorderLayout.EAST);
 		south_panel.add(southbuttonPane, BorderLayout.SOUTH);
 
 		this.add(north_panel, BorderLayout.NORTH);

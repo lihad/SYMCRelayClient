@@ -28,7 +28,7 @@ public class Linker extends MouseAdapter implements MouseMotionListener{
 				String href = (String) ( ((DefaultStyledDocument) doc).getCharacterElement(pos)).getAttributes().getAttribute(HTML.Attribute.HREF);
 				if (href != null){
 					try{Desktop.getDesktop().browse(new URI(href));}
-					catch (Exception ex){Client.logger.severe(ex.getMessage());}
+					catch (Exception ex){Client.getLogger().severe(ex.getMessage());}
 				}                      
 			}
 		}

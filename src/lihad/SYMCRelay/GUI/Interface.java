@@ -33,33 +33,52 @@ public class Interface extends WebFrame implements Runnable {
 	private static final long serialVersionUID = -453802812736036450L;
 	
 	// GUI components
-	public StatusPane statusPane;
-	public TabPane tabbedPane;
-	public UserPane userPane;	
-	public MenuPane menuPane;
-	
-	public WebPanel mainPane;
+	private StatusPane statusPane;
+	private TabPane tabbedPane;
+	private UserPane userPane;	
+	private MenuPane menuPane;
+	private WebPanel mainPane;
 
 	/////////////////////////////////////////////////////////////////
+	
+	public StatusPane getStatusPane(){
+		return this.statusPane;
+	}
+	
+	public TabPane getTabPane(){
+		return this.tabbedPane;
+	}
+	
+	public UserPane getUserPane(){
+		return this.userPane;
+	}
+	
+	public MenuPane getMenuPane(){
+		return this.menuPane;
+	}
+	
+	public WebPanel getMainPane(){
+		return this.mainPane;
+	}
 
 	// system tray
 	public void loadTray() throws MalformedURLException, IOException{
-		if (!SystemTray.isSupported()) { Client.logger.severe("SystemTray is not supported"); return; }
+		if (!SystemTray.isSupported()) { Client.getLogger().severe("SystemTray is not supported"); return; }
 		final TrayIcon trayIcon = new TrayIcon(ImageIO.read(Client.class.getResourceAsStream("Resource/icon_16.png")));
-		trayIcon.setToolTip("this does nothing. congrats");
+		//trayIcon.setToolTip("this does nothing. congrats");
 		final SystemTray tray = SystemTray.getSystemTray();
 		try {
 			tray.add(trayIcon);
 		} catch (AWTException e) {
-			Client.logger.error(e.toString(),e.getStackTrace());
+			Client.getLogger().error(e.toString(),e.getStackTrace());
 		}
 	}
 
 	public Interface() {
 		
-		super("SYMCRelay - Build "+Client.build);
+		super("SYMCRelay - Build "+Client.getBuild());
 		
-		try { loadTray();} catch (IOException e) {Client.logger.error(e.toString(),e.getStackTrace());}
+		try { loadTray();} catch (IOException e) {Client.getLogger().error(e.toString(),e.getStackTrace());}
 		
 		// create tabbed pane
 		tabbedPane = new TabPane();
@@ -73,13 +92,6 @@ public class Interface extends WebFrame implements Runnable {
 		// create user pane
 		userPane = new UserPane();	
 		
-		
-		/**
-		 * TODO:
-		 * RANDON WORKSPACE FOR COLORS :D
-		 * 
-		 */
-		
 		tabbedPane.setSelectedTopBg(ColorScheme.DEFAULT.getTabSelectedColor());
 		tabbedPane.setTopBg(ColorScheme.DEFAULT.getTabUnselectedColor());
 		menuPane.setBackground(ColorScheme.DEFAULT.getTabSelectedColor());
@@ -87,9 +99,7 @@ public class Interface extends WebFrame implements Runnable {
 		menuPane.getRelayMenu().setBackground(ColorScheme.DEFAULT.getTabSelectedColor());
 		menuPane.getDisconnectItem().setSelectedTopBg(ColorScheme.DEFAULT.getTabSelectedColor());
 		this.setBackground(ColorScheme.DEFAULT.getTabSelectedColor());
-		
-		
-		
+				
 		// create main pane
 		mainPane = new WebPanel(new BorderLayout());
 		mainPane.add(statusPane, BorderLayout.SOUTH);
@@ -100,7 +110,7 @@ public class Interface extends WebFrame implements Runnable {
 		// create main frame (this)
 		try {
 			this.setIconImage(ImageIO.read(Client.class.getResourceAsStream("Resource/icon_32.png")));
-		} catch (IOException e) {Client.logger.error(e.toString(),e.getStackTrace());}
+		} catch (IOException e) {Client.getLogger().error(e.toString(),e.getStackTrace());}
 		this.setContentPane(mainPane);
 		this.setPreferredSize(new Dimension(Integer.parseInt(Client.getRelayConfiguration().getWindowSize().split(",")[0]),Integer.parseInt(Client.getRelayConfiguration().getWindowSize().split(",")[1])));
 		this.setLocation(200, 200);
@@ -109,10 +119,10 @@ public class Interface extends WebFrame implements Runnable {
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent we) {
 				try{
-					for(;Client.gui.tabbedPane.getTabCount() > 0;){
-						Client.getChannel(Client.gui.tabbedPane.getTitleAt(Client.gui.tabbedPane.getTabCount()-1).replace("#", "")).leave(false, Client.gui.tabbedPane.getTabCount() - 1);
+					for(;Client.getGUI().getTabPane().getTabCount() > 0;){
+						Client.getChannel(Client.getGUI().getTabPane().getTitleAt(Client.getGUI().getTabPane().getTabCount()-1).replace("#", "")).leave(false, Client.getGUI().getTabPane().getTabCount() - 1);
 					}
-					Client.changeStatusTS(ConnectionStatus.DISCONNECTING, true, false);
+					Client.changeConnectionStatus(ConnectionStatus.DISCONNECTING);
 				}catch(Exception e){}
 				finally{System.exit(0);}
 			}
@@ -151,51 +161,50 @@ public class Interface extends WebFrame implements Runnable {
 		this.setAlwaysOnTop(false);
 		SYMCSound.playPing();
 		
-		Client.logger.debug("alert");
+		Client.getLogger().debug("alert");
 	}
 
 	// connectButton, disconnectButton, ipField, portField, usernameField, chatLine_text, chatLine_boolean, statusColor
 	private void updateFieldsHelpers(boolean cb, boolean db, boolean ipf, boolean pf, boolean uf, String clt, boolean clb, boolean f, boolean cha, Color c){
-		Client.previousStatus = Client.connectionStatus;
-
 		menuPane.getConnectItem().setEnabled(cb);
 		menuPane.getDisconnectItem().setEnabled(db);
 		menuPane.getChannelJoinItem().setEnabled(cha);
 
-		if(clt != null)for(Channel ch : Client.channels.keySet()) ch.getTextField().setText(clt); 
-		for(Channel ch : Client.channels.keySet()) ch.getTextField().setEnabled(clb);
+		if(clt != null)for(Channel ch : Client.getChannels()) ch.getTextField().setText(clt); 
+		for(Channel ch : Client.getChannels()) ch.getTextField().setEnabled(clb);
 		statusPane.getStatusColor().setBackground(c);		
 	}
 	
 	// update gui fields
 	public void updateFields(){
 		//update state-based fields
-		switch (Client.connectionStatus) {
+		switch (Client.getConnectionStatus()) {
 		case DISCONNECTED: updateFieldsHelpers(true, false, true, true, true, "", false, false, false, Color.red); break;
 		case DISCONNECTING: updateFieldsHelpers(false, false, false, false, false, null, false, false, false, Color.orange); break;
 		case CONNECTED: updateFieldsHelpers(false, true, false, false, false, null, true, false, true, Color.green); break;
 		case BEGIN_CONNECT: updateFieldsHelpers(false, true, false, false, false, null, false, false, false, Color.orange); break;
 		case DESYNC: updateFieldsHelpers(false, true, false, false, false, null, false, false, true, Color.yellow); break;
-		case NULL: break;
+		case REFRESH: break;
 
 		}
-		statusPane.getStatusField().setText(Client.connectionStatus.getStatus()+((Client.connectionStatus == ConnectionStatus.CONNECTED) ? Client.getRelayConfiguration().getHostIP() : ""));		
-		for(Map.Entry<Channel, StringBuffer> e : Client.toAppend.entrySet()){
-			if(e.getValue().length() > 0){
-				String s_b = e.getValue().toString();
-				if(s_b.contains(Client.IMPORTANT)){
-					alert();
-					s_b = s_b.replace(Client.IMPORTANT, "");
-				}
-				
-				FormatColor.decodeTextPaneFormat(e.getKey(),e.getKey().getTextPane().getStyledDocument(), e.getValue().toString(), true);
-				for(int i = 0; i < tabbedPane.getTabCount(); i++){
-					if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(e.getKey().getName())){
-						tabbedPane.setFlash(true,i,e.getValue().toString().contains(":"));
+		statusPane.getStatusField().setText(Client.getConnectionStatus().getStatus()+((Client.getConnectionStatus() == ConnectionStatus.CONNECTED) ? Client.getRelayConfiguration().getHostIP() : ""));		
+		for(Channel c : Client.getChannels()){
+			for(String string : c.getStringBuffer()){
+				if(string.length() > 0){
+					String s_b = string.toString();
+					if(s_b.contains(Client.IMPORTANT)){
+						alert();
+						s_b = s_b.replace(Client.IMPORTANT, "");
+					}
+					FormatColor.decodeTextPaneFormat(c,c.getTextPane().getStyledDocument(), string.toString(), true);
+					for(int i = 0; i < tabbedPane.getTabCount(); i++){
+						if(tabbedPane.getSelectedIndex() != i && tabbedPane.getTitleAt(i).replace("#", "").equalsIgnoreCase(c.getName())){
+							tabbedPane.setFlash(true,i,string.toString().contains(":"));
+						}
 					}
 				}
+				c.removeStringFromBuffer(string);			
 			}
-			e.getValue().setLength(0);
 		}
 	}
 

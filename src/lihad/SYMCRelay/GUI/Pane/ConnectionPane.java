@@ -40,7 +40,7 @@ public class ConnectionPane extends WebPanel {
 			public void focusLost(FocusEvent e) {
 				ipField.selectAll();
 				// should be editable only when disconnected
-				if (Client.connectionStatus != ConnectionStatus.DISCONNECTED) Client.changeStatusTS(ConnectionStatus.NULL, true, false);
+				if (Client.getConnectionStatus() != ConnectionStatus.DISCONNECTED) Client.changeConnectionStatus(ConnectionStatus.REFRESH);
 				else Client.getRelayConfiguration().setHostIP(ipField.getText());
 			}
 		});
@@ -55,7 +55,7 @@ public class ConnectionPane extends WebPanel {
 		portField.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
 				// should be editable only when disconnected
-				if (Client.connectionStatus != ConnectionStatus.DISCONNECTED) {Client.changeStatusTS(ConnectionStatus.NULL, true, false);}
+				if (Client.getConnectionStatus() != ConnectionStatus.DISCONNECTED) {Client.changeConnectionStatus(ConnectionStatus.REFRESH);}
 				else {
 					try {
 						Integer.parseInt(portField.getText());
@@ -63,7 +63,7 @@ public class ConnectionPane extends WebPanel {
 					}
 					catch (NumberFormatException nfe) {
 						portField.setText(Client.getRelayConfiguration().getHostPort());
-						Client.gui.repaint();
+						Client.getGUI().repaint();
 					}
 				}
 			}
@@ -75,24 +75,7 @@ public class ConnectionPane extends WebPanel {
 		pane = new WebPanel(new FlowLayout(FlowLayout.RIGHT));
 		pane.add(new WebLabel("Username:"));
 		usernameField = new WebTextField(10); usernameField.setEditable(false);
-		usernameField.setText(Client.username);
-		usernameField.addFocusListener(new FocusAdapter() {
-			public void focusLost(FocusEvent e) {
-				// should be editable only when disconnected
-				if (Client.connectionStatus != ConnectionStatus.DISCONNECTED) {Client.changeStatusTS(ConnectionStatus.NULL, true, false);}
-				else {
-					String temp;
-					try {
-						temp = usernameField.getText();
-						Client.username = temp;
-					}
-					catch (NumberFormatException nfe) {
-						usernameField.setText(Client.username);
-						Client.gui.repaint();
-					}
-				}
-			}
-		});
+		usernameField.setText(Client.getUsername());
 		pane.add(usernameField);
 		northpane.add(pane);
 
@@ -113,10 +96,10 @@ public class ConnectionPane extends WebPanel {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getActionCommand().equals("connect")){
 					Client.getRelayConfiguration().setAutoConnect(autoConnectBox.isSelected());
-					Client.gui.menuPane.closeConnectPane();
-					Client.changeStatusTS(ConnectionStatus.BEGIN_CONNECT, true, false);
+					Client.getGUI().getMenuPane().closeConnectPane();
+					Client.changeConnectionStatus(ConnectionStatus.BEGIN_CONNECT);
 				}
-				else Client.changeStatusTS(ConnectionStatus.DISCONNECTING, true, false);
+				else Client.changeConnectionStatus(ConnectionStatus.DISCONNECTING);
 			}
 		});
 		
