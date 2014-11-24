@@ -10,12 +10,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFrame;
 
 import com.alee.laf.panel.WebPanel;
-import com.alee.laf.rootpane.WebFrame;
 
 import lihad.SYMCRelay.Channel;
 import lihad.SYMCRelay.Client;
@@ -28,7 +27,7 @@ import lihad.SYMCRelay.GUI.Pane.TabPane;
 import lihad.SYMCRelay.GUI.Pane.UserPane;
 
 
-public class Interface extends WebFrame implements Runnable {
+public class Interface extends JFrame implements Runnable {
 
 	private static final long serialVersionUID = -453802812736036450L;
 	
@@ -41,25 +40,15 @@ public class Interface extends WebFrame implements Runnable {
 
 	/////////////////////////////////////////////////////////////////
 	
-	public StatusPane getStatusPane(){
-		return this.statusPane;
-	}
+	public StatusPane getStatusPane(){return this.statusPane;}
 	
-	public TabPane getTabPane(){
-		return this.tabbedPane;
-	}
+	public TabPane getTabPane(){return this.tabbedPane;}
 	
-	public UserPane getUserPane(){
-		return this.userPane;
-	}
+	public UserPane getUserPane(){return this.userPane;}
 	
-	public MenuPane getMenuPane(){
-		return this.menuPane;
-	}
+	public MenuPane getMenuPane(){return this.menuPane;}
 	
-	public WebPanel getMainPane(){
-		return this.mainPane;
-	}
+	public WebPanel getMainPane(){return this.mainPane;}
 
 	// system tray
 	public void loadTray() throws MalformedURLException, IOException{
@@ -115,7 +104,7 @@ public class Interface extends WebFrame implements Runnable {
 		this.setPreferredSize(new Dimension(Integer.parseInt(Client.getRelayConfiguration().getWindowSize().split(",")[0]),Integer.parseInt(Client.getRelayConfiguration().getWindowSize().split(",")[1])));
 		this.setLocation(200, 200);
 		this.setUndecorated(Client.getRelayConfiguration().getUndecoratedTogglable());
-		this.setDefaultCloseOperation(WebFrame.DO_NOTHING_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent we) {
 				try{

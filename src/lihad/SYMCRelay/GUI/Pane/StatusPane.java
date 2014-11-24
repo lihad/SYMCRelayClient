@@ -16,13 +16,13 @@ public class StatusPane extends WebPanel{
 	private WebLabel statusField;
 	private WebTextField statusColor, information;
 
-	public WebLabel getStatusField(){ return statusField; }
+	public WebLabel getStatusField(){ return this.statusField; }
 
-	public WebTextField getStatusColor(){ return statusColor; } 
+	public WebTextField getStatusColor(){ return this.statusColor; } 
 
-	public WebTextField getInformation(){ return information; } 
+	public WebTextField getInformation(){ return this.information; } 
 
-	public void setInformation(String string){ information.setText(string); } 
+	public void setInformation(String string){ this.information.setText(string); } 
 
 
 	public StatusPane(){
@@ -40,5 +40,4 @@ public class StatusPane extends WebPanel{
 		this.add(statusColor, BorderLayout.WEST);
 		this.add(statusField, BorderLayout.CENTER);
 	}
-
 }

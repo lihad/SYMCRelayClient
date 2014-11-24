@@ -25,7 +25,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 public class Client{
 
 	// variables
-	private static final double build = 154;
+	private static final double build = 155;
 	private static double server_build = 0;
 	private static String runtime;  // string variable used when restarting Relay
 	public static final String IP_UPDATE = "http://10.167.3.82/RelayClient/SYMCRelayClient/", IP_LNF = "http://10.167.3.82/RelayClient/LNF/", 
@@ -36,7 +36,7 @@ public class Client{
 	private static RelayConfiguration config; // configuration class
 	private static CommandHandler handler; // command class
 	private static Logger logger; //logger class
-	private static Interface gui; // interface class
+	private static Interface gui = null; // interface class
 
 	public static final String /** these are the characters received by the client/server to tell certain requests apart. */
 	END_CHAT_SESSION = new Character((char)0).toString(), // indicates the end of a session
