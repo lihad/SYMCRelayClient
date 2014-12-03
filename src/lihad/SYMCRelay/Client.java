@@ -25,7 +25,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 public class Client{
 
 	// variables
-	private static final double build = 157;
+	private static final double build = 158;
 	private static double server_build = 0;
 	private static String runtime;  // string variable used when restarting Relay
 	public static final String IP_UPDATE = "http://10.167.3.82/RelayClient/SYMCRelayClient/", IP_LNF = "http://10.167.3.82/RelayClient/LNF/", 
@@ -128,7 +128,7 @@ public class Client{
 	/////////////////////////////////////////////////////////////////
 	// send-methods
 
-	public static void sendChannelJoinRequest(String chan){send(out, chan+CHANNEL_JOIN); Client.getRelayConfiguration().removeDefaultChannel(chan);  /* <- spending chan, will get added back if connection goes through. */  }
+	public static void sendChannelJoinRequest(String chan){send(out, chan+CHANNEL_JOIN);}
 
 	public static void sendChannelLeaveRequest(String chan){send(out, chan+CHANNEL_LEAVE);}
 
@@ -356,6 +356,9 @@ public class Client{
 							}
 							// if the server is sending an update to the status pane
 							else if(s.contains(STATUS)){
+								
+								//TODO: patch job
+								if(s.contains("is whitelisted")) Client.getRelayConfiguration().removeDefaultChannel(s.replace(STATUS, "").split(" ")[0]);
 								gui.getStatusPane().setInformation(s.replace(STATUS, ""));
 							}
 							// if the server is sending its acceptable versions
