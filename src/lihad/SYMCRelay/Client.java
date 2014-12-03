@@ -25,7 +25,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 public class Client{
 
 	// variables
-	private static final double build = 159;
+	private static final double build = 160;
 	private static double server_build = 0;
 	private static String runtime;  // string variable used when restarting Relay
 	public static final String IP_UPDATE = "http://10.167.3.82/RelayClient/SYMCRelayClient/", IP_LNF = "http://10.167.3.82/RelayClient/LNF/", 

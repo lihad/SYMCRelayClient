@@ -175,7 +175,7 @@ public class Channel {
 						item.addActionListener(new ActionAdapter() {
 							public void actionPerformed(ActionEvent e) {
 								Client.getLogger().debug(item.getText() + " "+ item.getText().contains("|"));
-								field.setText(field.getText().substring(0, field.getText().lastIndexOf("@"))+"@"+(item.getText().contains("|") ? item.getText().split("|")[1]+" " : item.getText())+" ");
+								field.setText(field.getText().substring(0, field.getText().lastIndexOf("@"))+"@"+(item.getText().contains("|") ? item.getText().split("\\|")[1] : item.getText()));
 								field.requestFocus();
 							}
 						});
