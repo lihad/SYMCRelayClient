@@ -17,7 +17,7 @@ public class RelayConfiguration extends Properties{
 	private static final long serialVersionUID = -4752504796844276291L;
 
 	private String hostIP, hostPort, format, window, default_channels, lnf;
-	private boolean auto_connect, auto_reconnect, sound_toggle, log_toggle, bubble_toggle, flash_toggle, undecorated, user_list_expanded;
+	private boolean auto_connect, auto_reconnect, sound_toggle, log_toggle, bubble_toggle, flash_toggle, undecorated, user_list_expanded, join_leave_messages;
 
 	private File file;
 
@@ -42,6 +42,7 @@ public class RelayConfiguration extends Properties{
 			this.loadWindowSize();
 			this.loadFlashTogglable();
 			this.loadUserListExpanded();
+			this.loadJoinLeaveMessages();
 
 
 		}catch(Exception e){e.printStackTrace();}		
@@ -64,6 +65,7 @@ public class RelayConfiguration extends Properties{
 		l_a.add("WindowSize = "+getWindowSize());
 		l_a.add("FlashTogglable = "+getFlashTogglable());
 		l_a.add("UserListExpanded = "+getUserListExpanded());
+		l_a.add("JoinLeaveMessages = "+getJoinLeaveMessages());
 
 		return l_a.toArray(new String[0]);
 	}
@@ -164,6 +166,11 @@ public class RelayConfiguration extends Properties{
 	public void setUserListExpanded(boolean user_list_expanded){ this.user_list_expanded = user_list_expanded; saveUserListExpanded(); Client.getLogger().info("[RELAYCONFIGURATION] User List Expansion is now set to ["+this.user_list_expanded+"]");}
 	public boolean loadUserListExpanded(){ this.user_list_expanded = Boolean.parseBoolean(getProperty("user_list_expanded", "false")); return hasProperty("user_list_expanded");}
 	public void saveUserListExpanded(){ this.save("user_list_expanded", String.valueOf(this.user_list_expanded));}
+	
+	public boolean getJoinLeaveMessages(){ return join_leave_messages; }
+	public void setJoinLeaveMessages(boolean join_leave_messages){ this.join_leave_messages = join_leave_messages; saveJoinLeaveMessages(); Client.getLogger().info("[RELAYCONFIGURATION] Join/Leave Messages are now set to ["+this.join_leave_messages+"]");}
+	public boolean loadJoinLeaveMessages(){ this.join_leave_messages = Boolean.parseBoolean(getProperty("join_leave_messages", "true")); return hasProperty("join_leave_messages");}
+	public void saveJoinLeaveMessages(){ this.save("join_leave_messages", String.valueOf(this.join_leave_messages));}
 
 	public void save(String key, String value){
 		try {

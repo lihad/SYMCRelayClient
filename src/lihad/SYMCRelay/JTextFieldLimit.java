@@ -33,7 +33,7 @@ public class JTextFieldLimit extends PlainDocument {
 	public String replaceAllBreakers(String string){
 		string = string.replaceAll(Client.CHANNEL, "").replaceAll(Client.CHANNEL_JOIN, "").replaceAll(Client.CHANNEL_LEAVE, "").replaceAll(Client.COMMAND, "")
 				.replaceAll(Client.CONNECTED_USERS, "").replaceAll(Client.COUNT, "").replaceAll(Client.END_CHAT_SESSION, "").replaceAll(Client.FORMAT, "")
-				.replaceAll(Client.HEARTBEAT, "").replaceAll(Client.IMPORTANT, "").replaceAll(Client.RETURN, "").replaceAll(Client.STATUS, "").replaceAll(Client.VERSION, "");		
+				.replaceAll(Client.HEARTBEAT, "").replaceAll(Client.IMPORTANT, "").replaceAll(Client.RETURN, "").replaceAll(Client.STATUS, "").replaceAll(Client.VERSION, "").replaceAll(Client.MESSAGE, "");		
 		
 		return string;
 	}

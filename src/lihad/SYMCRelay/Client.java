@@ -25,7 +25,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 public class Client{
 
 	// variables
-	private static final double build = 155;
+	private static final double build = 156;
 	private static double server_build = 0;
 	private static String runtime;  // string variable used when restarting Relay
 	public static final String IP_UPDATE = "http://10.167.3.82/RelayClient/SYMCRelayClient/", IP_LNF = "http://10.167.3.82/RelayClient/LNF/", 
@@ -51,7 +51,9 @@ public class Client{
 	COUNT = new Character((char)9).toString(),
 	COMMAND = new Character((char)11).toString(),
 	IMPORTANT = new Character((char)12).toString(),
-	STATUS = new Character((char)13).toString();
+	STATUS = new Character((char)13).toString(),
+	MESSAGE = new Character((char)14).toString();
+
 
 	private static ConnectionStatus connectionStatus; // the current ConnectionStatus (enum) of Relay
 	private static List<StringBuffer> toSend;
@@ -126,7 +128,7 @@ public class Client{
 	/////////////////////////////////////////////////////////////////
 	// send-methods
 
-	public static void sendChannelJoinRequest(String chan){send(out, chan+CHANNEL_JOIN);}
+	public static void sendChannelJoinRequest(String chan){send(out, chan+CHANNEL_JOIN); Client.getRelayConfiguration().removeDefaultChannel(chan);  /* <- spending chan, will get added back if connection goes through. */  }
 	
 	public static void sendChannelLeaveRequest(String chan){send(out, chan+CHANNEL_LEAVE);}
 
@@ -185,7 +187,7 @@ public class Client{
 	/////////////////////////////////////////////////////////////////
 
 	// main procedure
-	public static void main(String args[]) {
+	public static void main(String args[]) {		
 		//define variables used throughout relay
 		username = System.getProperty("user.name");
 		log_file = System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay.log";

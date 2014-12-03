@@ -32,7 +32,7 @@ public class MenuPane extends WebMenuBar {
 	private static final long serialVersionUID = 4452654864959142763L;
 
 	private WebMenuItem colorChangeItem, exitItem, updateItem, channelJoinItem, connectItem, disconnectItem, openlogItem;
-	private WebCheckBoxMenuItem soundToggleItem, logToggleItem, bubbleToggleItem, undecoratedToggleItem, reconnectToggleItem, flashToggleItem;
+	private WebCheckBoxMenuItem soundToggleItem, logToggleItem, bubbleToggleItem, undecoratedToggleItem, reconnectToggleItem, flashToggleItem, joinLeaveToggleItem;
 	private WebMenu relay, channel, customize, help;
 	private JDialog colorPaneDialog, updatePaneDialog, legalPaneDialog;
 	private ChannelPane chan_pane;
@@ -228,6 +228,15 @@ public class MenuPane extends WebMenuBar {
 		channelJoinItem.addActionListener(channelListener);
 		channelJoinItem.setEnabled(false);
 		channel.add(channelJoinItem);
+		
+		joinLeaveToggleItem = new WebCheckBoxMenuItem("Join/Leave Posts");
+		joinLeaveToggleItem.setSelected(Client.getRelayConfiguration().getJoinLeaveMessages());
+		joinLeaveToggleItem.addActionListener(new ActionAdapter() {
+			public void actionPerformed(ActionEvent e) {
+				Client.getRelayConfiguration().setJoinLeaveMessages(joinLeaveToggleItem.isSelected());
+			}
+		});
+		channel.add(joinLeaveToggleItem);	
 
 		// customize menu drop
 		/////////////////////////////////////////////////////////////

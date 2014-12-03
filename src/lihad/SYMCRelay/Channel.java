@@ -4,12 +4,17 @@ import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -81,7 +86,28 @@ public class Channel {
 		this.name = name;
 		this.buffer = new LinkedList<String>();
 		pane = new JTextPane();
+		/**
+		//TODO: that background image
+		pane = new JTextPane(){
+			@Override
+	        protected void paintComponent(Graphics g) {
+	            // set background green - but can draw image here too
+	            g.setColor(Color.WHITE);
+	            g.fillRect(0, 0, getWidth(), getHeight());
 
+	            // uncomment the following to draw an image
+	            try {
+					g.drawImage(ImageIO.read(new File("C:\\Program Files\\Relay\\Themes\\maxresdefault.jpg")), 0, 0, this);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	            super.paintComponent(g);
+	        }
+		};
+		
+		*/
+		//pane.setBackground(new Color(0,0,0,0));
 		pane.setEditorKit(new WrapEditorKit());
 		pane.setEditable(false);
 		pane.setMinimumSize(new Dimension(0,0));
@@ -148,7 +174,8 @@ public class Channel {
 						final JMenuItem item = new JMenuItem(user);
 						item.addActionListener(new ActionAdapter() {
 							public void actionPerformed(ActionEvent e) {
-								field.setText(field.getText().substring(0, field.getText().lastIndexOf("@"))+"@"+(item.getText().contains("\\|") ? item.getText().split("\\|")[1] : item.getText())+" ");
+								Client.getLogger().debug(item.getText() + " "+ item.getText().contains("|"));
+								field.setText(field.getText().substring(0, field.getText().lastIndexOf("@"))+"@"+(item.getText().contains("|") ? item.getText().split("|")[1]+" " : item.getText())+" ");
 								field.requestFocus();
 							}
 						});
