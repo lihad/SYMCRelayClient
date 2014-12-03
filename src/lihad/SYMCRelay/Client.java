@@ -25,7 +25,7 @@ import lihad.SYMCRelay.Startup.PreInterfaceWeblaf;
 public class Client{
 
 	// variables
-	private static final double build = 156;
+	private static final double build = 157;
 	private static double server_build = 0;
 	private static String runtime;  // string variable used when restarting Relay
 	public static final String IP_UPDATE = "http://10.167.3.82/RelayClient/SYMCRelayClient/", IP_LNF = "http://10.167.3.82/RelayClient/LNF/", 
@@ -95,7 +95,7 @@ public class Client{
 	public static List<UnconnectedChannel> getUnconnectedChannels(){return unconnected_channels;}
 
 	public static ConnectionStatus getConnectionStatus(){return connectionStatus;}
-	
+
 	public static Channel getChannel(String name){for(Channel c : channels)if(c.getName().equalsIgnoreCase(name)) return c; return null;}
 
 	public static UnconnectedChannel getUnconnectedChannel(String name){for(UnconnectedChannel uc : unconnected_channels) if(uc.name.equalsIgnoreCase(name)) return uc; return null;}
@@ -113,7 +113,7 @@ public class Client{
 	public static boolean addChannel(Channel c){return channels.add(c);}
 
 	public static boolean addUnconnectedChannel(UnconnectedChannel c){return unconnected_channels.add(c);}
-	
+
 	public synchronized static void addSendString(String s) {toSend.add(new StringBuffer(s));}
 
 	/////////////////////////////////////////////////////////////////
@@ -129,20 +129,20 @@ public class Client{
 	// send-methods
 
 	public static void sendChannelJoinRequest(String chan){send(out, chan+CHANNEL_JOIN); Client.getRelayConfiguration().removeDefaultChannel(chan);  /* <- spending chan, will get added back if connection goes through. */  }
-	
+
 	public static void sendChannelLeaveRequest(String chan){send(out, chan+CHANNEL_LEAVE);}
 
 	public static void sendHeartbeat(){send(out, HEARTBEAT);}
-	
+
 	private static void send(PrintWriter pr, String s){ if(pr != null){pr.print(encode(s)+"\n"); pr.flush();}}
-	
+
 	/////////////////////////////////////////////////////////////////
 	// has-methods
-	
+
 	public static boolean hasChannel(String name){for(Channel c : channels)if(c.getName().equalsIgnoreCase(name)) return true; return false;}
 
 	public static boolean hasUnconnectedChannel(String name){for(UnconnectedChannel uc : unconnected_channels) if(uc.name.equalsIgnoreCase(name)) return true; return false;}
-	
+
 	/////////////////////////////////////////////////////////////////
 	// helper-methods
 	// cleanup for disconnect
@@ -167,16 +167,16 @@ public class Client{
 		while(!Client.isupdated){try { Thread.sleep(10); if(count >= timeout) break; count++;
 		}catch (InterruptedException e1) {Client.logger.error(e1.toString(),e1.getStackTrace());}}
 	}
-	
+
 	public static void updatechannelcount(String select){
 		updatechannelcount(select, 200);
 	}
-	
+
 	public static void changeConnectionStatus(ConnectionStatus newConnectStatus) {
 		if (newConnectStatus != ConnectionStatus.REFRESH) {connectionStatus = newConnectStatus;}
 		SwingUtilities.invokeLater(gui);
 	}
-	
+
 	private static String encode(String string){
 		return Base64.encode(string.getBytes()).replaceAll("\n", RETURN).replaceAll("\r",RETURN);
 	}
@@ -193,7 +193,7 @@ public class Client{
 		log_file = System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay.log";
 		connectionStatus = ConnectionStatus.DISCONNECTED;
 		toSend = new LinkedList<StringBuffer>();
-		
+
 		//create Logger object and a new log (renaming the previous)
 		if(new File(log_file).exists() && args.length == 0) new File(log_file).renameTo(new File(System.getenv("ProgramFiles")+"\\Relay\\Logs\\relay_"+System.currentTimeMillis()+".log"));
 		logger = new Logger(new File(log_file));
@@ -249,7 +249,7 @@ public class Client{
 			case BEGIN_CONNECT:
 				try {
 					logger.debug("beginning connect");
-					
+
 					// create socket and connection
 					socket = new Socket(getRelayConfiguration().getHostIP(), Integer.parseInt(getRelayConfiguration().getHostPort()));
 					in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -379,16 +379,18 @@ public class Client{
 							}					
 							// all else is received as text
 							else {
-								String[] arr = s.split(CHANNEL);
-								if(arr.length > 1 && hasChannel(arr[0])){
-									Channel c = getChannel(arr[0]);
-									c.addStringToBuffer(arr[1] + "\n");
-									if(!c.isInteracted())c.getTextPane().setCaretPosition(c.getTextPane().getDocument().getLength());
-									if(arr[1].split(FORMAT).length > 2)logger.info("["+c.getName()+"]"+arr[1].split(FORMAT)[0]+arr[1].split(FORMAT)[2]);
-									SYMCSound.playDing();
-									changeConnectionStatus(ConnectionStatus.REFRESH);
-								}else{
-									logger.severe("received a message that was tied to nothing: "+s);
+								if(!s.contains(MESSAGE)){
+									String[] arr = s.split(CHANNEL);
+									if(arr.length > 1 && hasChannel(arr[0])){
+										Channel c = getChannel(arr[0]);
+										c.addStringToBuffer(arr[1] + "\n");
+										if(!c.isInteracted())c.getTextPane().setCaretPosition(c.getTextPane().getDocument().getLength());
+										if(arr[1].split(FORMAT).length > 2)logger.info("["+c.getName()+"]"+arr[1].split(FORMAT)[0]+arr[1].split(FORMAT)[2]);
+										SYMCSound.playDing();
+										changeConnectionStatus(ConnectionStatus.REFRESH);
+									}else{
+										logger.severe("received a message that was tied to nothing: "+s);
+									}
 								}
 							}
 						}

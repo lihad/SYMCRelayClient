@@ -48,8 +48,6 @@ public class FormatColor {
 	 * @param pop 		Whether or not to display text via a pop-up on the TrayIcon
 	 */
 	public static void decodeTextPaneFormat(Channel channel, StyledDocument doc, String string, boolean pop){
-		if(string.contains(Client.MESSAGE) && !Client.getRelayConfiguration().getJoinLeaveMessages()) return;
-		
 		lastChannel = channel;
 		SimpleAttributeSet key = new SimpleAttributeSet();
 		String[] str_arr = string.split(Client.FORMAT);

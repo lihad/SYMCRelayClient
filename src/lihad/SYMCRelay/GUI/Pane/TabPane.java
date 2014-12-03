@@ -11,6 +11,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -86,6 +87,8 @@ public class TabPane extends WebTabbedPane{
 
 					Client.getGUI().getUserPane().orderNodes(getTabNames());
 					Client.getGUI().getUserPane().expandChannel(title.replaceFirst("#", ""));
+					Client.getRelayConfiguration().setDefaultChannels(Arrays.asList(getTabNames()));
+					
 					TabPane.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				}
 
